@@ -18,7 +18,7 @@ And this is the laziest web page ever (with the flashiest font I found).
 
 I'm a Master's student in Artificial Intelligence & Cybersecurity at the
 University of Udine (Italy) and Klagenfurt (Austria). I'm a member of
-![MadrHacks](https://www.madrhacks.org/), the ethical hacking team of the
+[MadrHacks](https://www.madrhacks.org/), the ethical hacking team of the
 University of Udine, one of the top teams in Italy on [CTFtime](https://ctftime.org/team/114509/).
 
 Even if changing constantly, my main interests are (not in order):
