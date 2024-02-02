@@ -44,5 +44,5 @@ can send me an email at `gianlucagianluca18[at]gmail.com`.
 
 
 `<footer>`{=html}
-Web page powered by [Markdown](https://en.wikipedia.org/wiki/Markdown){target="_blank"} and ![Pandoc](https://pandoc.org/){target="_blank"} because I'm not a web developer.
+Web page powered by [Markdown](https://en.wikipedia.org/wiki/Markdown){target="_blank"} and [Pandoc](https://pandoc.org/){target="_blank"} because I'm not a web developer.
 `</footer>`{=html}
