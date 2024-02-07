@@ -41,6 +41,9 @@ You can find me on [Github](https://github.com/gianzav) and
 can send me an email at `zavan.gianluca[at]gmail.com`.
 
 
+# Stuff
+
+- [Common Lisp resources](./common-lisp-resources.html)
 
 
 `<footer>`{=html}
