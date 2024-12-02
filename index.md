@@ -46,6 +46,8 @@ can send me an email at `zavan.gianluca[at]gmail.com`.
 
 # Things worth a look
 
+- [Advent of code 2024](./aoc2024.html): my solutions in CL to some of the
+problems of AOC 2024
 - [Common Lisp resources](./common-lisp-resources.html)
 - ["The Most Beautiful Program Even Written"](https://www.youtube.com/watch?v=OyfBQmvr2Hc&pp=ygUadGhlIG1vc3QgYmVhdXRpZnVsIHByb2dyYW0%3D) by William Byrd
     - To dive deeper, check [miniKanren](http://minikanren.org/)

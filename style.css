@@ -29,3 +29,8 @@ header {
 footer {
     margin-top: auto;
 }
+
+.sourceCode {
+  text-align: left;
+  text-justify: inter-word;
+}
