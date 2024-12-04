@@ -1,4 +1,8 @@
-for f in $(ls *.md)
+cp src/style.css dist/
+
+for f in $(ls ./src/*.md)
 do
-    pandoc "$f" -f markdown -t html -s --css "style.css" -o "${f%.md}.html"
+    f=$(echo "$f" | cut -d '/' -f 3)
+    pandoc "./src/$f" -f markdown -t html -s --css "style.css" -o "./dist/${f%.md}.html"
 done
+
