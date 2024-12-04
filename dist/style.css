@@ -9,9 +9,10 @@ body {
 
 html {
     background-color: #fae9ca;
-    margin-left: 20%;
-    margin-right: 20%;
+    /* margin-left: 20%; */
+    /* margin-right: 20%; */
     font-family: Georgia;
+    margin: 0 max(2em, calc(30% - 300px)) 0;
 }
 
 header {
