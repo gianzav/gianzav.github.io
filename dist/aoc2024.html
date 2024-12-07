@@ -96,7 +96,7 @@
 <h1 id="advent-of-code-2024-in-common-lisp">Advent of Code 2024 in
 Common Lisp</h1>
 <p></header></p>
-<h2 id="day-1.1-and-1.2">Day 1.1 and 1.2</h2>
+<h2 id="day-1">Day 1</h2>
 <div class="sourceCode" id="cb1"><pre
 class="sourceCode lisp"><code class="sourceCode commonlisp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> parse-input </span>(lines)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Transforms the lists provided as two colums into two LISP lists.&quot;</span></span>
@@ -131,13 +131,13 @@ class="sourceCode lisp"><code class="sourceCode commonlisp"><span id="cb1-1"><a 
 <span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">multiple-value-bind</span> (x y) (read-and-parse-input <span class="st">&quot;input&quot;</span>)</span>
 <span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">format</span> <span class="kw">t</span> <span class="st">&quot;~a~%&quot;</span> (total-similarity x y))</span>
 <span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">format</span> <span class="kw">t</span> <span class="st">&quot;~a~%&quot;</span> (total-distance x y))))</span></code></pre></div>
-<h2 id="day-2.1">Day 2.1</h2>
+<h2 id="day-2">Day 2</h2>
 <p>In <code>utils.lisp</code> I’ll move general functions defined over
 the AOC and that could be useful for the next days.</p>
 <pre><code>(load &quot;../utils.lisp&quot;)
 
 (defparameter *test*
-  &#39;((7 6 4 2 1) ;; safe
+  &#39;((7 6 4 2 1)
     (1 2 7 8 9)
     (9 7 6 2 1)
     (1 3 2 4 5)
@@ -150,28 +150,51 @@ the AOC and that could be useful for the next days.</p>
 (defun read-and-parse-file (input-file)
   (parse-file (uiop:read-file-lines input-file)))
 
+
 (defun check-pairs (sequence &amp;optional (comparison-func #&#39;&lt;=))
   (loop for i from 1 below (length sequence) do
-    (unless (funcall comparison-func (nth (1- i) sequence) (nth i sequence)) (return-from check-pairs nil)))
+    (unless (funcall comparison-func (nth (1- i) sequence) (nth i sequence))
+      (return-from check-pairs nil)))
   t)
 
 (defun pair-distance-ok-p (x y &amp;optional (min-distance 1) (max-distance 3))
   (let ((diff (abs (- x y))))
     (and (&gt;= diff min-distance) (&lt;= diff max-distance) )))
 
+(defun distance-ok-p (sequence &amp;optional (min-distance 1) (max-distance 3))
+  (check-pairs sequence #&#39;(lambda (x y) (pair-distance-ok-p x y min-distance max-distance))))
+
 (defun check-safety (sequence)
   &quot;A sequence of numbers is safe if it is monotonically decreasing or
 increasing, and any adjacent numbers differ by at least one and at
 most three.&quot;
   (cond ((&lt; (first sequence) (second sequence))
-     (check-pairs sequence #&#39;(lambda (x y) (and (&lt;= x y) (pair-distance-ok-p x y)))))
+     (check-pairs sequence #&#39;increasing-and-distance-p))
     ((&gt; (first sequence) (second sequence))
-     (check-pairs sequence #&#39;(lambda (x y) (and (&gt;= x y) (pair-distance-ok-p x y)))))
+     (check-pairs sequence #&#39;decreasing-and-distance-p))
     (t nil)))
+
+(defun increasing-and-distance-p (x y)
+  (and (&lt; x y) (pair-distance-ok-p x y)))
+
+(defun decreasing-and-distance-p (x y)
+  (and (&gt; x y) (pair-distance-ok-p x y)))
+
+(defun sequences-without-one-element (sequence)
+  (loop for i from 0 below (length sequence) collect
+    (append (subseq sequence 0 i) (subseq sequence (1+ i) (length sequence)))))
 
 (defun solve (input-file)
    (let ((sequences (read-and-parse-file input-file)))
-    (reduce #&#39;+ (mapcar #&#39;(lambda (seq) (if (check-safety seq) 1 0)) sequences))))
+     (format t &quot;~a~%&quot; (solve-first sequences))
+     (format t &quot;~a~%&quot; (solve-second sequences))
+     ))
+
+(defun solve-first (sequences)
+    (reduce #&#39;+ (mapcar #&#39;(lambda (seq) (if (check-safety seq) 1 0)) sequences)))
+
+(defun solve-second (sequences)
+    (reduce #&#39;+ (mapcar #&#39;(lambda (seq) (if (some #&#39;check-safety (sequences-without-one-element seq)) 1 0)) sequences)))
 </code></pre>
 <h2 id="utils">Utils</h2>
 <p>```lisp (defpackage :utils (:use :cl) (:export #:string-join
