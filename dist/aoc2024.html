@@ -134,88 +134,277 @@ class="sourceCode lisp"><code class="sourceCode commonlisp"><span id="cb1-1"><a 
 <h2 id="day-2">Day 2</h2>
 <p>In <code>utils.lisp</code> I’ll move general functions defined over
 the AOC and that could be useful for the next days.</p>
-<pre><code>(load &quot;../utils.lisp&quot;)
-
-(defparameter *test*
-  &#39;((7 6 4 2 1)
-    (1 2 7 8 9)
-    (9 7 6 2 1)
-    (1 3 2 4 5)
-    (8 6 4 4 1)
-    (1 3 6 7 9)))
-
-(defun parse-file (lines)
-  (mapcar #&#39;(lambda (line) (mapcar #&#39;parse-integer (utils:split-by-one-space line))) lines))
-
-(defun read-and-parse-file (input-file)
-  (parse-file (uiop:read-file-lines input-file)))
-
-
-(defun check-pairs (sequence &amp;optional (comparison-func #&#39;&lt;=))
-  (loop for i from 1 below (length sequence) do
-    (unless (funcall comparison-func (nth (1- i) sequence) (nth i sequence))
-      (return-from check-pairs nil)))
-  t)
-
-(defun pair-distance-ok-p (x y &amp;optional (min-distance 1) (max-distance 3))
-  (let ((diff (abs (- x y))))
-    (and (&gt;= diff min-distance) (&lt;= diff max-distance) )))
-
-(defun distance-ok-p (sequence &amp;optional (min-distance 1) (max-distance 3))
-  (check-pairs sequence #&#39;(lambda (x y) (pair-distance-ok-p x y min-distance max-distance))))
-
-(defun check-safety (sequence)
-  &quot;A sequence of numbers is safe if it is monotonically decreasing or
-increasing, and any adjacent numbers differ by at least one and at
-most three.&quot;
-  (cond ((&lt; (first sequence) (second sequence))
-     (check-pairs sequence #&#39;increasing-and-distance-p))
-    ((&gt; (first sequence) (second sequence))
-     (check-pairs sequence #&#39;decreasing-and-distance-p))
-    (t nil)))
-
-(defun increasing-and-distance-p (x y)
-  (and (&lt; x y) (pair-distance-ok-p x y)))
-
-(defun decreasing-and-distance-p (x y)
-  (and (&gt; x y) (pair-distance-ok-p x y)))
-
-(defun sequences-without-one-element (sequence)
-  (loop for i from 0 below (length sequence) collect
-    (append (subseq sequence 0 i) (subseq sequence (1+ i) (length sequence)))))
-
-(defun solve (input-file)
-   (let ((sequences (read-and-parse-file input-file)))
-     (format t &quot;~a~%&quot; (solve-first sequences))
-     (format t &quot;~a~%&quot; (solve-second sequences))
-     ))
-
-(defun solve-first (sequences)
-    (reduce #&#39;+ (mapcar #&#39;(lambda (seq) (if (check-safety seq) 1 0)) sequences)))
-
-(defun solve-second (sequences)
-    (reduce #&#39;+ (mapcar #&#39;(lambda (seq) (if (some #&#39;check-safety (sequences-without-one-element seq)) 1 0)) sequences)))
-</code></pre>
-<h2 id="utils">Utils</h2>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode lisp"><code class="sourceCode commonlisp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">load</span> <span class="st">&quot;../utils.lisp&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defparameter</span><span class="fu"> *test*</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  &#39;((<span class="dv">7</span> <span class="dv">6</span> <span class="dv">4</span> <span class="dv">2</span> <span class="dv">1</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">1</span> <span class="dv">2</span> <span class="dv">7</span> <span class="dv">8</span> <span class="dv">9</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">9</span> <span class="dv">7</span> <span class="dv">6</span> <span class="dv">2</span> <span class="dv">1</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">1</span> <span class="dv">3</span> <span class="dv">2</span> <span class="dv">4</span> <span class="dv">5</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">8</span> <span class="dv">6</span> <span class="dv">4</span> <span class="dv">4</span> <span class="dv">1</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">1</span> <span class="dv">3</span> <span class="dv">6</span> <span class="dv">7</span> <span class="dv">9</span>)))</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> parse-file </span>(lines)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">mapcar</span> <span class="op">#&#39;</span>(<span class="kw">lambda</span> (line) (<span class="kw">mapcar</span> <span class="op">#&#39;</span>parse-integer (utils:split-by-one-space line))) lines))</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> read-and-parse-file </span>(input-file)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  (parse-file (uiop:read-file-lines input-file)))</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> check-pairs </span>(<span class="kw">sequence</span> &amp;optional (comparison-func <span class="op">#&#39;</span>&lt;=))</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">loop</span> for i from <span class="dv">1</span> below (<span class="kw">length</span> <span class="kw">sequence</span>) <span class="kw">do</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">unless</span> (<span class="kw">funcall</span> comparison-func (<span class="kw">nth</span> (<span class="op">1-</span> i) <span class="kw">sequence</span>) (<span class="kw">nth</span> i <span class="kw">sequence</span>))</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">return-from</span> check-pairs <span class="kw">nil</span>)))</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="kw">t</span>)</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> pair-distance-ok-p </span>(x y &amp;optional (min-distance <span class="dv">1</span>) (max-distance <span class="dv">3</span>))</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((diff (<span class="kw">abs</span> (<span class="op">-</span> x y))))</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">and</span> (<span class="op">&gt;=</span> diff min-distance) (<span class="op">&lt;=</span> diff max-distance) )))</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> distance-ok-p </span>(<span class="kw">sequence</span> &amp;optional (min-distance <span class="dv">1</span>) (max-distance <span class="dv">3</span>))</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>  (check-pairs <span class="kw">sequence</span> <span class="op">#&#39;</span>(<span class="kw">lambda</span> (x y) (pair-distance-ok-p x y min-distance max-distance))))</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> check-safety </span>(<span class="kw">sequence</span>)</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;A sequence of numbers is safe if it is monotonically decreasing or</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="st">increasing, and any adjacent numbers differ by at least one and at</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="st">most three.&quot;</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">cond</span> ((<span class="op">&lt;</span> (<span class="kw">first</span> <span class="kw">sequence</span>) (<span class="kw">second</span> <span class="kw">sequence</span>))</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>     (check-pairs <span class="kw">sequence</span> <span class="op">#&#39;</span>increasing-and-distance-p))</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    ((<span class="op">&gt;</span> (<span class="kw">first</span> <span class="kw">sequence</span>) (<span class="kw">second</span> <span class="kw">sequence</span>))</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>     (check-pairs <span class="kw">sequence</span> <span class="op">#&#39;</span>decreasing-and-distance-p))</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">t</span> <span class="kw">nil</span>)))</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> increasing-and-distance-p </span>(x y)</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">and</span> (<span class="op">&lt;</span> x y) (pair-distance-ok-p x y)))</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> decreasing-and-distance-p </span>(x y)</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">and</span> (<span class="op">&gt;</span> x y) (pair-distance-ok-p x y)))</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> sequences-without-one-element </span>(<span class="kw">sequence</span>)</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">loop</span> for i from <span class="dv">0</span> below (<span class="kw">length</span> <span class="kw">sequence</span>) collect</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">append</span> (<span class="kw">subseq</span> <span class="kw">sequence</span> <span class="dv">0</span> i) (<span class="kw">subseq</span> <span class="kw">sequence</span> (<span class="op">1+</span> i) (<span class="kw">length</span> <span class="kw">sequence</span>)))))</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> solve </span>(input-file)</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>   (<span class="kw">let</span> ((sequences (read-and-parse-file input-file)))</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>     (<span class="kw">format</span> <span class="kw">t</span> <span class="st">&quot;~a~%&quot;</span> (solve-first sequences))</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>     (<span class="kw">format</span> <span class="kw">t</span> <span class="st">&quot;~a~%&quot;</span> (solve-second sequences))</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>     ))</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> solve-first </span>(sequences)</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">reduce</span> <span class="op">#&#39;</span>+ (<span class="kw">mapcar</span> <span class="op">#&#39;</span>(<span class="kw">lambda</span> (seq) (<span class="kw">if</span> (check-safety seq) <span class="dv">1</span> <span class="dv">0</span>)) sequences)))</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> solve-second </span>(sequences)</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">reduce</span> <span class="op">#&#39;</span>+ (<span class="kw">mapcar</span> <span class="op">#&#39;</span>(<span class="kw">lambda</span> (seq) (<span class="kw">if</span> (<span class="kw">some</span> <span class="op">#&#39;</span>check-safety (sequences-without-one-element seq)) <span class="dv">1</span> <span class="dv">0</span>)) sequences)))</span></code></pre></div>
+<h2 id="day-3">Day 3</h2>
+<h3 id="easy-sane-version">Easy, sane version</h3>
+<p>Just use <code>grep</code> to pre-process the file, or an available
+regex library.</p>
+<ul>
+<li>3.1:
+<code>grep "mul([0-9][0-9]*,[0-9][0-9]*)" input &gt; preprocessed-1</code></li>
+<li>3.2:
+<code>grep -e "mul([0-9][0-9]*,[0-9][0-9]*) -e "do()" -e "don't()" input &gt; preprocessed-2</code></li>
+</ul>
+<p>Then do the parsing and calculations in CL:</p>
 <div class="sourceCode" id="cb3"><pre
-class="sourceCode lisp"><code class="sourceCode commonlisp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defpackage</span><span class="fu"> </span>:utils</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  (<span class="bu">:use</span> :cl)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  (:export</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>   #:string-join #:split-by-one-space))</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>(<span class="kw">in-package</span> :utils)</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> string-join </span>(fill-in strings)</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((joined (<span class="kw">first</span> strings)))</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">dolist</span> (s (<span class="kw">rest</span> strings))</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">setf</span> joined (<span class="kw">concatenate</span> <span class="dt">&#39;string</span> joined fill-in s)))</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    joined))</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">;; from https://lispcookbook.github.io/cl-cookbook/strings.html#breaking-strings-into-graphenes-sentences-lines-and-words</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> split-by-one-space </span>(<span class="kw">string</span>)</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">loop</span> for i <span class="op">=</span> <span class="dv">0</span> then (<span class="op">1+</span> j)</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    as j <span class="op">=</span> (<span class="kw">position</span> <span class="ch">#\S</span>pace <span class="kw">string</span> <span class="bu">:start</span> i)</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    collect (<span class="kw">subseq</span> <span class="kw">string</span> i j)</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    while j))</span></code></pre></div>
+class="sourceCode lisp"><code class="sourceCode commonlisp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> get-valid-muls </span>(mixed &amp;optional (valid-region <span class="kw">t</span>))</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((valid &#39;()) (valid-region valid-region))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">loop</span> for <span class="kw">string</span> in mixed <span class="kw">do</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">cond</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    ((<span class="kw">string=</span> <span class="kw">string</span> <span class="st">&quot;do()&quot;</span>) (<span class="kw">setq</span> valid-region <span class="kw">t</span>))</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    ((<span class="kw">string=</span> <span class="kw">string</span> <span class="st">&quot;don&#39;t()&quot;</span>) (<span class="kw">setq</span> valid-region <span class="kw">nil</span>))</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    (valid-region (<span class="kw">setq</span> valid (<span class="kw">append</span> valid (<span class="kw">list</span> <span class="kw">string</span>))))))</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">values</span> valid valid-region)))</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> parse-mul </span>(mul-string)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let*</span> ((comma (<span class="kw">position</span> <span class="st">&quot;,&quot;</span> mul-string <span class="bu">:test</span> <span class="op">#&#39;</span>string=))</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>     (left (<span class="kw">parse-integer</span> (<span class="kw">subseq</span> mul-string <span class="dv">4</span> comma)))</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>     (right (<span class="kw">parse-integer</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>       (<span class="kw">subseq</span> mul-string (<span class="op">1+</span> comma) (<span class="kw">position</span> <span class="st">&quot;)&quot;</span> mul-string <span class="bu">:test</span> <span class="op">#&#39;</span>string=)))))</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    (<span class="op">*</span> left right)))</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> mul-and-add-line </span>(mul-line)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">reduce</span> <span class="op">#&#39;</span>+ (<span class="kw">mapcar</span> <span class="op">#&#39;</span>parse-mul mul-line)))</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> parse-mul </span>(mul-string)</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let*</span> ((comma (<span class="kw">position</span> <span class="st">&quot;,&quot;</span> mul-string <span class="bu">:test</span> <span class="op">#&#39;</span>string=))</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>     (left (<span class="kw">parse-integer</span> (<span class="kw">subseq</span> mul-string <span class="dv">4</span> comma)))</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>     (right (<span class="kw">parse-integer</span> (<span class="kw">subseq</span> mul-string (<span class="op">1+</span> comma) (<span class="kw">position</span> <span class="st">&quot;)&quot;</span> mul-string <span class="bu">:test</span> <span class="op">#&#39;</span>string=)))))</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    (<span class="op">*</span> left right)))</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> solve-1-preprocessed </span>(file)</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let*</span> ((line (uiop:read-file-lines file)))</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    (mul-and-add-line line)))</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> solve-2-preprocessed </span>(file)</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((line (get-valid-muls (uiop:read-file-lines file))))</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    (mul-and-add-line line)))</span></code></pre></div>
+<h3 id="the-hard-way">The hard way</h3>
+<p>So, actually I didn’t want to install a regex library, so I
+implemented my wonky regex engine by hard-coding the needed DFAs. The
+following is an example of how an automaton is defined:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode lisp"><code class="sourceCode commonlisp"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defstruct</span><span class="fu"> automaton </span>(init <span class="kw">nil</span>) (end <span class="kw">nil</span>) (delta &#39;()))</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defparameter</span><span class="fu"> *delta*</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  &#39;((<span class="dv">0</span> <span class="op">-</span> <span class="st">&quot;m&quot;</span> -&gt; <span class="dv">1</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">1</span> <span class="op">-</span> <span class="st">&quot;u&quot;</span> -&gt; <span class="dv">2</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">2</span> <span class="op">-</span> <span class="st">&quot;l&quot;</span> -&gt; <span class="dv">3</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">3</span> <span class="op">-</span> <span class="st">&quot;(&quot;</span> -&gt; <span class="dv">4</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">4</span> <span class="op">-</span> <span class="kw">number</span> -&gt; <span class="dv">5</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">5</span> <span class="op">-</span> <span class="kw">number</span> -&gt; <span class="dv">5</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">5</span> <span class="op">-</span> <span class="st">&quot;,&quot;</span> -&gt; <span class="dv">6</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">6</span> <span class="op">-</span> <span class="kw">number</span> -&gt; <span class="dv">7</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">7</span> <span class="op">-</span> <span class="kw">number</span> -&gt; <span class="dv">7</span>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">7</span> <span class="op">-</span> <span class="st">&quot;)&quot;</span> -&gt; <span class="dv">8</span>)))</span></code></pre></div>
+<p>Where the numbers represent states, the arrow is labeled with the
+symbol that enables the transition, and <code>number</code> represents
+the <code>[0-9]</code> set of chars. The actual matching on automata is
+handled in the following way (some things can easily be optimized
+e.g. with hash maps):</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode lisp"><code class="sourceCode commonlisp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> rule-with-input </span>(rules input)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;returns the single rule that have input on the arrow&quot;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((rule-list (<span class="kw">remove-if-not</span> <span class="op">#&#39;</span>(<span class="kw">lambda</span> (rule) (<span class="kw">string=</span> (<span class="kw">third</span> rule) input)) rules)))</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">if</span> rule-list (<span class="kw">first</span> rule-list) <span class="kw">nil</span>)))</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> rule-with-number </span>(rules)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;returns the single rule that have -number-&gt;&quot;</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((rule-list (<span class="kw">remove-if-not</span> <span class="op">#&#39;</span>(<span class="kw">lambda</span> (rule) (<span class="kw">eql</span> (<span class="kw">third</span> rule) <span class="dt">&#39;number</span>)) rules)))</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">if</span> rule-list (<span class="kw">first</span> rule-list) <span class="kw">nil</span>)))</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> rules-with-state </span>(rules state)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;returns list of rules for state&quot;</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">remove-if-not</span> <span class="op">#&#39;</span>(<span class="kw">lambda</span> (rule) (<span class="kw">eql</span> (<span class="kw">first</span> rule) state)) rules))</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> target-state </span>(rule)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">fifth</span> rule))</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> apply-delta-char </span>(delta state input)</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Apply delta on a single char string.&quot;</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((to-apply (rule-with-input (rules-with-state delta state) input)))</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">cond</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>      ((<span class="kw">equal</span> delta <span class="kw">nil</span>) <span class="kw">nil</span>)</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>      (to-apply</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>       (target-state to-apply))</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>      ((<span class="kw">and</span> (<span class="kw">position</span> input <span class="st">&quot;0123456789&quot;</span> <span class="bu">:test</span> <span class="op">#&#39;</span>string=) (rule-with-number (rules-with-state delta state)))</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>       (target-state (rule-with-number (rules-with-state delta state))))</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">t</span> <span class="kw">nil</span>))))</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> apply-delta-string </span>(delta state input end-state)</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>  (apply-delta-string-aux delta state (<span class="kw">concatenate</span> <span class="dt">&#39;string</span> input (<span class="kw">princ-to-string</span> (<span class="kw">code-char</span> <span class="dv">1</span>))) end-state <span class="dv">0</span>))</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> apply-delta-string-aux </span>(delta state input end-state <span class="kw">position</span>)</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Apply delta on a string&quot;</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">cond</span> ((<span class="kw">equal</span> state end-state) (<span class="kw">list</span> <span class="kw">t</span> <span class="kw">position</span>))</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>    ((<span class="kw">equal</span> state <span class="kw">nil</span>) (<span class="kw">list</span> <span class="kw">nil</span> (<span class="kw">if</span> (<span class="op">&gt;</span> <span class="kw">position</span> <span class="dv">1</span>) (<span class="op">1-</span> <span class="kw">position</span>) <span class="kw">position</span>)))</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">t</span> (apply-delta-string-aux delta (apply-delta-char delta state (<span class="kw">subseq</span> input <span class="dv">0</span> <span class="dv">1</span>)) (<span class="kw">subseq</span> input <span class="dv">1</span>) end-state (<span class="op">1+</span> <span class="kw">position</span>)))))</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> check-multiple-automaton </span>(automaton-list input)</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((<span class="kw">max</span> <span class="dv">0</span>))</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">loop</span> for automaton in automaton-list <span class="kw">do</span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">let</span> ((possible-match</span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>          (apply-delta-string</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>           (automaton-delta automaton)</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>           (automaton-init automaton)</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>           input</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>           (automaton-end automaton))))</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">cond</span></span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>      ((<span class="kw">first</span> possible-match) (<span class="kw">return-from</span> check-multiple-automaton possible-match))</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">t</span> (<span class="kw">if</span> (<span class="op">&gt;</span> (<span class="kw">second</span> possible-match) <span class="kw">max</span>) (<span class="kw">setq</span> <span class="kw">max</span> (<span class="kw">second</span> possible-match)))))</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>    ))</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">list</span> <span class="kw">nil</span> <span class="kw">max</span>)))</span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> apply-on-automaton-list </span>(automaton-list input)</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Run the automaton on the input string and return the list of matches&quot;</span></span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((i <span class="dv">0</span>) (matches &#39;()))</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">loop</span> while (<span class="op">&lt;</span> i (<span class="kw">length</span> input))</span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>      <span class="kw">do</span></span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>         (<span class="kw">destructuring-bind</span></span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>         (result char-read)</span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>         (check-multiple-automaton automaton-list (<span class="kw">subseq</span> input i))</span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>           (<span class="kw">cond</span></span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>         (result</span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>          (<span class="kw">setq</span> matches (<span class="kw">append</span> matches (<span class="kw">list</span> (<span class="kw">subseq</span> input i (<span class="op">+</span> i char-read)))))</span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>          (<span class="kw">incf</span> i char-read))</span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>         (<span class="kw">t</span> (<span class="kw">incf</span> i char-read)))))</span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>    matches))</span></code></pre></div>
+<p>With <code>apply-on-automaton-list</code> it’s possible to use
+multiple automata for the matching. The solution is completed as
+following:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode lisp"><code class="sourceCode commonlisp"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defparameter</span><span class="fu"> *mul-automaton* </span>(make-automaton :init <span class="dv">0</span> <span class="bu">:end</span> <span class="dv">8</span> :delta</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>                      &#39;((<span class="dv">0</span> <span class="op">-</span> <span class="st">&quot;m&quot;</span> -&gt; <span class="dv">1</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                        (<span class="dv">1</span> <span class="op">-</span> <span class="st">&quot;u&quot;</span> -&gt; <span class="dv">2</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>                        (<span class="dv">2</span> <span class="op">-</span> <span class="st">&quot;l&quot;</span> -&gt; <span class="dv">3</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>                        (<span class="dv">3</span> <span class="op">-</span> <span class="st">&quot;(&quot;</span> -&gt; <span class="dv">4</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>                        (<span class="dv">4</span> <span class="op">-</span> <span class="kw">number</span> -&gt; <span class="dv">5</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>                        (<span class="dv">5</span> <span class="op">-</span> <span class="kw">number</span> -&gt; <span class="dv">5</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>                        (<span class="dv">5</span> <span class="op">-</span> <span class="st">&quot;,&quot;</span> -&gt; <span class="dv">6</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>                        (<span class="dv">6</span> <span class="op">-</span> <span class="kw">number</span> -&gt; <span class="dv">7</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>                        (<span class="dv">7</span> <span class="op">-</span> <span class="kw">number</span> -&gt; <span class="dv">7</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>                        (<span class="dv">7</span> <span class="op">-</span> <span class="st">&quot;)&quot;</span> -&gt; <span class="dv">8</span>))))</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defparameter</span><span class="fu"> *do-automaton* </span>(make-automaton :init <span class="dv">0</span> <span class="bu">:end</span> <span class="dv">4</span> :delta</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>                         &#39;((<span class="dv">0</span> <span class="op">-</span> <span class="st">&quot;d&quot;</span> -&gt; <span class="dv">1</span>)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>                           (<span class="dv">1</span> <span class="op">-</span> <span class="st">&quot;o&quot;</span> -&gt; <span class="dv">2</span>)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>                           (<span class="dv">2</span> -&gt; <span class="st">&quot;(&quot;</span> -&gt; <span class="dv">3</span>)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>                           (<span class="dv">3</span> -&gt; <span class="st">&quot;)&quot;</span> -&gt; <span class="dv">4</span>))))</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defparameter</span><span class="fu"> *dont-automaton* </span>(make-automaton :init <span class="dv">0</span> <span class="bu">:end</span> <span class="dv">7</span> :delta</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>                           &#39;((<span class="dv">0</span> <span class="op">-</span> <span class="st">&quot;d&quot;</span> -&gt; <span class="dv">1</span>)</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>                         (<span class="dv">1</span> <span class="op">-</span> <span class="st">&quot;o&quot;</span> -&gt; <span class="dv">2</span>)</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>                         (<span class="dv">2</span> <span class="op">-</span> <span class="st">&quot;n&quot;</span> -&gt; <span class="dv">3</span>)</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>                         (<span class="dv">3</span> <span class="op">-</span> <span class="st">&quot;&#39;&quot;</span> -&gt; <span class="dv">4</span>)</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>                         (<span class="dv">4</span> <span class="op">-</span> <span class="st">&quot;t&quot;</span> -&gt; <span class="dv">5</span>)</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>                         (<span class="dv">5</span> <span class="op">-</span> <span class="st">&quot;(&quot;</span> -&gt; <span class="dv">6</span>)</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>                         (<span class="dv">6</span> <span class="op">-</span> <span class="st">&quot;)&quot;</span> -&gt; <span class="dv">7</span>))))</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> solve-1 </span>(file)</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let*</span> ((lines (uiop:read-file-lines file))</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    (parsed-lines (<span class="kw">mapcar</span> <span class="op">#&#39;</span>(<span class="kw">lambda</span> (line) (apply-on-automaton *mul-automaton* line)) lines)))</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">reduce</span> <span class="op">#&#39;</span>+ (<span class="kw">mapcar</span> <span class="op">#&#39;</span>mul-and-add-line parsed-lines))</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>    ))</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> solve-2 </span>(file)</span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let*</span> ((lines (uiop:read-file-lines file))</span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>     (valid-region <span class="kw">t</span>)</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>     (valid-muls &#39;()))</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">loop</span> for line in lines <span class="kw">do</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">multiple-value-bind</span> (valid last-valid-region)</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>      (get-valid-muls</span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>       (apply-on-automaton-list (<span class="kw">list</span> *mul-automaton* *do-automaton* *dont-automaton*) line) valid-region)</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">push</span> valid valid-muls)</span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">setq</span> valid-region last-valid-region)))</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">reduce</span> <span class="op">#&#39;</span>+ (<span class="kw">mapcar</span> <span class="op">#&#39;</span>mul-and-add-line valid-muls))))</span></code></pre></div>
+<p>It would be really nice to automatically compile at least a subset of
+the regex syntax into the equivalent automaton, but this is left as an
+exercise <em>for future me, maybe</em>.</p>
+<h2 id="utils">Utils</h2>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode lisp"><code class="sourceCode commonlisp"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defpackage</span><span class="fu"> </span>:utils</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  (<span class="bu">:use</span> :cl)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  (:export</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>   #:string-join #:split-by-one-space))</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>(<span class="kw">in-package</span> :utils)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> string-join </span>(fill-in strings)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((joined (<span class="kw">first</span> strings)))</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">dolist</span> (s (<span class="kw">rest</span> strings))</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">setf</span> joined (<span class="kw">concatenate</span> <span class="dt">&#39;string</span> joined fill-in s)))</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    joined))</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">;; from https://lispcookbook.github.io/cl-cookbook/strings.html#breaking-strings-into-graphenes-sentences-lines-and-words</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> split-by-one-space </span>(<span class="kw">string</span>)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">loop</span> for i <span class="op">=</span> <span class="dv">0</span> then (<span class="op">1+</span> j)</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    as j <span class="op">=</span> (<span class="kw">position</span> <span class="ch">#\S</span>pace <span class="kw">string</span> <span class="bu">:start</span> i)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    collect (<span class="kw">subseq</span> <span class="kw">string</span> i j)</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    while j))</span></code></pre></div>
 </body>
 </html>
