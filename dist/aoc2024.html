@@ -479,132 +479,187 @@ class="sourceCode lisp"><code class="sourceCode commonlisp"><span id="cb7-1"><a 
 <span id="cb7-90"><a href="#cb7-90" aria-hidden="true" tabindex="-1"></a>                (count-anti-diagonals square-lines <span class="st">&quot;MAS&quot;</span>))))</span>
 <span id="cb7-91"><a href="#cb7-91" aria-hidden="true" tabindex="-1"></a>           (<span class="kw">if</span> (<span class="op">=</span> <span class="dv">2</span> partial) (<span class="kw">incf</span> total)))) <span class="co">;; count one only if both diagonals match</span></span>
 <span id="cb7-92"><a href="#cb7-92" aria-hidden="true" tabindex="-1"></a>    total))</span></code></pre></div>
-<h2 id="utils">Utils</h2>
+<h3 id="day-5">Day 5</h3>
+<p>At start I tried to do something fancy by computing the topological
+order of the nodes in the dependency graph created with the ordering
+rules, but it ended up not working so I reverted to the simplest
+solution I could think of.</p>
 <div class="sourceCode" id="cb8"><pre
-class="sourceCode lisp"><code class="sourceCode commonlisp"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defpackage</span><span class="fu"> </span>:utils</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  (<span class="bu">:use</span> :cl)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  (:export</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>   #:string-join</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>   #:split-by-one-space</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>   #:compile-regex</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>   #:apply-on-automaton-list</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>   #:regex-match-all))</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>(<span class="kw">in-package</span> :utils)</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> string-join </span>(fill-in strings)</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((joined (<span class="kw">first</span> strings)))</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">dolist</span> (s (<span class="kw">rest</span> strings))</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">setf</span> joined (<span class="kw">concatenate</span> <span class="dt">&#39;string</span> joined fill-in s)))</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    joined))</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="co">;; from https://lispcookbook.github.io/cl-cookbook/strings.html#breaking-strings-into-graphenes-sentences-lines-and-words</span></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> split-by-one-space </span>(<span class="kw">string</span>)</span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">loop</span> for i <span class="op">=</span> <span class="dv">0</span> then (<span class="op">1+</span> j)</span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    as j <span class="op">=</span> (<span class="kw">position</span> <span class="ch">#\S</span>pace <span class="kw">string</span> <span class="bu">:start</span> i)</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    collect (<span class="kw">subseq</span> <span class="kw">string</span> i j)</span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    while j))</span>
+class="sourceCode lisp"><code class="sourceCode commonlisp"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> parse-sequence </span>(<span class="kw">sequence</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">mapcar</span> <span class="op">#&#39;</span>parse-integer (uiop:split-string <span class="kw">sequence</span> :separator &#39;(<span class="ch">#\,</span>))))</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> check-ordering </span>(rules <span class="kw">sequence</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">loop</span> for i from <span class="dv">1</span> below (<span class="kw">length</span> <span class="kw">sequence</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">do</span> (<span class="kw">if</span> (<span class="kw">some</span> <span class="op">#&#39;</span>(<span class="kw">lambda</span> (elem) (<span class="kw">find</span> elem (<span class="kw">gethash</span> (<span class="kw">nth</span> i <span class="kw">sequence</span>) rules))) (<span class="kw">subseq</span> <span class="kw">sequence</span> <span class="dv">0</span> i))</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>           (<span class="kw">return-from</span> check-ordering <span class="kw">nil</span>)))</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">t</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> parse-ordering-rules </span>(rules)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((parsed (<span class="kw">make-hash-table</span>)))</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">loop</span> for rule in rules</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>      <span class="kw">do</span> (<span class="kw">let*</span> ((pipe-pos (<span class="kw">position</span> <span class="st">&quot;|&quot;</span> rule <span class="bu">:test</span> <span class="op">#&#39;</span>string=))</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>            (left (<span class="kw">parse-integer</span> (<span class="kw">subseq</span> rule <span class="dv">0</span> pipe-pos)))</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>            (right (<span class="kw">parse-integer</span> (<span class="kw">subseq</span> rule (<span class="op">1+</span> pipe-pos)))))</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>           (<span class="kw">push</span> right (<span class="kw">gethash</span> left parsed))))</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    parsed))</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> preprocess-file </span>(file)</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let*</span> ((lines (uiop:read-file-lines file))</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>     (empty-line-pos (<span class="kw">position</span> <span class="st">&quot;&quot;</span> lines <span class="bu">:test</span> <span class="op">#&#39;</span>string=)))</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">list</span> (<span class="kw">subseq</span> lines <span class="dv">0</span> empty-line-pos) (<span class="kw">subseq</span> lines (<span class="op">1+</span> empty-line-pos)))))</span>
 <span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defstruct</span><span class="fu"> automaton </span>(init <span class="kw">nil</span>) (end <span class="kw">nil</span>) (delta &#39;()))</span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> rule-with-input </span>(rules input)</span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;returns the single rule that have input on the arrow&quot;</span></span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((rule-list (<span class="kw">remove-if-not</span> <span class="op">#&#39;</span>(<span class="kw">lambda</span> (rule) (<span class="kw">string=</span> (<span class="kw">third</span> rule) input)) rules)))</span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">if</span> rule-list (<span class="kw">first</span> rule-list) <span class="kw">nil</span>)))</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> compare </span>(x y rules)</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Returns non-NIL if x comes before y according to the rules.&quot;</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">find</span> y (<span class="kw">gethash</span> x rules)))</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> middle-element </span>(<span class="kw">sequence</span>)</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">nth</span> (<span class="kw">floor</span> (<span class="op">/</span> (<span class="kw">length</span> <span class="kw">sequence</span>) <span class="dv">2</span>)) <span class="kw">sequence</span>))</span>
 <span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> rule-with-number </span>(rules)</span>
-<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;returns the single rule that have -number-&gt;&quot;</span></span>
-<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((rule-list (<span class="kw">remove-if-not</span> <span class="op">#&#39;</span>(<span class="kw">lambda</span> (rule) (<span class="kw">eql</span> (<span class="kw">third</span> rule) <span class="dt">&#39;number</span>)) rules)))</span>
-<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">if</span> rule-list (<span class="kw">first</span> rule-list) <span class="kw">nil</span>)))</span>
-<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> rules-with-state </span>(rules state)</span>
-<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;returns list of rules for state&quot;</span></span>
-<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">remove-if-not</span> <span class="op">#&#39;</span>(<span class="kw">lambda</span> (rule) (<span class="kw">eql</span> (<span class="kw">first</span> rule) state)) rules))</span>
-<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> target-state </span>(rule)</span>
-<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">fifth</span> rule))</span>
-<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> apply-delta-char </span>(delta state input)</span>
-<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Apply delta on a single char string.&quot;</span></span>
-<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((to-apply (rule-with-input (rules-with-state delta state) input)))</span>
-<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">cond</span></span>
-<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>      ((<span class="kw">equal</span> delta <span class="kw">nil</span>) <span class="kw">nil</span>)</span>
-<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>      (to-apply</span>
-<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>       (target-state to-apply))</span>
-<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>      ((<span class="kw">and</span> (<span class="kw">position</span> input <span class="st">&quot;0123456789&quot;</span> <span class="bu">:test</span> <span class="op">#&#39;</span>string=) (rule-with-number (rules-with-state delta state)))</span>
-<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>       (target-state (rule-with-number (rules-with-state delta state))))</span>
-<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">t</span> <span class="kw">nil</span>))))</span>
-<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> apply-delta-string </span>(delta state input end-state)</span>
-<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>  (apply-delta-string-aux delta state (<span class="kw">concatenate</span> <span class="dt">&#39;string</span> input (<span class="kw">princ-to-string</span> (<span class="kw">code-char</span> <span class="dv">1</span>))) end-state <span class="dv">0</span>))</span>
-<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> apply-delta-string-aux </span>(delta state input end-state <span class="kw">position</span>)</span>
-<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Apply delta on a string&quot;</span></span>
-<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">cond</span> ((<span class="kw">equal</span> state end-state) (<span class="kw">list</span> <span class="kw">t</span> <span class="kw">position</span>))</span>
-<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>    ((<span class="kw">equal</span> state <span class="kw">nil</span>) (<span class="kw">list</span> <span class="kw">nil</span> (<span class="kw">if</span> (<span class="op">&gt;</span> <span class="kw">position</span> <span class="dv">1</span>) (<span class="op">1-</span> <span class="kw">position</span>) <span class="kw">position</span>)))</span>
-<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">t</span> (apply-delta-string-aux delta (apply-delta-char delta state (<span class="kw">subseq</span> input <span class="dv">0</span> <span class="dv">1</span>)) (<span class="kw">subseq</span> input <span class="dv">1</span>) end-state (<span class="op">1+</span> <span class="kw">position</span>)))))</span>
-<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> apply-on-automaton </span>(automaton input)</span>
-<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Run the automaton on the input string and return the list of matches&quot;</span></span>
-<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((i <span class="dv">0</span>) (matches &#39;()))</span>
-<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">loop</span> while (<span class="op">&lt;</span> i (<span class="kw">length</span> input))</span>
-<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a>      <span class="kw">do</span></span>
-<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a>         <span class="co">;; (format t &quot;~a~%&quot; (subseq input i))</span></span>
-<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a>         (<span class="kw">destructuring-bind</span> (result char-read)</span>
-<span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a>         (apply-delta-string</span>
-<span id="cb8-74"><a href="#cb8-74" aria-hidden="true" tabindex="-1"></a>          (automaton-delta automaton)</span>
-<span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a>          (automaton-init automaton)</span>
-<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a>          (<span class="kw">subseq</span> input i)</span>
-<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a>          (automaton-end automaton))</span>
-<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a>           <span class="co">;; (format t &quot;char read: ~a~%&quot; char-read)</span></span>
-<span id="cb8-79"><a href="#cb8-79" aria-hidden="true" tabindex="-1"></a>           (<span class="kw">cond</span></span>
-<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a>         (result</span>
-<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a>           (<span class="kw">setq</span> matches (<span class="kw">append</span> matches (<span class="kw">list</span> (<span class="kw">subseq</span> input i (<span class="op">+</span> i char-read)))))</span>
-<span id="cb8-82"><a href="#cb8-82" aria-hidden="true" tabindex="-1"></a>           (<span class="kw">incf</span> i char-read))</span>
-<span id="cb8-83"><a href="#cb8-83" aria-hidden="true" tabindex="-1"></a>         (<span class="kw">t</span> (<span class="kw">incf</span> i char-read)))))</span>
-<span id="cb8-84"><a href="#cb8-84" aria-hidden="true" tabindex="-1"></a>    matches))</span>
-<span id="cb8-85"><a href="#cb8-85" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-86"><a href="#cb8-86" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> check-multiple-automaton </span>(automaton-list input)</span>
-<span id="cb8-87"><a href="#cb8-87" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((<span class="kw">max</span> <span class="dv">0</span>))</span>
-<span id="cb8-88"><a href="#cb8-88" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">loop</span> for automaton in automaton-list <span class="kw">do</span></span>
-<span id="cb8-89"><a href="#cb8-89" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">let</span> ((possible-match</span>
-<span id="cb8-90"><a href="#cb8-90" aria-hidden="true" tabindex="-1"></a>          (apply-delta-string</span>
-<span id="cb8-91"><a href="#cb8-91" aria-hidden="true" tabindex="-1"></a>           (automaton-delta automaton)</span>
-<span id="cb8-92"><a href="#cb8-92" aria-hidden="true" tabindex="-1"></a>           (automaton-init automaton)</span>
-<span id="cb8-93"><a href="#cb8-93" aria-hidden="true" tabindex="-1"></a>           input</span>
-<span id="cb8-94"><a href="#cb8-94" aria-hidden="true" tabindex="-1"></a>           (automaton-end automaton))))</span>
-<span id="cb8-95"><a href="#cb8-95" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">cond</span></span>
-<span id="cb8-96"><a href="#cb8-96" aria-hidden="true" tabindex="-1"></a>      ((<span class="kw">first</span> possible-match) (<span class="kw">return-from</span> check-multiple-automaton possible-match))</span>
-<span id="cb8-97"><a href="#cb8-97" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">t</span> (<span class="kw">if</span> (<span class="op">&gt;</span> (<span class="kw">second</span> possible-match) <span class="kw">max</span>) (<span class="kw">setq</span> <span class="kw">max</span> (<span class="kw">second</span> possible-match)))))</span>
-<span id="cb8-98"><a href="#cb8-98" aria-hidden="true" tabindex="-1"></a>    ))</span>
-<span id="cb8-99"><a href="#cb8-99" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">list</span> <span class="kw">nil</span> <span class="kw">max</span>)))</span>
-<span id="cb8-100"><a href="#cb8-100" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-101"><a href="#cb8-101" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> apply-on-automaton-list </span>(automaton-list input)</span>
-<span id="cb8-102"><a href="#cb8-102" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Run the automaton on the input string and return the list of matches&quot;</span></span>
-<span id="cb8-103"><a href="#cb8-103" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((i <span class="dv">0</span>) (matches &#39;()))</span>
-<span id="cb8-104"><a href="#cb8-104" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">loop</span> while (<span class="op">&lt;</span> i (<span class="kw">length</span> input))</span>
-<span id="cb8-105"><a href="#cb8-105" aria-hidden="true" tabindex="-1"></a>      <span class="kw">do</span></span>
-<span id="cb8-106"><a href="#cb8-106" aria-hidden="true" tabindex="-1"></a>         (<span class="kw">destructuring-bind</span></span>
-<span id="cb8-107"><a href="#cb8-107" aria-hidden="true" tabindex="-1"></a>         (result char-read)</span>
-<span id="cb8-108"><a href="#cb8-108" aria-hidden="true" tabindex="-1"></a>         (check-multiple-automaton automaton-list (<span class="kw">subseq</span> input i))</span>
-<span id="cb8-109"><a href="#cb8-109" aria-hidden="true" tabindex="-1"></a>           (<span class="kw">cond</span></span>
-<span id="cb8-110"><a href="#cb8-110" aria-hidden="true" tabindex="-1"></a>         (result</span>
-<span id="cb8-111"><a href="#cb8-111" aria-hidden="true" tabindex="-1"></a>          (<span class="kw">setq</span> matches (<span class="kw">append</span> matches (<span class="kw">list</span> (<span class="kw">subseq</span> input i (<span class="op">+</span> i char-read)))))</span>
-<span id="cb8-112"><a href="#cb8-112" aria-hidden="true" tabindex="-1"></a>          (<span class="kw">incf</span> i char-read))</span>
-<span id="cb8-113"><a href="#cb8-113" aria-hidden="true" tabindex="-1"></a>         (<span class="kw">t</span> (<span class="kw">incf</span> i char-read)))))</span>
-<span id="cb8-114"><a href="#cb8-114" aria-hidden="true" tabindex="-1"></a>    matches))</span>
-<span id="cb8-115"><a href="#cb8-115" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-116"><a href="#cb8-116" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> compile-regex </span>(regex)</span>
-<span id="cb8-117"><a href="#cb8-117" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((delta</span>
-<span id="cb8-118"><a href="#cb8-118" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">loop</span> for index from <span class="dv">0</span></span>
-<span id="cb8-119"><a href="#cb8-119" aria-hidden="true" tabindex="-1"></a>        for <span class="kw">char</span> across regex</span>
-<span id="cb8-120"><a href="#cb8-120" aria-hidden="true" tabindex="-1"></a>        collect (<span class="kw">list</span> index <span class="dt">&#39;-</span> <span class="kw">char</span> <span class="dt">&#39;-&gt;</span> (<span class="op">1+</span> index)))))</span>
-<span id="cb8-121"><a href="#cb8-121" aria-hidden="true" tabindex="-1"></a>    (make-automaton :init <span class="dv">0</span> <span class="bu">:end</span> (<span class="kw">length</span> regex) :delta delta)))</span>
-<span id="cb8-122"><a href="#cb8-122" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-123"><a href="#cb8-123" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-124"><a href="#cb8-124" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> regex-match-all </span>(regex input)</span>
-<span id="cb8-125"><a href="#cb8-125" aria-hidden="true" tabindex="-1"></a>  (apply-on-automaton (compile-regex regex) input))</span></code></pre></div>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> solve-1 </span>(file)</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">destructuring-bind</span> (raw-rules raw-sequences) (preprocess-file file)</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">let</span> ((rules (parse-ordering-rules raw-rules))</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>      (sequences (<span class="kw">mapcar</span> <span class="op">#&#39;</span>parse-sequence raw-sequences)))</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">reduce</span> <span class="op">#&#39;</span>+ (<span class="kw">mapcar</span> <span class="op">#&#39;</span>middle-element</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>              (<span class="kw">remove-if-not</span> <span class="op">#&#39;</span>(<span class="kw">lambda</span> (<span class="kw">sequence</span>) (check-ordering rules <span class="kw">sequence</span>)) sequences))))))</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> solve-2 </span>(file)</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">destructuring-bind</span> (raw-rules raw-sequences) (preprocess-file file)</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">let*</span> ((rules (parse-ordering-rules raw-rules))</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>       (sequences (<span class="kw">mapcar</span> <span class="op">#&#39;</span>parse-sequence raw-sequences))</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>       (not-ordered (<span class="kw">remove-if</span> <span class="op">#&#39;</span>(<span class="kw">lambda</span> (<span class="kw">sequence</span>) (check-ordering rules <span class="kw">sequence</span>)) sequences)))</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">reduce</span> <span class="op">#&#39;</span>+ (<span class="kw">mapcar</span></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>           <span class="op">#&#39;</span>middle-element</span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>           (<span class="kw">mapcar</span></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>            <span class="op">#&#39;</span>(<span class="kw">lambda</span> (<span class="kw">sequence</span>)</span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>            (<span class="kw">sort</span> <span class="kw">sequence</span> <span class="op">#&#39;</span>(<span class="kw">lambda</span> (x y) (compare x y rules))))</span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>            not-ordered))))))</span></code></pre></div>
+<h2 id="utils">Utils</h2>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode lisp"><code class="sourceCode commonlisp"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defpackage</span><span class="fu"> </span>:utils</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  (<span class="bu">:use</span> :cl)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  (:export</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>   #:string-join</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>   #:split-by-one-space</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>   #:compile-regex</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>   #:apply-on-automaton-list</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>   #:regex-match-all))</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>(<span class="kw">in-package</span> :utils)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> string-join </span>(fill-in strings)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((joined (<span class="kw">first</span> strings)))</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">dolist</span> (s (<span class="kw">rest</span> strings))</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">setf</span> joined (<span class="kw">concatenate</span> <span class="dt">&#39;string</span> joined fill-in s)))</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    joined))</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">;; from https://lispcookbook.github.io/cl-cookbook/strings.html#breaking-strings-into-graphenes-sentences-lines-and-words</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> split-by-one-space </span>(<span class="kw">string</span>)</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">loop</span> for i <span class="op">=</span> <span class="dv">0</span> then (<span class="op">1+</span> j)</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    as j <span class="op">=</span> (<span class="kw">position</span> <span class="ch">#\S</span>pace <span class="kw">string</span> <span class="bu">:start</span> i)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    collect (<span class="kw">subseq</span> <span class="kw">string</span> i j)</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    while j))</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defstruct</span><span class="fu"> automaton </span>(init <span class="kw">nil</span>) (end <span class="kw">nil</span>) (delta &#39;()))</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> rule-with-input </span>(rules input)</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;returns the single rule that have input on the arrow&quot;</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((rule-list (<span class="kw">remove-if-not</span> <span class="op">#&#39;</span>(<span class="kw">lambda</span> (rule) (<span class="kw">string=</span> (<span class="kw">third</span> rule) input)) rules)))</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">if</span> rule-list (<span class="kw">first</span> rule-list) <span class="kw">nil</span>)))</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> rule-with-number </span>(rules)</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;returns the single rule that have -number-&gt;&quot;</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((rule-list (<span class="kw">remove-if-not</span> <span class="op">#&#39;</span>(<span class="kw">lambda</span> (rule) (<span class="kw">eql</span> (<span class="kw">third</span> rule) <span class="dt">&#39;number</span>)) rules)))</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">if</span> rule-list (<span class="kw">first</span> rule-list) <span class="kw">nil</span>)))</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> rules-with-state </span>(rules state)</span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;returns list of rules for state&quot;</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">remove-if-not</span> <span class="op">#&#39;</span>(<span class="kw">lambda</span> (rule) (<span class="kw">eql</span> (<span class="kw">first</span> rule) state)) rules))</span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> target-state </span>(rule)</span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">fifth</span> rule))</span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> apply-delta-char </span>(delta state input)</span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Apply delta on a single char string.&quot;</span></span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((to-apply (rule-with-input (rules-with-state delta state) input)))</span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">cond</span></span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>      ((<span class="kw">equal</span> delta <span class="kw">nil</span>) <span class="kw">nil</span>)</span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>      (to-apply</span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>       (target-state to-apply))</span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>      ((<span class="kw">and</span> (<span class="kw">position</span> input <span class="st">&quot;0123456789&quot;</span> <span class="bu">:test</span> <span class="op">#&#39;</span>string=) (rule-with-number (rules-with-state delta state)))</span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a>       (target-state (rule-with-number (rules-with-state delta state))))</span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">t</span> <span class="kw">nil</span>))))</span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> apply-delta-string </span>(delta state input end-state)</span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>  (apply-delta-string-aux delta state (<span class="kw">concatenate</span> <span class="dt">&#39;string</span> input (<span class="kw">princ-to-string</span> (<span class="kw">code-char</span> <span class="dv">1</span>))) end-state <span class="dv">0</span>))</span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> apply-delta-string-aux </span>(delta state input end-state <span class="kw">position</span>)</span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Apply delta on a string&quot;</span></span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">cond</span> ((<span class="kw">equal</span> state end-state) (<span class="kw">list</span> <span class="kw">t</span> <span class="kw">position</span>))</span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a>    ((<span class="kw">equal</span> state <span class="kw">nil</span>) (<span class="kw">list</span> <span class="kw">nil</span> (<span class="kw">if</span> (<span class="op">&gt;</span> <span class="kw">position</span> <span class="dv">1</span>) (<span class="op">1-</span> <span class="kw">position</span>) <span class="kw">position</span>)))</span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">t</span> (apply-delta-string-aux delta (apply-delta-char delta state (<span class="kw">subseq</span> input <span class="dv">0</span> <span class="dv">1</span>)) (<span class="kw">subseq</span> input <span class="dv">1</span>) end-state (<span class="op">1+</span> <span class="kw">position</span>)))))</span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> apply-on-automaton </span>(automaton input)</span>
+<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Run the automaton on the input string and return the list of matches&quot;</span></span>
+<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((i <span class="dv">0</span>) (matches &#39;()))</span>
+<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">loop</span> while (<span class="op">&lt;</span> i (<span class="kw">length</span> input))</span>
+<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a>      <span class="kw">do</span></span>
+<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a>         <span class="co">;; (format t &quot;~a~%&quot; (subseq input i))</span></span>
+<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a>         (<span class="kw">destructuring-bind</span> (result char-read)</span>
+<span id="cb9-73"><a href="#cb9-73" aria-hidden="true" tabindex="-1"></a>         (apply-delta-string</span>
+<span id="cb9-74"><a href="#cb9-74" aria-hidden="true" tabindex="-1"></a>          (automaton-delta automaton)</span>
+<span id="cb9-75"><a href="#cb9-75" aria-hidden="true" tabindex="-1"></a>          (automaton-init automaton)</span>
+<span id="cb9-76"><a href="#cb9-76" aria-hidden="true" tabindex="-1"></a>          (<span class="kw">subseq</span> input i)</span>
+<span id="cb9-77"><a href="#cb9-77" aria-hidden="true" tabindex="-1"></a>          (automaton-end automaton))</span>
+<span id="cb9-78"><a href="#cb9-78" aria-hidden="true" tabindex="-1"></a>           <span class="co">;; (format t &quot;char read: ~a~%&quot; char-read)</span></span>
+<span id="cb9-79"><a href="#cb9-79" aria-hidden="true" tabindex="-1"></a>           (<span class="kw">cond</span></span>
+<span id="cb9-80"><a href="#cb9-80" aria-hidden="true" tabindex="-1"></a>         (result</span>
+<span id="cb9-81"><a href="#cb9-81" aria-hidden="true" tabindex="-1"></a>           (<span class="kw">setq</span> matches (<span class="kw">append</span> matches (<span class="kw">list</span> (<span class="kw">subseq</span> input i (<span class="op">+</span> i char-read)))))</span>
+<span id="cb9-82"><a href="#cb9-82" aria-hidden="true" tabindex="-1"></a>           (<span class="kw">incf</span> i char-read))</span>
+<span id="cb9-83"><a href="#cb9-83" aria-hidden="true" tabindex="-1"></a>         (<span class="kw">t</span> (<span class="kw">incf</span> i char-read)))))</span>
+<span id="cb9-84"><a href="#cb9-84" aria-hidden="true" tabindex="-1"></a>    matches))</span>
+<span id="cb9-85"><a href="#cb9-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-86"><a href="#cb9-86" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> check-multiple-automaton </span>(automaton-list input)</span>
+<span id="cb9-87"><a href="#cb9-87" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((<span class="kw">max</span> <span class="dv">0</span>))</span>
+<span id="cb9-88"><a href="#cb9-88" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">loop</span> for automaton in automaton-list <span class="kw">do</span></span>
+<span id="cb9-89"><a href="#cb9-89" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">let</span> ((possible-match</span>
+<span id="cb9-90"><a href="#cb9-90" aria-hidden="true" tabindex="-1"></a>          (apply-delta-string</span>
+<span id="cb9-91"><a href="#cb9-91" aria-hidden="true" tabindex="-1"></a>           (automaton-delta automaton)</span>
+<span id="cb9-92"><a href="#cb9-92" aria-hidden="true" tabindex="-1"></a>           (automaton-init automaton)</span>
+<span id="cb9-93"><a href="#cb9-93" aria-hidden="true" tabindex="-1"></a>           input</span>
+<span id="cb9-94"><a href="#cb9-94" aria-hidden="true" tabindex="-1"></a>           (automaton-end automaton))))</span>
+<span id="cb9-95"><a href="#cb9-95" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">cond</span></span>
+<span id="cb9-96"><a href="#cb9-96" aria-hidden="true" tabindex="-1"></a>      ((<span class="kw">first</span> possible-match) (<span class="kw">return-from</span> check-multiple-automaton possible-match))</span>
+<span id="cb9-97"><a href="#cb9-97" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">t</span> (<span class="kw">if</span> (<span class="op">&gt;</span> (<span class="kw">second</span> possible-match) <span class="kw">max</span>) (<span class="kw">setq</span> <span class="kw">max</span> (<span class="kw">second</span> possible-match)))))</span>
+<span id="cb9-98"><a href="#cb9-98" aria-hidden="true" tabindex="-1"></a>    ))</span>
+<span id="cb9-99"><a href="#cb9-99" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">list</span> <span class="kw">nil</span> <span class="kw">max</span>)))</span>
+<span id="cb9-100"><a href="#cb9-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-101"><a href="#cb9-101" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> apply-on-automaton-list </span>(automaton-list input)</span>
+<span id="cb9-102"><a href="#cb9-102" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Run the automaton on the input string and return the list of matches&quot;</span></span>
+<span id="cb9-103"><a href="#cb9-103" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((i <span class="dv">0</span>) (matches &#39;()))</span>
+<span id="cb9-104"><a href="#cb9-104" aria-hidden="true" tabindex="-1"></a>    (<span class="kw">loop</span> while (<span class="op">&lt;</span> i (<span class="kw">length</span> input))</span>
+<span id="cb9-105"><a href="#cb9-105" aria-hidden="true" tabindex="-1"></a>      <span class="kw">do</span></span>
+<span id="cb9-106"><a href="#cb9-106" aria-hidden="true" tabindex="-1"></a>         (<span class="kw">destructuring-bind</span></span>
+<span id="cb9-107"><a href="#cb9-107" aria-hidden="true" tabindex="-1"></a>         (result char-read)</span>
+<span id="cb9-108"><a href="#cb9-108" aria-hidden="true" tabindex="-1"></a>         (check-multiple-automaton automaton-list (<span class="kw">subseq</span> input i))</span>
+<span id="cb9-109"><a href="#cb9-109" aria-hidden="true" tabindex="-1"></a>           (<span class="kw">cond</span></span>
+<span id="cb9-110"><a href="#cb9-110" aria-hidden="true" tabindex="-1"></a>         (result</span>
+<span id="cb9-111"><a href="#cb9-111" aria-hidden="true" tabindex="-1"></a>          (<span class="kw">setq</span> matches (<span class="kw">append</span> matches (<span class="kw">list</span> (<span class="kw">subseq</span> input i (<span class="op">+</span> i char-read)))))</span>
+<span id="cb9-112"><a href="#cb9-112" aria-hidden="true" tabindex="-1"></a>          (<span class="kw">incf</span> i char-read))</span>
+<span id="cb9-113"><a href="#cb9-113" aria-hidden="true" tabindex="-1"></a>         (<span class="kw">t</span> (<span class="kw">incf</span> i char-read)))))</span>
+<span id="cb9-114"><a href="#cb9-114" aria-hidden="true" tabindex="-1"></a>    matches))</span>
+<span id="cb9-115"><a href="#cb9-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-116"><a href="#cb9-116" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> compile-regex </span>(regex)</span>
+<span id="cb9-117"><a href="#cb9-117" aria-hidden="true" tabindex="-1"></a>  (<span class="kw">let</span> ((delta</span>
+<span id="cb9-118"><a href="#cb9-118" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">loop</span> for index from <span class="dv">0</span></span>
+<span id="cb9-119"><a href="#cb9-119" aria-hidden="true" tabindex="-1"></a>        for <span class="kw">char</span> across regex</span>
+<span id="cb9-120"><a href="#cb9-120" aria-hidden="true" tabindex="-1"></a>        collect (<span class="kw">list</span> index <span class="dt">&#39;-</span> <span class="kw">char</span> <span class="dt">&#39;-&gt;</span> (<span class="op">1+</span> index)))))</span>
+<span id="cb9-121"><a href="#cb9-121" aria-hidden="true" tabindex="-1"></a>    (make-automaton :init <span class="dv">0</span> <span class="bu">:end</span> (<span class="kw">length</span> regex) :delta delta)))</span>
+<span id="cb9-122"><a href="#cb9-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-123"><a href="#cb9-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-124"><a href="#cb9-124" aria-hidden="true" tabindex="-1"></a>(<span class="kw">defun</span><span class="fu"> regex-match-all </span>(regex input)</span>
+<span id="cb9-125"><a href="#cb9-125" aria-hidden="true" tabindex="-1"></a>  (apply-on-automaton (compile-regex regex) input))</span></code></pre></div>
 </body>
 </html>
