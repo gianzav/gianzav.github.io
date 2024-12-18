@@ -41,7 +41,7 @@ Even if changing constantly, my main interests are (not in order):
 
 You can find me on [Github](https://github.com/gianzav) and
 [Linkedin](https://it.linkedin.com/in/gianluca-zavan-0a3031293). If needed, you
-can send me an email at `zavan.gianluca[at]gmail.com`.
+can send me an email at `zavan.gianluca[at]outlook.com`.
 
 
 # Things worth a look
