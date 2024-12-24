@@ -33,3 +33,11 @@ footer {
   text-align: left;
   text-justify: inter-word;
 }
+
+div.sourceCode {
+    margin: 1em 0;
+    background: #CAFAE1;
+    padding: 5px;
+    border-radius: 1%;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
