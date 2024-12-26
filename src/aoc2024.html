@@ -3,12 +3,101 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
+<!-- 2024-12-26 Thu 12:21 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Advent of Code 2024 in Common Lisp</title>
 <meta name="generator" content="Org Mode" />
-<link rel="stylesheet"
-                  href="./style.css" type="text/css"/>
+<style type="text/css">
+@import url(//fonts.googleapis.com/css?family=Honk);
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+
+html {
+    background-color: #fae9ca;
+    font-family: Georgia;
+    margin: 0 max(2em, calc(30% - 300px)) 0;
+}
+
+header {
+    text-align: center;
+}
+
+.header {
+    font-family: Honk
+}
+
+.title {
+    text-align: center;
+}
+
+footer {
+    margin-top: auto;
+}
+
+.sourceCode {
+  text-align: left;
+  text-justify: inter-word;
+}
+
+.org-src-container {
+    border: 1px solid #ccc;
+    background-color: #f7f7f3;
+    border-radius: 3px;
+    line-height: 1.3;
+    font-family: monospace;
+    margin: 1em auto;
+    padding: .1em .5em;
+    position: relative;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+/* highglighting */
+.org-function-name {
+    color: #af00af
+}
+.org-keyword {
+    color: #005faf
+}
+.org-builtin {
+    color: #870087
+}
+.org-string, .org-doc {
+    color: #008700
+}
+.org-comment,
+.org-comment-delimiter {
+    color: #8a8a8a;
+    font-style: italic;
+}
+.org-preprocessor {
+    color: #008787
+}
+.org-type {
+    color: #af5f00
+}
+.org-variable-name {
+    color: #870087
+}
+.org-constant {
+    color: #af0000
+}
+.org-warning {
+    color: #ff8c00;
+    font-weight: 700
+}
+.org-error {
+    color: red;
+    font-weight: 700
+}
+.org-escape-glyph {
+    color: #8700ff
+}
+</style>
 </head>
 <body>
 <div id="content" class="content">
@@ -75,8 +164,8 @@
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">main</span> ()
   (<span class="org-keyword">multiple-value-bind</span> (x y) (read-and-parse-input <span class="org-string">"input"</span>)
-    (format t <span class="org-string">"~a~%"</span> (total-similarity x y))
-    (format t <span class="org-string">"~a~%"</span> (total-distance x y))))
+                       (format t <span class="org-string">"~a~%"</span> (total-similarity x y))
+                       (format t <span class="org-string">"~a~%"</span> (total-distance x y))))
 </pre>
 </div>
 </div>
@@ -93,12 +182,13 @@ that could be useful for the next days.
 <div class="org-src-container">
 <pre class="src src-lisp">(load <span class="org-string">"../utils.lisp"</span>)
 
-(<span class="org-keyword">defparameter</span> <span class="org-variable-name">*test*</span>'((7 6 4 2 1)
-                      (1 2 7 8 9)
-                      (9 7 6 2 1)
-                      (1 3 2 4 5)
-                      (8 6 4 4 1)
-                      (1 3 6 7 9)))
+(<span class="org-keyword">defparameter</span> <span class="org-variable-name">*test*</span>
+              '((7 6 4 2 1)
+                (1 2 7 8 9)
+                (9 7 6 2 1)
+                (1 3 2 4 5)
+                (8 6 4 4 1)
+                (1 3 6 7 9)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">parse-file</span> (lines)
   (mapcar #'(<span class="org-keyword">lambda</span> (line) (mapcar #'parse-integer (utils:split-by-one-space line))) lines))
@@ -109,8 +199,8 @@ that could be useful for the next days.
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">check-pairs</span> (sequence <span class="org-type">&amp;optional</span> (comparison-func #'&lt;=))
   (<span class="org-keyword">loop</span> for i from 1 below (length sequence) do
-    (<span class="org-keyword">unless</span> (funcall comparison-func (nth (1- i) sequence) (nth i sequence))
-      (<span class="org-keyword">return-from</span> check-pairs nil)))
+        (<span class="org-keyword">unless</span> (funcall comparison-func (nth (1- i) sequence) (nth i sequence))
+          (<span class="org-keyword">return-from</span> check-pairs nil)))
   t)
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">pair-distance-ok-p</span> (x y <span class="org-type">&amp;optional</span> (min-distance 1) (max-distance 3))
@@ -122,8 +212,8 @@ that could be useful for the next days.
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">check-safety</span> (sequence)
   <span class="org-doc">"A sequence of numbers is safe if it is monotonically decreasing or</span>
-<span class="org-doc">  increasing, and any adjacent numbers differ by at least one and at</span>
-<span class="org-doc">  most three."</span>
+<span class="org-doc">increasing, and any adjacent numbers differ by at least one and at</span>
+<span class="org-doc">most three."</span>
   (<span class="org-keyword">cond</span> ((&lt; (first sequence) (second sequence))
          (<span class="org-warning">check-pairs</span> sequence #'increasing-and-distance-p))
         ((&gt; (first sequence) (second sequence))
@@ -138,7 +228,7 @@ that could be useful for the next days.
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">sequences-without-one-element</span> (sequence)
   (<span class="org-keyword">loop</span> for i from 0 below (length sequence) collect
-                                             (append (subseq sequence 0 i) (subseq sequence (1+ i) (length sequence)))))
+        (append (subseq sequence 0 i) (subseq sequence (1+ i) (length sequence)))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve</span> (input-file)
   (<span class="org-keyword">let</span> ((sequences (read-and-parse-file input-file)))
@@ -181,10 +271,10 @@ Then do the parsing and calculations in CL:
 (<span class="org-keyword">defun</span> <span class="org-function-name">get-valid-muls</span> (mixed <span class="org-type">&amp;optional</span> (valid-region t))
   (<span class="org-keyword">let</span> ((valid '()) (valid-region valid-region))
     (<span class="org-keyword">loop</span> for string in mixed do
-      (<span class="org-keyword">cond</span>
-        ((string= string <span class="org-string">"do()"</span>) (setq valid-region t))
-        ((string= string <span class="org-string">"don't()"</span>) (setq valid-region nil))
-        (valid-region (setq valid (append valid (list string))))))
+          (<span class="org-keyword">cond</span>
+           ((string= string <span class="org-string">"do()"</span>) (setq valid-region t))
+           ((string= string <span class="org-string">"don't()"</span>) (setq valid-region nil))
+           (valid-region (setq valid (append valid (list string))))))
     (values valid valid-region)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">parse-mul</span> (mul-string)
@@ -879,10 +969,10 @@ and making small edits would've solved the problem anyway.
           for num = (digit-char-p char)
           for pos from 0 below (length line)
           if (oddp pos)
-            do (<span class="org-keyword">loop</span> for j from 1 to num do (push 'dot parsed))
+          do (<span class="org-keyword">loop</span> for j from 1 to num do (push 'dot parsed))
           else
-            do (<span class="org-keyword">loop</span> for j from 1 to num do (push id parsed))
-               (incf id))
+          do (<span class="org-keyword">loop</span> for j from 1 to num do (push id parsed))
+          (incf id))
     (reverse parsed)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">get-empty-space-positions</span> (disk-map)
@@ -892,12 +982,12 @@ and making small edits would've solved the problem anyway.
         for file in disk-map
         for pos from 0 below (length disk-map)
         when (and (not in-empty-space) (eq file 'dot))
-          do (setf in-empty-space t)
-             (setf start-pos pos)
+        do (setf in-empty-space t)
+        (setf start-pos pos)
         when (and in-empty-space (not (eq file 'dot)))
-          do (setf in-empty-space nil)
-             (setf end-pos pos)
-          and collect (list start-pos end-pos)))
+        do (setf in-empty-space nil)
+        (setf end-pos pos)
+        and collect (list start-pos end-pos)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">get-file-positions</span> (disk-map)
   (<span class="org-keyword">loop</span> with file-positions = (make-hash-table)
@@ -908,40 +998,40 @@ and making small edits would've solved the problem anyway.
         for file in disk-map
         for pos from 0 below (length disk-map)
         when (and (not (eq file 'dot)) in-empty-space (/= file file-id))
-          do (setf file-id file)
-             (setf start-pos pos)
-             (setf in-empty-space nil)
+        do (setf file-id file)
+        (setf start-pos pos)
+        (setf in-empty-space nil)
         when (and (not (eq file 'dot)) in-empty-space (/= file file-id))
-          do (setf file-id file)
-             (setf start-pos pos)
-             (setf in-empty-space nil)
+        do (setf file-id file)
+        (setf start-pos pos)
+        (setf in-empty-space nil)
         when (and (not (eq file 'dot)) (not in-empty-space) (/= file file-id))
-          do (setf end-pos pos)
-             (setf (gethash file-id file-positions) (list start-pos end-pos))
-             (setf file-id file)
-             (setf start-pos pos)
+        do (setf end-pos pos)
+        (setf (gethash file-id file-positions) (list start-pos end-pos))
+        (setf file-id file)
+        (setf start-pos pos)
         when (and (not in-empty-space) (eq file 'dot))
-          do (setf in-empty-space t)
-             (setf end-pos pos)
-             (setf (gethash file-id file-positions) (list start-pos end-pos))
+        do (setf in-empty-space t)
+        (setf end-pos pos)
+        (setf (gethash file-id file-positions) (list start-pos end-pos))
         finally (setf (gethash file-id file-positions) (list start-pos (1+ pos)))
-                (<span class="org-keyword">return</span> file-positions)))
+        (<span class="org-keyword">return</span> file-positions)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">move-file-block</span> (disk-map last-empty-pos)
   (<span class="org-keyword">when</span> disk-map
     (<span class="org-keyword">let*</span> ((dot-pos (position 'dot (subseq disk-map last-empty-pos)))
            (empty-pos (<span class="org-keyword">when</span> dot-pos (+ last-empty-pos dot-pos))))
       (<span class="org-keyword">cond</span>
-        ((and empty-pos (= empty-pos (1- (length disk-map))))
-         (list (butlast disk-map) empty-pos nil))
-        (empty-pos
-         (list (append
-                (subseq disk-map 0 empty-pos)
-                (last disk-map)
-                (butlast (subseq disk-map (1+ empty-pos))))
-               empty-pos
-               nil))
-        (t (list disk-map empty-pos t))))))
+       ((and empty-pos (= empty-pos (1- (length disk-map))))
+        (list (butlast disk-map) empty-pos nil))
+       (empty-pos
+        (list (append
+               (subseq disk-map 0 empty-pos)
+               (last disk-map)
+               (butlast (subseq disk-map (1+ empty-pos))))
+              empty-pos
+              nil))
+       (t (list disk-map empty-pos t))))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">move-file-blocks</span> (disk-map)
   (<span class="org-keyword">loop</span> with last-disk-map = (copy-list disk-map)
@@ -949,11 +1039,11 @@ and making small edits would've solved the problem anyway.
         with last-empty-pos = 0
         while (not fixpoint)
         do (<span class="org-keyword">destructuring-bind</span>
-               (new-disk-map empty-pos fixpoint-p)
-               (move-file-block last-disk-map last-empty-pos)
-             (setf last-empty-pos empty-pos)
-             (setf fixpoint fixpoint-p)
-             (setf last-disk-map new-disk-map))
+            (new-disk-map empty-pos fixpoint-p)
+            (move-file-block last-disk-map last-empty-pos)
+            (setf last-empty-pos empty-pos)
+            (setf fixpoint fixpoint-p)
+            (setf last-disk-map new-disk-map))
         finally (<span class="org-keyword">return</span> last-disk-map)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">empty-intervals-before</span> (position empty-intervals)
@@ -972,27 +1062,27 @@ and making small edits would've solved the problem anyway.
                      file-interval
                      (empty-intervals-before file-interval remaining-empty-intervals))
           if fit
-            do (<span class="org-keyword">let*</span> ((fitting-interval (nth fit remaining-empty-intervals))
-                      (filled-from (first fitting-interval))
-                      (filled-to (+ filled-from (- (second file-interval) (first file-interval))))
-                      (filled-interval (list filled-from filled-to))
-                      (leftover-interval (list filled-to (second fitting-interval))))
-                 (setf (gethash id new-file-intervals) filled-interval)
-                 (<span class="org-keyword">if</span> (equal leftover-interval fitting-interval)
-                     <span class="org-comment-delimiter">;; </span><span class="org-comment">if the fitting interval is filled, remove it from the empty intervals list</span>
-                     (setf remaining-empty-intervals (remove (nth fit remaining-empty-intervals) remaining-empty-intervals))
-                     <span class="org-comment-delimiter">;; </span><span class="org-comment">otherwise replace the empty interva with the leftover interval after moving the file block</span>
-                     (setf remaining-empty-intervals
-                           (replace remaining-empty-intervals (list leftover-interval)
-                                    <span class="org-builtin">:start1</span> fit 
-                                    <span class="org-builtin">:end1</span> (1+ fit)))))
+          do (<span class="org-keyword">let*</span> ((fitting-interval (nth fit remaining-empty-intervals))
+                    (filled-from (first fitting-interval))
+                    (filled-to (+ filled-from (- (second file-interval) (first file-interval))))
+                    (filled-interval (list filled-from filled-to))
+                    (leftover-interval (list filled-to (second fitting-interval))))
+               (setf (gethash id new-file-intervals) filled-interval)
+               (<span class="org-keyword">if</span> (equal leftover-interval fitting-interval)
+                   <span class="org-comment-delimiter">;; </span><span class="org-comment">if the fitting interval is filled, remove it from the empty intervals list</span>
+                   (setf remaining-empty-intervals (remove (nth fit remaining-empty-intervals) remaining-empty-intervals))
+                 <span class="org-comment-delimiter">;; </span><span class="org-comment">otherwise replace the empty interva with the leftover interval after moving the file block</span>
+                 (setf remaining-empty-intervals
+                       (replace remaining-empty-intervals (list leftover-interval)
+                                <span class="org-builtin">:start1</span> fit 
+                                <span class="org-builtin">:end1</span> (1+ fit)))))
           else
-            do (setf (gethash id new-file-intervals) (gethash id file-intervals)))
+          do (setf (gethash id new-file-intervals) (gethash id file-intervals)))
     new-file-intervals))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">hash-map-to-alist</span> (hash-map)
   (<span class="org-keyword">loop</span> for key being the hash-key of hash-map
-          using (hash-value value)
+        using (hash-value value)
         collect (cons key (list value))))
 
 
@@ -1158,8 +1248,17 @@ and making small edits would've solved the problem anyway.
   (<span class="org-keyword">loop</span> for x in list1 for y in list2 when (not (equal x y)) return (funcall pred x y)))
 </pre>
 </div>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(concat (file-name-directory buffer-file-name) <span class="org-string">"style.css"</span>)
+</pre>
 </div>
 </div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Created: 2024-12-26 Thu 12:21</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
 </html>

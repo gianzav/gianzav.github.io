@@ -1,0 +1,1084 @@
+#+title: Advent of Code 2024 in Common Lisp
+#+options: toc:nil num:0
+
+[[./index.html][Home]]
+
+#+toc: headlines 2
+
+** Day 1
+:PROPERTIES:
+:CUSTOM_ID: day-1
+:END:
+#+begin_src lisp
+  (defun parse-input (lines)
+    "Transforms the lists provided as two colums into two LISP lists."
+    (values
+     (mapcar #'(lambda (collection) (parse-integer (first (remove "" (split-by-one-space collection) :test #'string=)))) lines)
+     (mapcar #'(lambda (collection) (parse-integer (second (remove "" (split-by-one-space collection) :test #'string=)))) lines)))
+
+  (defun read-and-parse-input (input-file)
+    (parse-input (uiop:read-file-lines input-file)))
+
+  ;; from https://lispcookbook.github.io/cl-cookbook/strings.html#breaking-strings-into-graphenes-sentences-lines-and-words
+  (defun split-by-one-space (string)
+    (loop for i = 0 then (1+ j)
+	  as j = (position #\Space string :start i)
+	  collect (subseq string i j)
+	  while j))
+
+  (defun total-distance (list-1 list-2)
+    (let ((sorted-1 (sort (copy-seq list-1) #'<))
+	  (sorted-2 (sort (copy-seq list-2) #'<)))
+      (reduce #'+ (mapcar #'(lambda (x y) (abs (- x y))) sorted-1 sorted-2))))
+
+  (defun total-similarity (list-1 list-2)
+    (let ((occurrences (make-hash-table)))
+      (dolist (item list-1)
+	(setf (gethash item occurrences) 0))
+      (dolist (item list-2)
+	(when (gethash item occurrences) (incf (gethash item occurrences))))
+      (reduce #'+ (mapcar #'(lambda (item) (* item (gethash item occurrences))) list-1))))
+
+  (defun main ()
+    (multiple-value-bind (x y) (read-and-parse-input "input")
+      (format t "~a~%" (total-similarity x y))
+      (format t "~a~%" (total-distance x y))))
+  #+end_src
+
+#+RESULTS:
+: MAIN
+
+** Day 2
+:PROPERTIES:
+:CUSTOM_ID: day-2
+:END:
+In =utils.lisp= I'll move general functions defined over the AOC and
+that could be useful for the next days.
+
+#+begin_src lisp
+  (load "../utils.lisp")
+
+  (defparameter *test*'((7 6 4 2 1)
+			(1 2 7 8 9)
+			(9 7 6 2 1)
+			(1 3 2 4 5)
+			(8 6 4 4 1)
+			(1 3 6 7 9)))
+
+  (defun parse-file (lines)
+    (mapcar #'(lambda (line) (mapcar #'parse-integer (utils:split-by-one-space line))) lines))
+
+  (defun read-and-parse-file (input-file)
+    (parse-file (uiop:read-file-lines input-file)))
+
+
+  (defun check-pairs (sequence &optional (comparison-func #'<=))
+    (loop for i from 1 below (length sequence) do
+      (unless (funcall comparison-func (nth (1- i) sequence) (nth i sequence))
+	(return-from check-pairs nil)))
+    t)
+
+  (defun pair-distance-ok-p (x y &optional (min-distance 1) (max-distance 3))
+    (let ((diff (abs (- x y))))
+      (and (>= diff min-distance) (<= diff max-distance) )))
+
+  (defun distance-ok-p (sequence &optional (min-distance 1) (max-distance 3))
+    (check-pairs sequence #'(lambda (x y) (pair-distance-ok-p x y min-distance max-distance))))
+
+  (defun check-safety (sequence)
+    "A sequence of numbers is safe if it is monotonically decreasing or
+    increasing, and any adjacent numbers differ by at least one and at
+    most three."
+    (cond ((< (first sequence) (second sequence))
+	   (check-pairs sequence #'increasing-and-distance-p))
+	  ((> (first sequence) (second sequence))
+	   (check-pairs sequence #'decreasing-and-distance-p))
+	  (t nil)))
+
+  (defun increasing-and-distance-p (x y)
+    (and (< x y) (pair-distance-ok-p x y)))
+
+  (defun decreasing-and-distance-p (x y)
+    (and (> x y) (pair-distance-ok-p x y)))
+
+  (defun sequences-without-one-element (sequence)
+    (loop for i from 0 below (length sequence) collect
+					       (append (subseq sequence 0 i) (subseq sequence (1+ i) (length sequence)))))
+
+  (defun solve (input-file)
+    (let ((sequences (read-and-parse-file input-file)))
+      (format t "~a~%" (solve-first sequences))
+      (format t "~a~%" (solve-second sequences))))
+
+  (defun solve-first (sequences)
+    (reduce #'+ (mapcar #'(lambda (seq) (if (check-safety seq) 1 0)) sequences)))
+
+  (defun solve-second (sequences)
+    (reduce #'+ (mapcar #'(lambda (seq) (if (some #'check-safety (sequences-without-one-element seq)) 1 0)) sequences)))
+#+end_src
+
+** Day 3
+:PROPERTIES:
+:CUSTOM_ID: day-3
+:END:
+*** Easy, sane version
+:PROPERTIES:
+:CUSTOM_ID: easy-sane-version
+:END:
+Just use =grep= to pre-process the file, or an available regex library.
+
+- 3.1: =grep "mul([0-9][0-9]*,[0-9][0-9]*)" input > preprocessed-1=
+- 3.2:
+  =grep -e "mul([0-9][0-9]*,[0-9][0-9]*) -e "do()" -e "don't()" input > preprocessed-2=
+
+Then do the parsing and calculations in CL:
+
+#+begin_src lisp
+
+  (defun get-valid-muls (mixed &optional (valid-region t))
+    (let ((valid '()) (valid-region valid-region))
+      (loop for string in mixed do
+	(cond
+	  ((string= string "do()") (setq valid-region t))
+	  ((string= string "don't()") (setq valid-region nil))
+	  (valid-region (setq valid (append valid (list string))))))
+      (values valid valid-region)))
+
+  (defun parse-mul (mul-string)
+    (let* ((comma (position "," mul-string :test #'string=))
+	   (left (parse-integer (subseq mul-string 4 comma)))
+	   (right (parse-integer
+		   (subseq mul-string (1+ comma) (position ")" mul-string :test #'string=)))))
+      (* left right)))
+
+  (defun mul-and-add-line (mul-line)
+    (reduce #'+ (mapcar #'parse-mul mul-line)))
+
+  (defun parse-mul (mul-string)
+    (let* ((comma (position "," mul-string :test #'string=))
+	   (left (parse-integer (subseq mul-string 4 comma)))
+	   (right (parse-integer (subseq mul-string (1+ comma) (position ")" mul-string :test #'string=)))))
+      (* left right)))
+
+  (defun solve-1-preprocessed (file)
+    (let* ((line (uiop:read-file-lines file)))
+      (mul-and-add-line line)))
+
+  (defun solve-2-preprocessed (file)
+    (let ((line (get-valid-muls (uiop:read-file-lines file))))
+      (mul-and-add-line line)))
+#+end_src
+
+*** The hard way
+:PROPERTIES:
+:CUSTOM_ID: the-hard-way
+:END:
+So, actually I didn't want to install a regex library, so I implemented
+my wonky regex engine by hard-coding the needed DFAs. The following is
+an example of how an automaton is defined:
+
+#+begin_src lisp
+  (defstruct automaton (init nil) (end nil) (delta '()))
+
+  (defparameter *delta*
+		'((0 - "m" -> 1)
+		  (1 - "u" -> 2)
+		  (2 - "l" -> 3)
+		  (3 - "(" -> 4)
+		  (4 - number -> 5)
+		  (5 - number -> 5)
+		  (5 - "," -> 6)
+		  (6 - number -> 7)
+		  (7 - number -> 7)
+		  (7 - ")" -> 8)))
+#+end_src
+
+Where the numbers represent states, the arrow is labeled with the symbol
+that enables the transition, and =number= represents the =[0-9]= set of
+chars. The actual matching on automata is handled in the following way
+(some things can easily be optimized e.g. with hash maps):
+
+#+begin_src lisp
+  (defun rule-with-input (rules input)
+    "returns the single rule that have input on the arrow"
+    (let ((rule-list (remove-if-not #'(lambda (rule) (string= (third rule) input)) rules)))
+      (if rule-list (first rule-list) nil)))
+
+  (defun rule-with-number (rules)
+    "returns the single rule that have -number->"
+    (let ((rule-list (remove-if-not #'(lambda (rule) (eql (third rule) 'number)) rules)))
+      (if rule-list (first rule-list) nil)))
+
+  (defun rules-with-state (rules state)
+    "returns list of rules for state"
+    (remove-if-not #'(lambda (rule) (eql (first rule) state)) rules))
+
+  (defun target-state (rule)
+    (fifth rule))
+
+
+  (defun apply-delta-char (delta state input)
+    "Apply delta on a single char string."
+    (let ((to-apply (rule-with-input (rules-with-state delta state) input)))
+      (cond
+       ((equal delta nil) nil)
+       (to-apply
+	(target-state to-apply))
+       ((and (position input "0123456789" :test #'string=) (rule-with-number (rules-with-state delta state)))
+	(target-state (rule-with-number (rules-with-state delta state))))
+       (t nil))))
+
+  (defun apply-delta-string (delta state input end-state)
+    (apply-delta-string-aux delta state (concatenate 'string input (princ-to-string (code-char 1))) end-state 0))
+
+  (defun apply-delta-string-aux (delta state input end-state position)
+    "Apply delta on a string"
+    (cond ((equal state end-state) (list t position))
+	  ((equal state nil) (list nil (if (> position 1) (1- position) position)))
+	  (t (apply-delta-string-aux delta (apply-delta-char delta state (subseq input 0 1)) (subseq input 1) end-state (1+ position)))))
+
+
+  (defun check-multiple-automaton (automaton-list input)
+    (let ((max 0))
+      (loop for automaton in automaton-list do
+	    (let ((possible-match
+		   (apply-delta-string
+		    (automaton-delta automaton)
+		    (automaton-init automaton)
+		    input
+		    (automaton-end automaton))))
+	      (cond
+	       ((first possible-match) (return-from check-multiple-automaton possible-match))
+	       (t (if (> (second possible-match) max) (setq max (second possible-match)))))
+	      ))
+      (list nil max)))
+
+  (defun apply-on-automaton-list (automaton-list input)
+    "Run the automaton on the input string and return the list of matches"
+    (let ((i 0) (matches '()))
+      (loop while (< i (length input))
+	    do
+	    (destructuring-bind
+	     (result char-read)
+	     (check-multiple-automaton automaton-list (subseq input i))
+	     (cond
+	      (result
+	       (setq matches (append matches (list (subseq input i (+ i char-read)))))
+	       (incf i char-read))
+	      (t (incf i char-read)))))
+      matches))
+#+end_src
+
+With =apply-on-automaton-list= it's possible to use multiple automata
+for the matching. The solution is completed as following:
+
+#+begin_src lisp
+  (defparameter *mul-automaton* (make-automaton :init 0 :end 8 :delta
+						'((0 - "m" -> 1)
+						  (1 - "u" -> 2)
+						  (2 - "l" -> 3)
+						  (3 - "(" -> 4)
+						  (4 - number -> 5)
+						  (5 - number -> 5)
+						  (5 - "," -> 6)
+						  (6 - number -> 7)
+						  (7 - number -> 7)
+						  (7 - ")" -> 8))))
+
+  (defparameter *do-automaton* (make-automaton :init 0 :end 4 :delta
+					       '((0 - "d" -> 1)
+						 (1 - "o" -> 2)
+						 (2 -> "(" -> 3)
+						 (3 -> ")" -> 4))))
+
+  (defparameter *dont-automaton* (make-automaton :init 0 :end 7 :delta
+						 '((0 - "d" -> 1)
+						   (1 - "o" -> 2)
+						   (2 - "n" -> 3)
+						   (3 - "'" -> 4)
+						   (4 - "t" -> 5)
+						   (5 - "(" -> 6)
+						   (6 - ")" -> 7))))
+
+
+  (defun solve-1 (file)
+    (let* ((lines (uiop:read-file-lines file))
+	   (parsed-lines (mapcar #'(lambda (line) (apply-on-automaton *mul-automaton* line)) lines)))
+      (reduce #'+ (mapcar #'mul-and-add-line parsed-lines))
+      ))
+
+  (defun solve-2 (file)
+    (let* ((lines (uiop:read-file-lines file))
+	   (valid-region t)
+	   (valid-muls '()))
+      (loop for line in lines do
+	    (multiple-value-bind (valid last-valid-region)
+				 (get-valid-muls
+				  (apply-on-automaton-list (list *mul-automaton* *do-automaton* *dont-automaton*) line) valid-region)
+				 (push valid valid-muls)
+				 (setq valid-region last-valid-region)))
+      (reduce #'+ (mapcar #'mul-and-add-line valid-muls))))
+#+end_src
+
+It would be really nice to automatically compile at least a subset of
+the regex syntax into the equivalent automaton, but this is left as an
+exercise /for future me, maybe/.
+
+** Day 4
+:PROPERTIES:
+:CUSTOM_ID: day-4
+:END:
+#+begin_src lisp
+
+  (load "../utils.lisp")
+
+  (defun get-diagonals (lines &optional (len 4))
+    "From bottom right to top left"
+    (loop for i from (1- len) below (length lines)
+	  collect
+	  (loop for j from (1- len) below (length (nth i lines))
+		collect
+		(utils:string-join ""
+				   (loop for k from 0 to (1- len)
+					 collect (subseq (nth (- i k) lines) (- j k) (1+ (- j k))))))))
+
+  (defun get-squares (lines &optional (dim 3))
+    (loop for i from 0 to (- (length lines) dim)
+	  nconc
+	  (loop for j from 0 to (- (length (nth i lines)) dim)
+		collect
+		(utils:string-join (list #\Newline)
+				   (loop for k from 0 below dim collect (subseq (nth (+ k i) lines) j (+ j dim)))))))
+
+
+  (defun get-anti-diagonals (lines &optional (len 4))
+    "From bottom left to top right."
+    (loop for i from (1- len) below (length lines) collect
+	  (loop for j from 0 below (- (length (nth i lines)) (1- len))
+		collect
+		(utils:string-join ""
+				   (loop for k from 0 to (1- len)
+					 collect (subseq (nth (- i k) lines) (+ j k) (1+ (+ j k))))))))
+
+
+  (defun get-vertical (lines)
+    (let ((vertical '()))
+      (loop for line in lines do
+	    (loop for i from 0 below (length line) do
+		  (cond
+		   ((nth i vertical) (setf (nth i vertical) (concatenate 'string (nth i vertical) (subseq line i (1+ i)))))
+		   (t (setf vertical (append vertical (list (subseq line i (1+ i)))))))))
+      vertical))
+
+
+  (defun count-horizontal (lines word)
+    (+
+     (reduce #'+
+	     (mapcar #'(lambda (line) (count word (utils:regex-match-all word line) :test #'string=)) lines))
+     (reduce #'+
+	     (mapcar #'(lambda (line) (count (reverse word) (utils:regex-match-all (reverse word) line) :test #'string=)) lines))))
+
+  (defun count-main-diagonals (lines word)
+    (+
+     (reduce #'+
+	     (mapcar #'(lambda (line) (count word line :test #'string=)) (get-diagonals lines (length word))))
+     (reduce #'+
+	     (mapcar #'(lambda (line) (count (reverse word) line :test #'string=)) (get-diagonals lines (length word))))))
+
+  (defun count-anti-diagonals (lines word)
+    (+
+     (reduce #'+
+	     (mapcar #'(lambda (line) (count word line :test #'string=)) (get-anti-diagonals lines (length word))))
+     (reduce #'+
+	     (mapcar #'(lambda (line) (count (reverse word) line :test #'string=)) (get-anti-diagonals lines (length word))))))
+
+  (defun count-vertical (lines word)
+    (+
+     (reduce #'+
+	     (mapcar #'(lambda (line) (count word (utils:regex-match-all word line) :test #'string=)) (get-vertical lines)))
+     (reduce #'+
+	     (mapcar #'(lambda (line) (count (reverse word) (utils:regex-match-all (reverse word) line) :test #'string=)) (get-vertical lines)))))
+
+  (defun solve-1 (file)
+    (let ((lines (uiop:read-file-lines file)))
+      (+
+       ;; horizontal
+       (count-horizontal lines "XMAS")
+       ;; main diagonals
+       (count-main-diagonals lines "XMAS")
+       ;; anti-diagonals
+       (count-anti-diagonals lines "XMAS")
+       ;; vertical
+       (count-vertical lines "XMAS")
+       )))
+
+  (defun solve-2 (file)
+    (let ((lines (uiop:read-file-lines file)) (total 0))
+      (loop for square in (get-squares lines (length "MAS"))
+	    do
+	    (let* ((square-lines (uiop:split-string square :separator '(#\Newline)))
+		   (partial (+ (count-main-diagonals square-lines "MAS")
+			       (count-anti-diagonals square-lines "MAS"))))
+	      (if (= 2 partial) (incf total)))) ;; count one only if both diagonals match
+      total))
+#+end_src
+
+** Day 5
+:PROPERTIES:
+:CUSTOM_ID: day-5
+:END:
+At start I tried to do something fancy by computing the topological
+order of the nodes in the dependency graph created with the ordering
+rules, but it ended up not working so I reverted to the simplest
+solution I could think of.
+
+#+begin_src lisp
+  (defun parse-sequence (sequence)
+    (mapcar #'parse-integer (uiop:split-string sequence :separator '(#\,))))
+
+
+  (defun check-ordering (rules sequence)
+    (loop for i from 1 below (length sequence)
+	  do (if (some #'(lambda (elem) (find elem (gethash (nth i sequence) rules))) (subseq sequence 0 i))
+		 (return-from check-ordering nil)))
+    t)
+
+  (defun parse-ordering-rules (rules)
+    (let ((parsed (make-hash-table)))
+      (loop for rule in rules
+	    do (let* ((pipe-pos (position "|" rule :test #'string=))
+		      (left (parse-integer (subseq rule 0 pipe-pos)))
+		      (right (parse-integer (subseq rule (1+ pipe-pos)))))
+		 (push right (gethash left parsed))))
+      parsed))
+
+  (defun preprocess-file (file)
+    (let* ((lines (uiop:read-file-lines file))
+	   (empty-line-pos (position "" lines :test #'string=)))
+      (list (subseq lines 0 empty-line-pos) (subseq lines (1+ empty-line-pos)))))
+
+  (defun compare (x y rules)
+    "Returns non-NIL if x comes before y according to the rules."
+    (find y (gethash x rules)))
+
+  (defun middle-element (sequence)
+    (nth (floor (/ (length sequence) 2)) sequence))
+
+  (defun solve-1 (file)
+    (destructuring-bind (raw-rules raw-sequences) (preprocess-file file)
+			(let ((rules (parse-ordering-rules raw-rules))
+			      (sequences (mapcar #'parse-sequence raw-sequences)))
+			  (reduce #'+ (mapcar #'middle-element
+					      (remove-if-not #'(lambda (sequence) (check-ordering rules sequence)) sequences))))))
+
+  (defun solve-2 (file)
+    (destructuring-bind (raw-rules raw-sequences) (preprocess-file file)
+			(let* ((rules (parse-ordering-rules raw-rules))
+			       (sequences (mapcar #'parse-sequence raw-sequences))
+			       (not-ordered (remove-if #'(lambda (sequence) (check-ordering rules sequence)) sequences)))
+			  (reduce #'+ (mapcar
+				       #'middle-element
+				       (mapcar
+					#'(lambda (sequence)
+					    (sort sequence #'(lambda (x y) (compare x y rules))))
+					not-ordered))))))
+#+end_src
+
+** Day 6
+:PROPERTIES:
+:CUSTOM_ID: day-6
+:END:
+This solution is not only inefficient, but also /wonky/ in my opinion.
+But hey! Still learning the language, so everything is accepted right?
+*Right?*
+
+#+begin_src lisp
+  (defparameter *test*
+		(uiop:split-string
+		 "....#.....
+  .........#
+  ..........
+  ..#.......
+  .......#..
+  ..........
+  .#..^.....
+  ........#.
+  #.........
+  ......#..." :separator '(#\Newline)))
+
+
+  ;; position can be 'up 'down 'left 'right
+  (defstruct game-map (grid nil) (guard-position nil) (guard-facing nil))
+
+  (defun parse-grid (rows) ;; assumed to be list of strings
+    (let* ((nrows (length rows))
+	   (ncols (length (first rows)))
+	   (grid (make-array (list nrows ncols)))
+	   (guard-position '(0 0))
+	   (facing 'up))
+      (loop for i from 0 below nrows
+	    do (loop for j from 0 below ncols
+		     do (let ((current-char (schar (nth i rows) j)))
+			  (setf (aref grid i j) current-char)
+			  (cond
+			   ((char= current-char #\^) (setf facing 'up) (setf guard-position (list i j)))
+			   ((char= current-char #\v) (setf facing 'down) (setf guard-position (list i j)))
+			   ((char= current-char #\>) (setf facing 'right) (setf guard-position (list i j)))
+			   ((char= current-char #\<) (setf facing 'left) (setf guard-position (list i j)))
+			   (t t)))))
+      (make-game-map :grid grid :guard-position guard-position :guard-facing facing)))
+
+
+  (defun take-step (map current-position facing &optional (added-obstacle-position nil added-obstacle-p))
+    (let* ((nrows (array-dimension (game-map-grid map) 0))
+	   (ncols (array-dimension (game-map-grid map) 1))
+	   (next-row 0)
+	   (next-col 0))
+      (cond
+       ((eq facing 'up)
+	(setf next-row (1- (first current-position)))
+	(setf next-col (second current-position)))
+       ((eq facing 'down)
+	(setf next-row (1+ (first current-position)))
+	(setf next-col (second current-position)))
+       ((eq facing 'left)
+	(setf next-row (first current-position))
+	(setf next-col (1- (second current-position))))
+       ((eq facing 'right)
+	(setf next-row (first current-position))
+	(setf next-col (1+ (second current-position)))))
+
+      (when (or (>= next-row nrows) (< next-row 0) (>= next-col ncols) (< next-col 0))
+	(return-from take-step nil))
+
+      (if (or (and added-obstacle-p (equal added-obstacle-position (list next-row next-col)))
+	      (char= #\# (aref (game-map-grid map) next-row next-col)))
+	  (cond
+	   ((eq facing 'down)
+	    (list 'left (list (1- next-row) (1- next-col))))
+	   ((eq facing 'up)
+	    (list 'right (list (1+ next-row) (1+ next-col))))
+	   ((eq facing 'left)
+	    (list 'up (list (1- next-row) (1+ next-col))))
+	   ((eq facing 'right)
+	    (list 'down (list (1+ next-row) (1- next-col)))))
+	(list facing (list next-row next-col)))
+      ))
+
+
+  (defun solve-1 (file)
+    (let* ((map (parse-grid (uiop:read-file-lines file)))
+	   (position (copy-list (game-map-guard-position map)))
+	   (facing (game-map-guard-facing map))
+	   (counter 0)
+	   (visited (make-array (array-dimensions (game-map-grid map)) :initial-element nil)))
+      (loop while position 
+	    do (unless (aref visited (first position) (second position)) (incf counter))
+	    (setf (aref visited (first position) (second position)) t)
+	    (let ((result (take-step map position facing)))
+	      (if result
+		  (destructuring-bind (new-facing new-position) result
+				      (setf position new-position)
+				      (setf facing new-facing))
+		(setf position nil))))
+      counter))
+
+  (defun solve-2 (file)
+    (let* ((map (parse-grid (uiop:read-file-lines file)))
+	   (position (copy-list (game-map-guard-position map)))
+	   (facing (game-map-guard-facing map))
+	   (obstacles 0)
+	   (nrows (array-dimension (game-map-grid map) 0))
+	   (ncols (array-dimension (game-map-grid map) 1))
+	   (loop-detected nil)
+	   (visited-facing (make-array (list nrows ncols) :initial-element nil)))
+      (loop for i from 0 below nrows
+	    do (loop for j from 0 below ncols
+		     do (loop initially (setf position (copy-list (game-map-guard-position map)))
+			      (setf facing (game-map-guard-facing map))
+			      (setf loop-detected nil)
+			      (setf visited-facing (make-array (list nrows ncols) :initial-element nil))
+			      while (and position (not loop-detected))
+			      do (let ((result (take-step map position facing (list i j))))
+				   (if result
+				       (destructuring-bind (new-facing new-position) result
+							   (when (and (aref visited-facing (first new-position) (second new-position))
+								      (equal new-facing (aref visited-facing (first new-position) (second new-position))))
+							     (setf loop-detected t))
+							   (setf (aref visited-facing (first position) (second position)) facing)
+							   (setf position new-position)
+							   (setf facing new-facing))
+				     (setf position nil)))
+			      finally (when loop-detected
+					(incf obstacles)))))
+      obstacles))
+#+end_src
+
+** Day 7
+:PROPERTIES:
+:CUSTOM_ID: day-7
+:END:
+Passing the possible operators as high-order functions and using a bit
+of recursion magic, day 7 is pretty straightforward. The solution for
+the second part is the same as the first, with the only difference that
+the new =concatenate= operator is also considered. Abstraction FTW!
+
+#+begin_src lisp
+  (load "../utils.lisp")
+
+  (defstruct equation (result nil) (terms nil))
+
+  (defun possible-results (terms operators)
+    (cond
+     ((= 1 (length terms)) terms)
+     (t (loop for operator in operators
+	      nconc (let ((partial (funcall operator (first terms) (second terms))))
+		      (possible-results (cons partial (cdr (cdr terms))) operators))))))
+
+  (defun equation-valid-p (equation operators)
+    (some #'(lambda (possible) (= possible (equation-result equation))) (possible-results (equation-terms equation) operators)))
+
+  (defun parse-equation (line)
+    (let* ((terms (utils:split-by-one-space line))
+	   (colon-pos (position #\: (car terms) :test #'char=)))
+      (make-equation :result (parse-integer (subseq (car terms) 0 colon-pos))
+		     :terms (mapcar #'parse-integer (cdr terms)))))
+
+  (defun concatenation (term1 term2)
+    (parse-integer (concatenate 'string (princ-to-string term1) (princ-to-string term2))))
+
+  (defun solve-1 (file)
+    (let* ((lines (uiop:read-file-lines file))
+	   (equations (mapcar #'parse-equation lines))
+	   (valid-equations
+	    (remove-if-not #'(lambda (equation) (equation-valid-p equation (list #'+ #'*))) equations)))
+      (reduce #'+ (mapcar #'(lambda (equation) (equation-result equation)) valid-equations))))
+
+  (defun solve-2 (file)
+    (let* ((lines (uiop:read-file-lines file))
+	   (equations (mapcar #'parse-equation lines))
+	   (valid-equations
+	    (remove-if-not #'(lambda (equation) (equation-valid-p equation (list #'+ #'* #'concatenation))) equations)))
+      (reduce #'+ (mapcar #'(lambda (equation) (equation-result equation)) valid-equations))))
+#+end_src
+
+** Day 8
+:PROPERTIES:
+:CUSTOM_ID: day-8
+:END:
+I tried to make =get-antinodes-positions= and =count-antinodes= as most
+general as possible even if I know that just copy-pasting the functions
+and making small edits would've solved the problem anyway.
+
+#+begin_src lisp
+  (load "../utils.lisp")
+
+  (defstruct grid (antennas nil) (nrows nil) (ncols nil))
+
+  (defun parse-grid (lines)
+    (let ((frequencies (make-hash-table))
+	  (nrows (length lines))
+	  (ncols (length (first lines))))
+      (loop for row from 0 below nrows
+	    nconc (loop for col from 0 below ncols
+			do (let ((current-char (char (nth row lines) col)))
+			     (when (char-not-equal current-char #\.)
+			       (push (list row col) (gethash current-char frequencies))))))
+      (make-grid :antennas frequencies :nrows nrows :ncols ncols)))
+
+  (defun get-antinodes-positions (antenna-1 antenna-2 &key (delta-x 1) (delta-y 1) (min-antinode-offset 1) (max-antinode-offset 1))
+    (destructuring-bind (a1 a2)
+			(if (utils:compare-lists antenna-1 antenna-2)
+			    (list antenna-1 antenna-2)
+			  (list antenna-2 antenna-1))
+			(let* ((a1-x (second a1)) (a1-y (first a1))
+			       (a2-x (second a2)) (a2-y (first a2))
+			       (delta-x (if (functionp delta-x)
+					    (funcall delta-x a1 a2)
+					  delta-x))
+			       (delta-y (if (functionp delta-y)
+					    (funcall delta-y a1 a2)
+					  delta-y)))
+			  (loop for i from min-antinode-offset to max-antinode-offset
+				for computed-delta-x = (* i delta-x)
+				for computed-delta-y = (* i delta-y)
+				if (<= a1-x a2-x)
+				nconc (list (list (- a1-y computed-delta-y) (- a1-x computed-delta-x))
+					    (list (+ a2-y computed-delta-y) (+ a2-x computed-delta-x)))
+				else
+				nconc (list (list (- a1-y computed-delta-y) (+ a1-x computed-delta-x))
+					    (list (+ a2-y computed-delta-y) (- a2-x computed-delta-x)))))))
+
+  (defun out-of-bounds-p (position nrows ncols)
+    (let ((col (second position))
+	  (row (first position)))
+      (or (< col 0) (< row 0) (>= col ncols) (>= row nrows))))
+
+  (defun counted-p (position counted)
+    (aref counted (first position) (second position)))
+
+  (defun set-counted (position counted)
+    "Set the position as counted. Modifies counted (an array)."
+    (setf (aref counted (first position) (second position)) t))
+
+
+  (defun count-antinodes (antennas nrows ncols counted &key (delta-x 1) (delta-y 1) (min-antinode-offset 1) (max-antinode-offset 1))
+    "Given a list of antenna positions of a single frequency, generate the antinodes"
+    (let ((counter 0))
+      (cond
+       ((= 1 (length antennas)) 0)
+       (t (loop for antenna in (cdr antennas)
+		do (loop for antinode-pos in (get-antinodes-positions
+					      antenna
+					      (car antennas)
+					      :delta-x delta-x
+					      :delta-y delta-y
+					      :min-antinode-offset min-antinode-offset
+					      :max-antinode-offset max-antinode-offset)
+			 when (and
+			       (not (out-of-bounds antinode-pos nrows ncols))
+			       (not (counted-p antinode-pos counted)))
+			 do ; (format t "~a~%" antinode-pos)
+			 (incf counter)
+			 (set-counted antinode-pos counted)))
+	  (incf counter (count-antinodes
+			 (cdr antennas)
+			 nrows
+			 ncols
+			 counted
+			 :delta-x delta-x
+			 :delta-y delta-y
+			 :min-antinode-offset min-antinode-offset
+			 :max-antinode-offset max-antinode-offset))))
+      counter))
+
+  (defun print-counted (counted)
+    (loop for i from 0 below (array-dimension counted 1)
+	  do (when (> i 0) (format t "~%"))
+	  (loop for j from 0 below (array-dimension counted 0)
+		do (if (aref counted i j)
+		       (format t "#")
+		     (format t ".")))))
+
+
+  (defun solve-1 (file)
+    (let* ((lines (uiop:read-file-lines file))
+	   (grid (parse-grid lines))
+	   (nrows (grid-nrows grid))
+	   (ncols (grid-ncols grid))
+	   (counted (make-array (list nrows ncols) :initial-element nil)))
+      (loop for antennas being the hash-value of (grid-antennas grid)
+	    sum (count-antinodes antennas nrows ncols counted
+				 :delta-x #'(lambda (pos1 pos2) (abs (- (second pos1) (second pos2))))
+				 :delta-y #'(lambda (pos1 pos2) (abs (- (first pos1) (first pos2))))
+				 :min-antinode-offset 1
+				 :max-antinode-offset 1))))
+
+
+  (defun solve-2 (file)
+    (let* ((lines (uiop:read-file-lines file))
+	   (grid (parse-grid lines))
+	   (nrows (grid-nrows grid))
+	   (ncols (grid-ncols grid))
+	   (counted (make-array (list nrows ncols) :initial-element nil)))
+      (loop for antennas being the hash-value of (grid-antennas grid)
+	    sum (count-antinodes antennas nrows ncols counted
+				 :delta-x #'(lambda (pos1 pos2) (abs (- (second pos1) (second pos2))))
+				 :delta-y #'(lambda (pos1 pos2) (abs (- (first pos1) (first pos2))))
+				 :min-antinode-offset 0
+				 :max-antinode-offset nrows))))
+#+end_src
+
+** Day 9
+:PROPERTIES:
+:CUSTOM_ID: day-9
+:END:
+#+begin_src lisp
+  (load "../utils.lisp")
+
+  (defun parse-disk-map (line)
+    (let ((id 0)
+	  (parsed nil))
+      (loop for char across line
+	    for num = (digit-char-p char)
+	    for pos from 0 below (length line)
+	    if (oddp pos)
+	      do (loop for j from 1 to num do (push 'dot parsed))
+	    else
+	      do (loop for j from 1 to num do (push id parsed))
+		 (incf id))
+      (reverse parsed)))
+
+  (defun get-empty-space-positions (disk-map)
+    (loop with in-empty-space = nil
+	  with start-pos = 0
+	  with end-pos = 0
+	  for file in disk-map
+	  for pos from 0 below (length disk-map)
+	  when (and (not in-empty-space) (eq file 'dot))
+	    do (setf in-empty-space t)
+	       (setf start-pos pos)
+	  when (and in-empty-space (not (eq file 'dot)))
+	    do (setf in-empty-space nil)
+	       (setf end-pos pos)
+	    and collect (list start-pos end-pos)))
+
+  (defun get-file-positions (disk-map)
+    (loop with file-positions = (make-hash-table)
+	  with file-id = 0
+	  with start-pos = 0
+	  with end-pos = 0
+	  with in-empty-space = nil
+	  for file in disk-map
+	  for pos from 0 below (length disk-map)
+	  when (and (not (eq file 'dot)) in-empty-space (/= file file-id))
+	    do (setf file-id file)
+	       (setf start-pos pos)
+	       (setf in-empty-space nil)
+	  when (and (not (eq file 'dot)) in-empty-space (/= file file-id))
+	    do (setf file-id file)
+	       (setf start-pos pos)
+	       (setf in-empty-space nil)
+	  when (and (not (eq file 'dot)) (not in-empty-space) (/= file file-id))
+	    do (setf end-pos pos)
+	       (setf (gethash file-id file-positions) (list start-pos end-pos))
+	       (setf file-id file)
+	       (setf start-pos pos)
+	  when (and (not in-empty-space) (eq file 'dot))
+	    do (setf in-empty-space t)
+	       (setf end-pos pos)
+	       (setf (gethash file-id file-positions) (list start-pos end-pos))
+	  finally (setf (gethash file-id file-positions) (list start-pos (1+ pos)))
+		  (return file-positions)))
+
+  (defun move-file-block (disk-map last-empty-pos)
+    (when disk-map
+      (let* ((dot-pos (position 'dot (subseq disk-map last-empty-pos)))
+	     (empty-pos (when dot-pos (+ last-empty-pos dot-pos))))
+	(cond
+	  ((and empty-pos (= empty-pos (1- (length disk-map))))
+	   (list (butlast disk-map) empty-pos nil))
+	  (empty-pos
+	   (list (append
+		  (subseq disk-map 0 empty-pos)
+		  (last disk-map)
+		  (butlast (subseq disk-map (1+ empty-pos))))
+		 empty-pos
+		 nil))
+	  (t (list disk-map empty-pos t))))))
+
+  (defun move-file-blocks (disk-map)
+    (loop with last-disk-map = (copy-list disk-map)
+	  with fixpoint = nil
+	  with last-empty-pos = 0
+	  while (not fixpoint)
+	  do (destructuring-bind
+		 (new-disk-map empty-pos fixpoint-p)
+		 (move-file-block last-disk-map last-empty-pos)
+	       (setf last-empty-pos empty-pos)
+	       (setf fixpoint fixpoint-p)
+	       (setf last-disk-map new-disk-map))
+	  finally (return last-disk-map)))
+
+  (defun empty-intervals-before (position empty-intervals)
+    (remove-if #'(lambda (pos) (>= (first pos) (second position))) empty-intervals))
+
+  (defun find-fitting-position (file-position empty-intervals)
+    (position-if #'(lambda (pos) (>= (- (second pos) (first pos)) (- (second file-position) (first file-position)))) empty-intervals))
+
+  (defun move-exact-file-blocks (file-intervals empty-intervals)
+    (let ((file-ids (sort (loop for k being the hash-key of file-intervals collect k) #'>))
+	  (remaining-empty-intervals (copy-list empty-intervals))
+	  (new-file-intervals (make-hash-table)))
+      (loop for id in file-ids
+	    for file-interval = (gethash id file-intervals)
+	    for fit = (find-fitting-position
+		       file-interval
+		       (empty-intervals-before file-interval remaining-empty-intervals))
+	    if fit
+	      do (let* ((fitting-interval (nth fit remaining-empty-intervals))
+			(filled-from (first fitting-interval))
+			(filled-to (+ filled-from (- (second file-interval) (first file-interval))))
+			(filled-interval (list filled-from filled-to))
+			(leftover-interval (list filled-to (second fitting-interval))))
+		   (setf (gethash id new-file-intervals) filled-interval)
+		   (if (equal leftover-interval fitting-interval)
+		       ;; if the fitting interval is filled, remove it from the empty intervals list
+		       (setf remaining-empty-intervals (remove (nth fit remaining-empty-intervals) remaining-empty-intervals))
+		       ;; otherwise replace the empty interva with the leftover interval after moving the file block
+		       (setf remaining-empty-intervals
+			     (replace remaining-empty-intervals (list leftover-interval)
+				      :start1 fit 
+				      :end1 (1+ fit)))))
+	    else
+	      do (setf (gethash id new-file-intervals) (gethash id file-intervals)))
+      new-file-intervals))
+
+  (defun hash-map-to-alist (hash-map)
+    (loop for key being the hash-key of hash-map
+	    using (hash-value value)
+	  collect (cons key (list value))))
+
+
+  (defun solve-1 (file)
+    (let* ((line (uiop:read-file-line file))
+	   (disk-map (parse-disk-map line))
+	   (moved-disk-map (move-file-blocks disk-map)))
+      (loop for position from 0 below (length moved-disk-map)
+	    for file-id in moved-disk-map
+	    sum (* position file-id))))
+
+
+  (defun solve-2 (file)
+    (let* ((disk-map (parse-disk-map (uiop:read-file-line file)))
+	   (empty-spaces (get-empty-space-positions disk-map))
+	   (file-positions (get-file-positions disk-map))
+	   (moved-file-positions (move-exact-file-blocks file-positions empty-spaces))
+	   (sorted (sort (hash-map-to-alist moved-file-positions) #'< :key #'(lambda (id-pos) (caadr id-pos)))))
+      (loop for file in sorted
+	    for start = (caadr file) ; I felt fancy, just to take the first element of the second element
+	    for end = (1- (cadadr file)) ; I felt even fancier
+	    for pos-sum = (* (/ (+ start end) 2) (+ (- end start) 1))
+	    sum (* (car file) pos-sum))))
+#+end_src
+
+** Utils
+:PROPERTIES:
+:CUSTOM_ID: utils
+:END:
+#+begin_src lisp
+  (defpackage :utils
+	      (:use :cl)
+	      (:export
+	       #:string-join
+	       #:split-by-one-space
+	       #:compile-regex
+	       #:apply-on-automaton-list
+	       #:regex-match-all
+	       #:compare-lists))
+
+  (in-package :utils)
+
+  (defun string-join (fill-in strings)
+    (let ((joined (first strings)))
+      (dolist (s (rest strings))
+	(setf joined (concatenate 'string joined fill-in s)))
+      joined))
+
+  ;; from https://lispcookbook.github.io/cl-cookbook/strings.html#breaking-strings-into-graphenes-sentences-lines-and-words
+  (defun split-by-one-space (string)
+    (loop for i = 0 then (1+ j)
+	  as j = (position #\Space string :start i)
+	  collect (subseq string i j)
+	  while j))
+
+  (defstruct automaton (init nil) (end nil) (delta '()))
+
+  (defun rule-with-input (rules input)
+    "returns the single rule that have input on the arrow"
+    (let ((rule-list (remove-if-not #'(lambda (rule) (string= (third rule) input)) rules)))
+      (if rule-list (first rule-list) nil)))
+
+  (defun rule-with-number (rules)
+    "returns the single rule that have -number->"
+    (let ((rule-list (remove-if-not #'(lambda (rule) (eql (third rule) 'number)) rules)))
+      (if rule-list (first rule-list) nil)))
+
+  (defun rules-with-state (rules state)
+    "returns list of rules for state"
+    (remove-if-not #'(lambda (rule) (eql (first rule) state)) rules))
+
+  (defun target-state (rule)
+    (fifth rule))
+
+
+  (defun apply-delta-char (delta state input)
+    "Apply delta on a single char string."
+    (let ((to-apply (rule-with-input (rules-with-state delta state) input)))
+      (cond
+       ((equal delta nil) nil)
+       (to-apply
+	(target-state to-apply))
+       ((and (position input "0123456789" :test #'string=) (rule-with-number (rules-with-state delta state)))
+	(target-state (rule-with-number (rules-with-state delta state))))
+       (t nil))))
+
+  (defun apply-delta-string-aux (delta state input end-state position)
+    "Apply delta on a string"
+    (cond ((equal state end-state) (list t position))
+	  ((equal state nil) (list nil (if (> position 1) (1- position) position)))
+	  (t (apply-delta-string-aux delta (apply-delta-char delta state (subseq input 0 1)) (subseq input 1) end-state (1+ position)))))
+
+  (defun apply-delta-string (delta state input end-state)
+    (apply-delta-string-aux delta state (concatenate 'string input (princ-to-string (code-char 1))) end-state 0))
+
+  (defun apply-on-automaton (automaton input)
+    "Run the automaton on the input string and return the list of matches"
+    (let ((i 0) (matches '()))
+      (loop while (< i (length input))
+	    do
+	    ;; (format t "~a~%" (subseq input i))
+	    (destructuring-bind (result char-read)
+				(apply-delta-string
+				 (automaton-delta automaton)
+				 (automaton-init automaton)
+				 (subseq input i)
+				 (automaton-end automaton))
+				;; (format t "char read: ~a~%" char-read)
+				(cond
+				 (result
+				  (setq matches (append matches (list (subseq input i (+ i char-read)))))
+				  (incf i char-read))
+				 (t (incf i char-read)))))
+      matches))
+
+  (defun check-multiple-automaton (automaton-list input)
+    (let ((max 0))
+      (loop for automaton in automaton-list do
+	    (let ((possible-match
+		   (apply-delta-string
+		    (automaton-delta automaton)
+		    (automaton-init automaton)
+		    input
+		    (automaton-end automaton))))
+	      (cond
+	       ((first possible-match) (return-from check-multiple-automaton possible-match))
+	       (t (if (> (second possible-match) max) (setq max (second possible-match)))))
+	      ))
+      (list nil max)))
+
+  (defun apply-on-automaton-list (automaton-list input)
+    "Run the automaton on the input string and return the list of matches"
+    (let ((i 0) (matches '()))
+      (loop while (< i (length input))
+	    do
+	    (destructuring-bind
+	     (result char-read)
+	     (check-multiple-automaton automaton-list (subseq input i))
+	     (cond
+	      (result
+	       (setq matches (append matches (list (subseq input i (+ i char-read)))))
+	       (incf i char-read))
+	      (t (incf i char-read)))))
+      matches))
+
+  (defun compile-regex (regex)
+    (let ((delta
+	   (loop for index from 0
+		 for char across regex
+		 collect (list index '- char '-> (1+ index)))))
+      (make-automaton :init 0 :end (length regex) :delta delta)))
+
+
+  (defun regex-match-all (regex input)
+    (apply-on-automaton (compile-regex regex) input))
+
+
+  (defun compare-lists (list1 list2 &optional (pred #'<))
+
+    "Execute pred on each pair of elements of list1 and list2 and return non-NIL if is to precede list2."
+    (loop for x in list1 for y in list2 when (not (equal x y)) return (funcall pred x y)))
+#+end_src
+
+#+RESULTS:
+: COMMON-LISP-USER::COMPARE-LISTS

@@ -1,0 +1,23 @@
+#+title: Gianluca's blog
+
+[[./index.html][Home]]
+
+* Common Lisp resources
+:PROPERTIES:
+:CUSTOM_ID: common-lisp-resources
+:END:
+
+Some links that point to resources I want to remember about, and that
+can be useful for others. This is part of my journey on learning Common
+Lisp.
+
+- [[https://gigamonkeys.com/book/][Practical Common Lisp]]: a great
+  introduction on the main aspects of the language
+- [[https://softouch.on.ca/kb/data/Common%20Lisp%20Recipes.pdf][Common
+  Lisp Recipes]]: CL patterns, to be consulted on need
+- [[https://paulgraham.com/onlisp.html][On Lisp]]: advanced Lisp
+  techniques
+- [[https://www.lispworks.com/documentation/HyperSpec/Front/StartPts.htm][Common
+  Lisp HyperSpec]]
+- [[https://github.com/norvig/paip-lisp/tree/main][Paradigms of
+  Artificial Intelligence Programming: Case Studies in Common Lisp]]
