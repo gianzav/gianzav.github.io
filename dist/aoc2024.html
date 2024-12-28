@@ -35,6 +35,7 @@
 <li><a href="#day-7">Day 7</a></li>
 <li><a href="#day-8">Day 8</a></li>
 <li><a href="#day-9">Day 9</a></li>
+<li><a href="#org3260a71">Day 10</a></li>
 <li><a href="#utils">Utils</a></li>
 </ul>
 </div>
@@ -1016,6 +1017,132 @@ and making small edits would've solved the problem anyway.
           for end = (1- (cadadr file)) <span class="org-comment">; I felt even fancier</span>
           for pos-sum = (* (/ (+ start end) 2) (+ (- end start) 1))
           sum (* (car file) pos-sum))))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org3260a71" class="outline-2">
+<h2 id="org3260a71">Day 10</h2>
+<div class="outline-text-2" id="text-org3260a71">
+<div class="org-src-container">
+<pre class="src src-lisp">(load <span class="org-string">"../utils.lisp"</span>)
+
+(<span class="org-keyword">defclass</span> <span class="org-type">graph</span> ()
+  ((nodes <span class="org-builtin">:documentation</span> <span class="org-doc">"List of node labels. The node id is the position of the node in the list."</span>
+          <span class="org-builtin">:accessor</span> nodes
+          <span class="org-builtin">:initarg</span> <span class="org-builtin">:nodes</span>)
+   (edges <span class="org-builtin">:documentation</span> <span class="org-doc">"Hash map of the edges. The keys are the node</span>
+<span class="org-doc">   ids and the edges are pairs (q c) where q is the id of a node and c</span>
+<span class="org-doc">   is the cost of the edge"</span>
+          <span class="org-builtin">:accessor</span> edges
+          <span class="org-builtin">:initarg</span> <span class="org-builtin">:edges</span>
+          <span class="org-builtin">:initform</span> (make-hash-table))))
+
+(<span class="org-keyword">defmethod</span> <span class="org-function-name">neighbors</span> ((graph graph) node)
+  (gethash node (edges graph)))
+
+(<span class="org-keyword">defmethod</span> <span class="org-function-name">add-neighbor</span> ((graph graph) node neighbor cost)
+  (push (list neighbor cost) (gethash node (edges graph))))
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">dfs-search</span> (graph node visited <span class="org-type">&amp;optional</span> (feasible #'identity) (paths nil))
+  (<span class="org-keyword">let</span> ((reachable
+          (mapcan
+           #'(<span class="org-keyword">lambda</span> (neighbor-cost)
+               (<span class="org-keyword">let</span> ((neighbor (first neighbor-cost)))
+                 (<span class="org-keyword">when</span> (and paths (funcall feasible neighbor-cost) (gethash neighbor visited))
+                   (incf (gethash neighbor paths))
+                   (dfs-search graph neighbor visited feasible paths))
+                 (<span class="org-keyword">when</span> (and (funcall feasible neighbor-cost) (not (gethash neighbor visited)))
+                   (setf (gethash neighbor visited) t)
+                   (<span class="org-keyword">cond</span>
+                     (paths
+                      (setf (gethash neighbor paths) (gethash node paths))
+                      (dfs-search graph neighbor visited feasible paths))
+                     (t (dfs-search graph neighbor visited feasible))))))
+           (neighbors graph node))))
+    (values (cons node reachable) paths)))
+
+(<span class="org-keyword">defgeneric</span> <span class="org-function-name">reachable-from</span> (graph node <span class="org-type">&amp;optional</span> count-all-paths)
+  (<span class="org-builtin">:documentation</span> <span class="org-doc">"Reachability."</span>))
+
+(<span class="org-keyword">defmethod</span> <span class="org-function-name">reachable-from</span> ((graph graph) node <span class="org-type">&amp;optional</span> (count-all-paths nil))
+  (<span class="org-keyword">if</span> count-all-paths
+      (<span class="org-keyword">let</span> ((paths (make-hash-table)))
+        (setf (gethash node paths) 1)
+        (dfs-search graph
+                    node
+                    (make-hash-table)
+                    #'(<span class="org-keyword">lambda</span> (neighbor-cost) (eq 1 (second neighbor-cost)))
+                    paths))
+      (dfs-search graph
+                  node
+                  (make-hash-table)
+                  #'(<span class="org-keyword">lambda</span> (neighbor-cost) (eq 1 (second neighbor-cost))))))
+
+(<span class="org-keyword">defmethod</span> <span class="org-function-name">nodes-with-label</span> ((graph graph) label)
+  (<span class="org-keyword">loop</span> for node in (nodes graph)
+        for idx from 0 below (length (nodes graph))
+        when (eq node label) collect idx))
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">parse-lines</span> (lines)
+  (<span class="org-keyword">loop</span> for line in lines
+        collect (<span class="org-keyword">loop</span> for char across line collect (digit-char-p char))))
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">edge-cost</span> (lines row col direction)
+  (<span class="org-keyword">cond</span>
+    ((eq direction 'top)
+     (- (nth col (nth (1- row) lines)) (nth col (nth row lines))))
+    ((eq direction 'bottom)
+     (- (nth col (nth (1+ row) lines)) (nth col (nth row lines))))
+    ((eq direction 'right)
+     (- (nth (1+ col) (nth row lines)) (nth col (nth row lines))))
+    ((eq direction 'left)
+     (- (nth (1- col) (nth row lines)) (nth col (nth row lines))))
+    (t (<span class="org-warning">error</span> <span class="org-string">"direction should be one of 'top 'bottom 'right 'left."</span>))))
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">parse-graph</span> (lines)
+  (<span class="org-keyword">let</span> ((graph (make-instance 'graph <span class="org-builtin">:nodes</span> nil))
+        (nrows (length lines))
+        (ncols (length (first lines))))
+    (<span class="org-keyword">loop</span> for row from 0 below nrows
+          do (<span class="org-keyword">loop</span> for col from 0 below ncols
+                   for current = (+ (* row ncols) col)
+                   for top = (+ (* (1- row) ncols) col)
+                   for left = (+ (* row ncols) (1- col))
+                   for right = (+ (* row ncols) (1+ col))
+                   for bottom = (+ (* (1+ row) ncols) col)
+                   do (setf (nodes graph) (append (nodes graph) (list (nth col (nth row lines))))) 
+                   when (&gt;= (1- row) 0)
+                     do (add-neighbor graph current top (edge-cost lines row col 'top))
+                   when (&lt; (1+ row) nrows)
+                     do (add-neighbor graph current bottom (edge-cost lines row col 'bottom))
+                   when (&gt;= (1- col) 0)
+                     do (add-neighbor graph current left (edge-cost lines row col 'left))
+                   when (&lt; (1+ col) ncols)
+                     do (add-neighbor graph current right (edge-cost lines row col 'right))))
+    graph))
+
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">solve-1</span> (file)
+  (<span class="org-keyword">let*</span> ((lines (parse-lines (uiop:read-file-lines file)))
+         (graph (parse-graph lines)))
+    (reduce #'+ (mapcar #'(<span class="org-keyword">lambda</span> (list) (count 9 list))
+                        (<span class="org-keyword">loop</span> for node in (nodes-with-label graph 0)
+                              collect (mapcar
+                                       #'(<span class="org-keyword">lambda</span> (node-idx) (nth node-idx (nodes graph)))
+                                       (reachable-from graph node)))))))
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">solve-2</span> (file)
+  (<span class="org-keyword">let*</span> ((lines (parse-lines (uiop:read-file-lines file)))
+         (graph (parse-graph lines)))
+    (reduce #'+
+            (<span class="org-keyword">loop</span> for node in (nodes-with-label graph 0)
+                  nconc (<span class="org-keyword">multiple-value-bind</span>
+                              (reachable paths) (reachable-from graph node t)
+                          (<span class="org-keyword">loop</span> for node-idx in reachable
+                                when (eq 9 (nth node-idx (nodes graph)))
+                                  collect (gethash node-idx paths)))))))
 </pre>
 </div>
 </div>
