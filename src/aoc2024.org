@@ -1064,20 +1064,64 @@ and making small edits would've solved the problem anyway.
 				    collect (gethash node-idx paths)))))))
 #+end_src
 
+** Day 11
+
+#+begin_src lisp
+  (load "../utils.lisp")
+
+  (defun parse-numbers (numbers)
+    (mapcar #'parse-integer (utils:split-by-one-space numbers)))
+
+  (defun apply-rule (number)
+    (let* ((number-string (princ-to-string number))
+	   (num-of-digits (length number-string)))
+     (cond
+      ((= number 0) (list 1))
+      ((evenp num-of-digits)
+       (list (parse-integer (subseq number-string 0 (/ num-of-digits 2)))
+	     (parse-integer (subseq number-string (/ num-of-digits 2)))))
+      (t (list (* 2024 number))))))
+
+  (defun apply-rule-to-list-aux (number-list times)
+    (if (= 0 times)
+	(length number-list)
+	(apply-rule-to-list (mapcan #'apply-rule number-list) (1- times))))
+
+  (utils:apply-memoization 'apply-rule-to-list-aux)
+
+  (defun apply-rule-to-list (number-list &optional (times 1))
+    (reduce #'+ (mapcar #'(lambda (num) (apply-rule-to-list-aux (list num) times)) number-list)))
+
+  (utils:apply-memoization 'apply-rule-to-list)
+
+  (defun solve-1 (file)
+    (let* ((line (uiop:read-file-line file))
+	   (number-list (parse-numbers line)))
+      (apply-rule-to-list number-list 25)))
+
+  (defun solve-2 (file)
+    (let* ((line (uiop:read-file-line file))
+	   (number-list (parse-numbers line)))
+      (apply-rule-to-list number-list 75)))
+#+end_src
+
 ** Utils
 :PROPERTIES:
 :CUSTOM_ID: utils
 :END:
 #+begin_src lisp
   (defpackage :utils
-	      (:use :cl)
-	      (:export
-	       #:string-join
-	       #:split-by-one-space
-	       #:compile-regex
-	       #:apply-on-automaton-list
-	       #:regex-match-all
-	       #:compare-lists))
+    (:use :cl)
+    (:export
+     #:string-join
+     #:split-by-one-space
+     #:compile-regex
+     #:apply-on-automaton-list
+     #:regex-match-all
+     #:compare-lists
+     #:let+
+     #:string*
+     #:apply-memoization))
 
   (in-package :utils)
 
@@ -1108,7 +1152,7 @@ and making small edits would've solved the problem anyway.
 
   (defun rules-with-state (rules state)
     "returns list of rules for state"
-    (remove-if-not #'(lambda (rule) (eql (first rule) state)) rules))
+      (remove-if-not #'(lambda (rule) (eql (first rule) state)) rules))
 
   (defun target-state (rule)
     (fifth rule))
@@ -1118,12 +1162,12 @@ and making small edits would've solved the problem anyway.
     "Apply delta on a single char string."
     (let ((to-apply (rule-with-input (rules-with-state delta state) input)))
       (cond
-       ((equal delta nil) nil)
-       (to-apply
-	(target-state to-apply))
-       ((and (position input "0123456789" :test #'string=) (rule-with-number (rules-with-state delta state)))
-	(target-state (rule-with-number (rules-with-state delta state))))
-       (t nil))))
+	((equal delta nil) nil)
+	(to-apply
+	 (target-state to-apply))
+	((and (position input "0123456789" :test #'string=) (rule-with-number (rules-with-state delta state)))
+	 (target-state (rule-with-number (rules-with-state delta state))))
+	(t nil))))
 
   (defun apply-delta-string-aux (delta state input end-state position)
     "Apply delta on a string"
@@ -1139,34 +1183,34 @@ and making small edits would've solved the problem anyway.
     (let ((i 0) (matches '()))
       (loop while (< i (length input))
 	    do
-	    ;; (format t "~a~%" (subseq input i))
-	    (destructuring-bind (result char-read)
-				(apply-delta-string
-				 (automaton-delta automaton)
-				 (automaton-init automaton)
-				 (subseq input i)
-				 (automaton-end automaton))
-				;; (format t "char read: ~a~%" char-read)
-				(cond
-				 (result
-				  (setq matches (append matches (list (subseq input i (+ i char-read)))))
-				  (incf i char-read))
-				 (t (incf i char-read)))))
-      matches))
+	       ;; (format t "~a~%" (subseq input i))
+	       (destructuring-bind (result char-read)
+		   (apply-delta-string
+		    (automaton-delta automaton)
+		    (automaton-init automaton)
+		    (subseq input i)
+		    (automaton-end automaton))
+		 ;; (format t "char read: ~a~%" char-read)
+		 (cond
+		   (result
+		     (setq matches (append matches (list (subseq input i (+ i char-read)))))
+		     (incf i char-read))
+		   (t (incf i char-read)))))
+	  matches))
 
   (defun check-multiple-automaton (automaton-list input)
     (let ((max 0))
       (loop for automaton in automaton-list do
-	    (let ((possible-match
-		   (apply-delta-string
-		    (automaton-delta automaton)
-		    (automaton-init automaton)
-		    input
-		    (automaton-end automaton))))
-	      (cond
-	       ((first possible-match) (return-from check-multiple-automaton possible-match))
-	       (t (if (> (second possible-match) max) (setq max (second possible-match)))))
-	      ))
+	(let ((possible-match
+		(apply-delta-string
+		 (automaton-delta automaton)
+		 (automaton-init automaton)
+		 input
+		 (automaton-end automaton))))
+	  (cond
+	    ((first possible-match) (return-from check-multiple-automaton possible-match))
+	    (t (if (> (second possible-match) max) (setq max (second possible-match)))))
+	  ))
       (list nil max)))
 
   (defun apply-on-automaton-list (automaton-list input)
@@ -1174,21 +1218,21 @@ and making small edits would've solved the problem anyway.
     (let ((i 0) (matches '()))
       (loop while (< i (length input))
 	    do
-	    (destructuring-bind
-	     (result char-read)
-	     (check-multiple-automaton automaton-list (subseq input i))
-	     (cond
-	      (result
-	       (setq matches (append matches (list (subseq input i (+ i char-read)))))
-	       (incf i char-read))
-	      (t (incf i char-read)))))
+	       (destructuring-bind
+		   (result char-read)
+		   (check-multiple-automaton automaton-list (subseq input i))
+		 (cond
+		   (result
+		    (setq matches (append matches (list (subseq input i (+ i char-read)))))
+		    (incf i char-read))
+		   (t (incf i char-read)))))
       matches))
 
   (defun compile-regex (regex)
     (let ((delta
-	   (loop for index from 0
-		 for char across regex
-		 collect (list index '- char '-> (1+ index)))))
+	    (loop for index from 0
+		  for char across regex
+		  collect (list index '- char '-> (1+ index)))))
       (make-automaton :init 0 :end (length regex) :delta delta)))
 
 
@@ -1196,10 +1240,55 @@ and making small edits would've solved the problem anyway.
     (apply-on-automaton (compile-regex regex) input))
 
 
-  (defun compare-lists (list1 list2 &optional (pred #'<))
 
+  ;;; (let+ ((a 1)
+  ;;;        ((b c) (list 1 2))))
+  ;;; 
+  ;;; should expand into
+  ;;; 
+  ;;; (let ((a 1))
+  ;;;   (destructuring-bind (b c) (list 1 2)))
+
+  (defmacro let+ (bindings &body body)
+    "Allows to implicitly mix let and destructuring-bind inside a single let+ call.
+  For normal let the syntax stays the same, while for a destructuring-bind the syntax is
+  (let+ (((a b) '(1 2)))) which is like (destructuring-bind (a b) '(1 2))."
+    (let ((stack nil)
+	  (compiled nil))
+      (loop for binding in bindings
+	    if (listp (car binding)) ; multiple symbols to bind
+	      do (push `(destructuring-bind ,@binding) stack)
+	    else ; normal let
+	      do (push `(let ,(list binding)) stack))
+      ;; last binding gets the actual body
+      (setf compiled (append (pop stack) body))
+      (loop while stack ; build the nested expression by unwinding the stack
+	    do (setf compiled (append (pop stack) (list compiled))))
+      compiled))
+
+  (defun compare-lists (list1 list2 &optional (pred #'<))
     "Execute pred on each pair of elements of list1 and list2 and return non-NIL if is to precede list2."
     (loop for x in list1 for y in list2 when (not (equal x y)) return (funcall pred x y)))
+
+
+  (defun string* (string times)
+    (let ((product ""))
+      (dotimes (i times product)
+	(setf product (concatenate 'string product string)))))
+
+  (defun memoize (fn)
+    (let ((cache (make-hash-table :test #'equal)))
+	  #'(lambda (&rest args)
+	      (multiple-value-bind
+		    (result in-cache)
+		  (gethash args cache)
+		  (if in-cache
+		      result
+		      (setf (gethash args cache)
+			    (apply fn args)))))))
+
+  (defun apply-memoization (fname)
+    (setf (fdefinition fname) (memoize (symbol-function fname))))
 #+end_src
 
 #+RESULTS:

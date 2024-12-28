@@ -36,6 +36,7 @@
 <li><a href="#day-8">Day 8</a></li>
 <li><a href="#day-9">Day 9</a></li>
 <li><a href="#org3260a71">Day 10</a></li>
+<li><a href="#org6a8a71d">Day 11</a></li>
 <li><a href="#utils">Utils</a></li>
 </ul>
 </div>
@@ -1148,19 +1149,67 @@ and making small edits would've solved the problem anyway.
 </div>
 </div>
 
+<div id="outline-container-org6a8a71d" class="outline-2">
+<h2 id="org6a8a71d">Day 11</h2>
+<div class="outline-text-2" id="text-org6a8a71d">
+<div class="org-src-container">
+<pre class="src src-lisp">(load <span class="org-string">"../utils.lisp"</span>)
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">parse-numbers</span> (numbers)
+  (mapcar #'parse-integer (utils:split-by-one-space numbers)))
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">apply-rule</span> (number)
+  (<span class="org-keyword">let*</span> ((number-string (princ-to-string number))
+         (num-of-digits (length number-string)))
+   (<span class="org-keyword">cond</span>
+    ((= number 0) (list 1))
+    ((evenp num-of-digits)
+     (list (parse-integer (subseq number-string 0 (/ num-of-digits 2)))
+           (parse-integer (subseq number-string (/ num-of-digits 2)))))
+    (t (list (* 2024 number))))))
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">apply-rule-to-list-aux</span> (number-list times)
+  (<span class="org-keyword">if</span> (= 0 times)
+      (length number-list)
+      (apply-rule-to-list (mapcan #'apply-rule number-list) (1- times))))
+
+(utils:apply-memoization 'apply-rule-to-list-aux)
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">apply-rule-to-list</span> (number-list <span class="org-type">&amp;optional</span> (times 1))
+  (reduce #'+ (mapcar #'(<span class="org-keyword">lambda</span> (num) (apply-rule-to-list-aux (list num) times)) number-list)))
+
+(utils:apply-memoization 'apply-rule-to-list)
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">solve-1</span> (file)
+  (<span class="org-keyword">let*</span> ((line (uiop:read-file-line file))
+         (number-list (parse-numbers line)))
+    (apply-rule-to-list number-list 25)))
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">solve-2</span> (file)
+  (<span class="org-keyword">let*</span> ((line (uiop:read-file-line file))
+         (number-list (parse-numbers line)))
+    (apply-rule-to-list number-list 75)))
+</pre>
+</div>
+</div>
+</div>
+
 <div id="outline-container-utils" class="outline-2">
 <h2 id="utils">Utils</h2>
 <div class="outline-text-2" id="text-utils">
 <div class="org-src-container">
 <pre class="src src-lisp">(<span class="org-keyword">defpackage</span> <span class="org-type">:utils</span>
-            (<span class="org-builtin">:use</span> <span class="org-builtin">:cl</span>)
-            (<span class="org-builtin">:export</span>
-             <span class="org-builtin">#:string-join</span>
-             <span class="org-builtin">#:split-by-one-space</span>
-             <span class="org-builtin">#:compile-regex</span>
-             <span class="org-builtin">#:apply-on-automaton-list</span>
-             <span class="org-builtin">#:regex-match-all</span>
-             <span class="org-builtin">#:compare-lists</span>))
+  (<span class="org-builtin">:use</span> <span class="org-builtin">:cl</span>)
+  (<span class="org-builtin">:export</span>
+   <span class="org-builtin">#:string-join</span>
+   <span class="org-builtin">#:split-by-one-space</span>
+   <span class="org-builtin">#:compile-regex</span>
+   <span class="org-builtin">#:apply-on-automaton-list</span>
+   <span class="org-builtin">#:regex-match-all</span>
+   <span class="org-builtin">#:compare-lists</span>
+   <span class="org-builtin">#:let+</span>
+   <span class="org-builtin">#:string*</span>
+   <span class="org-builtin">#:apply-memoization</span>))
 
 (<span class="org-keyword">in-package</span> <span class="org-builtin">:utils</span>)
 
@@ -1191,7 +1240,7 @@ and making small edits would've solved the problem anyway.
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">rules-with-state</span> (rules state)
   <span class="org-doc">"returns list of rules for state"</span>
-  (remove-if-not #'(<span class="org-keyword">lambda</span> (rule) (eql (first rule) state)) rules))
+    (remove-if-not #'(<span class="org-keyword">lambda</span> (rule) (eql (first rule) state)) rules))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">target-state</span> (rule)
   (fifth rule))
@@ -1201,12 +1250,12 @@ and making small edits would've solved the problem anyway.
   <span class="org-doc">"Apply delta on a single char string."</span>
   (<span class="org-keyword">let</span> ((to-apply (rule-with-input (rules-with-state delta state) input)))
     (<span class="org-keyword">cond</span>
-     ((equal delta nil) nil)
-     (to-apply
-      (target-state to-apply))
-     ((and (position input <span class="org-string">"0123456789"</span> <span class="org-builtin">:test</span> #'string=) (rule-with-number (rules-with-state delta state)))
-      (target-state (rule-with-number (rules-with-state delta state))))
-     (t nil))))
+      ((equal delta nil) nil)
+      (to-apply
+       (target-state to-apply))
+      ((and (position input <span class="org-string">"0123456789"</span> <span class="org-builtin">:test</span> #'string=) (rule-with-number (rules-with-state delta state)))
+       (target-state (rule-with-number (rules-with-state delta state))))
+      (t nil))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">apply-delta-string-aux</span> (delta state input end-state position)
   <span class="org-doc">"Apply delta on a string"</span>
@@ -1222,34 +1271,34 @@ and making small edits would've solved the problem anyway.
   (<span class="org-keyword">let</span> ((i 0) (matches '()))
     (<span class="org-keyword">loop</span> while (&lt; i (length input))
           do
-          <span class="org-comment-delimiter">;; </span><span class="org-comment">(format t "~a~%" (subseq input i))</span>
-          (<span class="org-keyword">destructuring-bind</span> (result char-read)
-                              (apply-delta-string
-                               (automaton-delta automaton)
-                               (automaton-init automaton)
-                               (subseq input i)
-                               (automaton-end automaton))
-                              <span class="org-comment-delimiter">;; </span><span class="org-comment">(format t "char read: ~a~%" char-read)</span>
-                              (<span class="org-keyword">cond</span>
-                               (result
-                                (setq matches (append matches (list (subseq input i (+ i char-read)))))
-                                (incf i char-read))
-                               (t (incf i char-read)))))
-    matches))
+             <span class="org-comment-delimiter">;; </span><span class="org-comment">(format t "~a~%" (subseq input i))</span>
+             (<span class="org-keyword">destructuring-bind</span> (result char-read)
+                 (apply-delta-string
+                  (automaton-delta automaton)
+                  (automaton-init automaton)
+                  (subseq input i)
+                  (automaton-end automaton))
+               <span class="org-comment-delimiter">;; </span><span class="org-comment">(format t "char read: ~a~%" char-read)</span>
+               (<span class="org-keyword">cond</span>
+                 (result
+                   (setq matches (append matches (list (subseq input i (+ i char-read)))))
+                   (incf i char-read))
+                 (t (incf i char-read)))))
+        matches))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">check-multiple-automaton</span> (automaton-list input)
   (<span class="org-keyword">let</span> ((max 0))
     (<span class="org-keyword">loop</span> for automaton in automaton-list do
-          (<span class="org-keyword">let</span> ((possible-match
-                 (apply-delta-string
-                  (automaton-delta automaton)
-                  (automaton-init automaton)
-                  input
-                  (automaton-end automaton))))
-            (<span class="org-keyword">cond</span>
-             ((first possible-match) (<span class="org-keyword">return-from</span> check-multiple-automaton possible-match))
-             (t (<span class="org-keyword">if</span> (&gt; (second possible-match) max) (setq max (second possible-match)))))
-            ))
+      (<span class="org-keyword">let</span> ((possible-match
+              (apply-delta-string
+               (automaton-delta automaton)
+               (automaton-init automaton)
+               input
+               (automaton-end automaton))))
+        (<span class="org-keyword">cond</span>
+          ((first possible-match) (<span class="org-keyword">return-from</span> check-multiple-automaton possible-match))
+          (t (<span class="org-keyword">if</span> (&gt; (second possible-match) max) (setq max (second possible-match)))))
+        ))
     (list nil max)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">apply-on-automaton-list</span> (automaton-list input)
@@ -1257,21 +1306,21 @@ and making small edits would've solved the problem anyway.
   (<span class="org-keyword">let</span> ((i 0) (matches '()))
     (<span class="org-keyword">loop</span> while (&lt; i (length input))
           do
-          (<span class="org-keyword">destructuring-bind</span>
-           (result char-read)
-           (<span class="org-warning">check-multiple-automaton</span> automaton-list (subseq input i))
-           (<span class="org-keyword">cond</span>
-            (result
-             (setq matches (append matches (list (subseq input i (+ i char-read)))))
-             (incf i char-read))
-            (t (incf i char-read)))))
+             (<span class="org-keyword">destructuring-bind</span>
+                 (result char-read)
+                 (<span class="org-warning">check-multiple-automaton</span> automaton-list (subseq input i))
+               (<span class="org-keyword">cond</span>
+                 (result
+                  (setq matches (append matches (list (subseq input i (+ i char-read)))))
+                  (incf i char-read))
+                 (t (incf i char-read)))))
     matches))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">compile-regex</span> (regex)
   (<span class="org-keyword">let</span> ((delta
-         (<span class="org-keyword">loop</span> for index from 0
-               for char across regex
-               collect (list index '- char '-&gt; (1+ index)))))
+          (<span class="org-keyword">loop</span> for index from 0
+                for char across regex
+                collect (list index '- char '-&gt; (1+ index)))))
     (make-automaton <span class="org-builtin">:init</span> 0 <span class="org-builtin">:end</span> (length regex) <span class="org-builtin">:delta</span> delta)))
 
 
@@ -1279,10 +1328,55 @@ and making small edits would've solved the problem anyway.
   (apply-on-automaton (compile-regex regex) input))
 
 
-(<span class="org-keyword">defun</span> <span class="org-function-name">compare-lists</span> (list1 list2 <span class="org-type">&amp;optional</span> (pred #'&lt;))
 
+<span class="org-comment-delimiter">;;; </span><span class="org-comment">(let+ ((a 1)</span>
+<span class="org-comment-delimiter">;;;        </span><span class="org-comment">((b c) (list 1 2))))</span>
+<span class="org-comment-delimiter">;;; </span>
+<span class="org-comment-delimiter">;;; </span><span class="org-comment">should expand into</span>
+<span class="org-comment-delimiter">;;; </span>
+<span class="org-comment-delimiter">;;; </span><span class="org-comment">(let ((a 1))</span>
+<span class="org-comment-delimiter">;;;   </span><span class="org-comment">(destructuring-bind (b c) (list 1 2)))</span>
+
+(<span class="org-keyword">defmacro</span> <span class="org-function-name">let+</span> (bindings <span class="org-type">&amp;body</span> body)
+  <span class="org-doc">"Allows to implicitly mix let and destructuring-bind inside a single let+ call.</span>
+<span class="org-doc">For normal let the syntax stays the same, while for a destructuring-bind the syntax is</span>
+<span class="org-doc">(let+ (((a b) '(1 2)))) which is like (destructuring-bind (a b) '(1 2))."</span>
+  (<span class="org-keyword">let</span> ((stack nil)
+        (compiled nil))
+    (<span class="org-keyword">loop</span> for binding in bindings
+          if (listp (car binding)) <span class="org-comment">; multiple symbols to bind</span>
+            do (push `(<span class="org-keyword">destructuring-bind</span> ,@binding) stack)
+          else <span class="org-comment">; normal let</span>
+            do (push `(<span class="org-keyword">let</span> ,(list binding)) stack))
+    <span class="org-comment-delimiter">;; </span><span class="org-comment">last binding gets the actual body</span>
+    (setf compiled (append (pop stack) body))
+    (<span class="org-keyword">loop</span> while stack <span class="org-comment">; build the nested expression by unwinding the stack</span>
+          do (setf compiled (append (pop stack) (list compiled))))
+    compiled))
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">compare-lists</span> (list1 list2 <span class="org-type">&amp;optional</span> (pred #'&lt;))
   <span class="org-doc">"Execute pred on each pair of elements of list1 and list2 and return non-NIL if is to precede list2."</span>
   (<span class="org-keyword">loop</span> for x in list1 for y in list2 when (not (equal x y)) return (funcall pred x y)))
+
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">string*</span> (string times)
+  (<span class="org-keyword">let</span> ((product <span class="org-string">""</span>))
+    (<span class="org-keyword">dotimes</span> (i times product)
+      (setf product (concatenate 'string product string)))))
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">memoize</span> (fn)
+  (<span class="org-keyword">let</span> ((cache (make-hash-table <span class="org-builtin">:test</span> #'equal)))
+        #'(<span class="org-keyword">lambda</span> (<span class="org-type">&amp;rest</span> args)
+            (<span class="org-keyword">multiple-value-bind</span>
+                  (result in-cache)
+                (gethash args cache)
+                (<span class="org-keyword">if</span> in-cache
+                    result
+                    (setf (gethash args cache)
+                          (apply fn args)))))))
+
+(<span class="org-keyword">defun</span> <span class="org-function-name">apply-memoization</span> (fname)
+  (setf (fdefinition fname) (memoize (symbol-function fname))))
 </pre>
 </div>
 </div>
