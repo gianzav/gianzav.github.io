@@ -1105,6 +1105,221 @@ and making small edits would've solved the problem anyway.
       (apply-rule-to-list number-list 75)))
 #+end_src
 
+** Day 12
+
+#+begin_src lisp
+  (load "../utils.lisp")
+
+  (defclass edge ()
+    ((from :accessor from
+	   :initarg :from)
+     (to :accessor to
+	 :initarg :to)
+     (cost :accessor cost
+	   :initarg :cost
+	   :initform 0)
+     (label :accessor label
+	    :initarg :label
+	    :initform nil)))
+
+  (defclass graph ()
+    ((nodes :documentation "List of node labels. The node id is the position of the node in the list."
+	    :accessor nodes
+	    :initarg :nodes)
+     (edges :documentation "Hash map of the edges. The keys are the node
+     ids and the edges are pairs (q c) where q is the id of a node and c
+     is the cost of the edge"
+	    :accessor edges
+	    :initarg :edges
+	    :initform (make-hash-table))))
+
+  (defgeneric neighbors (graph node)
+    (:documentation "Returns the neighbors of node in graph."))
+
+  (defmethod neighbors ((graph graph) node)
+    (gethash node (edges graph)))
+
+  (defgeneric add-neighbor (graph node neighbor &key cost label)
+    (:documentation "Adds an edge in graph from node to neighbor."))
+
+  (defmethod add-neighbor ((graph graph) node neighbor &key (cost 0) (label nil))
+    (push (make-instance 'edge :from node :to neighbor :cost cost :label label) (gethash node (edges graph))))
+
+  (defgeneric nodes-with-label (graph label)
+    (:documentation "Returns all the node ids of the nodes that have the iven lavel"))
+
+  (defun transform-point (point)
+    (destructuring-bind (row col) point
+      (list (list row col)
+	    (list row (1+ col))
+	    (list (1+ row) col)
+	    (list (1+ row) (1+ col)))))
+
+  (defun parse-graph (lines)
+    "Parses a text matrix and builds a graph where two nodes are connected by an edge only if they have the same label."
+    (let ((graph (make-instance 'graph :nodes nil))
+	  (nrows (length lines))
+	  (ncols (length (first lines))))
+      (loop for row from 0 below nrows
+	    do (loop for col from 0 below ncols
+		     for current = (+ (* row ncols) col)
+		     for top = (+ (* (1- row) ncols) col)
+		     for left = (+ (* row ncols) (1- col))
+		     for right = (+ (* row ncols) (1+ col))
+		     for bottom = (+ (* (1+ row) ncols) col)
+		     do (push (list (elt (elt lines row) col) (transform-point (list row col))) (nodes graph))
+			;; add an edge only if the labels are equal
+		     when (and (>= (1- row) 0 ) (equal (elt (elt lines row) col) (elt (elt lines (1- row)) col)))
+		       do (add-neighbor graph current top :label 'top)
+		     when (and (< (1+ row) nrows) (equal (elt (elt lines row) col) (elt (elt lines (1+ row)) col)))
+		       do (add-neighbor graph current bottom :label 'bottom)
+		     when (and (>= (1- col) 0) (equal (elt (elt lines row) col) (elt (elt lines row) (1- col))))
+		       do (add-neighbor graph current left :label 'left)
+		     when (and (< (1+ col) ncols) (equal (elt (elt lines row) col) (elt (elt lines row) (1+ col))))
+		       do (add-neighbor graph current right :label 'right)))
+      (setf (nodes graph) (reverse (nodes graph)))
+      graph))
+
+  (defun dfs-search (graph node visited &optional (feasible #'identity))
+    (setf (gethash node visited) t)
+    (let ((reachable
+	    (mapcan
+	     #'(lambda (edge)
+		 (let ((neighbor (to edge)))
+		   (when (and (funcall feasible neighbor) (not (gethash neighbor visited)))
+		     (setf (gethash neighbor visited) t)
+		     (dfs-search graph neighbor visited feasible))))
+	     (neighbors graph node))))
+      (values (cons node reachable))))
+
+  (defgeneric reachable-from (graph node)
+    (:documentation "Reachability."))
+
+  (defmethod reachable-from ((graph graph) node)
+    (dfs-search graph node (make-hash-table)))
+
+  (defun compute-price-perimeter (graph node-cluster)
+    (* (length node-cluster) ; area
+       (reduce #'+ ; perimeter, which is the sum of 4 - number of neighbors of node, over all nodes in the cluster
+	       (mapcar #'(lambda (node-idx) (- 4 (length (neighbors graph node-idx)))) node-cluster))))
+
+  (defstruct segment start end mergeable)
+
+  (defun get-node-segments (graph node-id)
+    (utils:let+ (((_ points) (elt (nodes graph) node-id))
+		 (segments nil)
+		 (neighbors (neighbors graph node-id))
+		 ((top-left top-right bot-left bot-right) points)
+		 (label-equal #'(lambda (dir edge) (equal dir (label edge))))
+		 (mergeable (mapcar #'label neighbors)))
+      (unless (find 'top neighbors :test label-equal)
+	(push (make-segment :start top-left
+			    :end top-right
+			    :mergeable (remove-if-not #'(lambda (dir) (or (equal dir 'left) (equal dir 'right))) mergeable))
+	      segments))
+      (unless (find 'bottom neighbors :test label-equal)
+	(push (make-segment :start bot-left
+			    :end bot-right
+			    :mergeable (remove-if-not #'(lambda (dir) (or (equal dir 'left) (equal dir 'right))) mergeable))
+	      segments))
+      (unless (find 'right neighbors :test label-equal)
+	(push (make-segment :start top-right
+			    :end bot-right
+			    :mergeable (remove-if-not #'(lambda (dir) (or (equal dir 'top) (equal dir 'bottom))) mergeable))
+	      segments))
+      (unless (find 'left neighbors :test label-equal)
+	(push (make-segment :start top-left
+			    :end bot-left
+			    :mergeable (remove-if-not #'(lambda (dir) (or (equal dir 'top) (equal dir 'bottom))) mergeable))
+	      segments))
+      segments))
+
+  (defun merge-segments (segment-a segment-b)
+    (cond
+      ((eq nil segment-a) segment-b)
+      ((eq nil segment-b) segment-a)
+      (t (let ((a-start (segment-start segment-a))
+	       (a-end (segment-end segment-a))
+	       (b-start (segment-start segment-b))
+	       (b-end (segment-end segment-b)))
+	   (if (not (equal a-end b-start))
+	       (error "End of segment-a doesn't match with start of segment-b.")
+	       (make-segment :start a-start
+			     :end b-end
+			     :mergeable (intersection (segment-mergeable segment-a) (segment-mergeable segment-b))))))))
+
+
+  (defun segment-compatible-p (new-segment segment)
+    (if segment
+	(and
+	 ;; segment ends where new-segment starts
+	 (equal (segment-start new-segment) (segment-end segment))
+	 (or
+	  ;; new-segment is exactly on the x axis w.r.t. segment
+	  (and (equal (car (segment-start segment)) (car (segment-end segment)))
+	       (equal (car (segment-end segment)) (car (segment-start new-segment)))
+	       (equal (car (segment-start new-segment)) (car (segment-end new-segment)))
+	       (find 'right (segment-mergeable segment)))
+	  ;; new-segment is exactly on the y axis w.r.t. segment
+	  (and (equal (cdr (segment-start segment)) (cdr (segment-end segment)))
+	       (equal (cdr (segment-end segment)) (cdr (segment-start new-segment)))
+	       (equal (cdr (segment-start new-segment)) (cdr (segment-end new-segment)))
+	       (find 'bottom (segment-mergeable segment)))))
+	nil))
+
+  (defun merge-segment-in-list (segment-list new-segment)
+    (let* ((segment-compatible-p #'(lambda (segment) (segment-compatible-p new-segment segment)))
+	   (to-merge-pos (position-if segment-compatible-p segment-list)))
+      (if to-merge-pos
+	  (values (append (subseq segment-list 0 to-merge-pos)
+			  (list (merge-segments (elt segment-list to-merge-pos) new-segment))
+			  (subseq segment-list (1+ to-merge-pos)))
+		  t)
+	  (values (cons new-segment segment-list) nil))))
+
+  (defun print-node-cluster (graph nrows ncols node-cluster)
+    (let ((grid (make-array (list nrows ncols) :initial-element nil)))
+      (dolist (node node-cluster)
+	(utils:let+ (((char points) (elt (nodes graph) node))
+		     ((row col) (first points)))
+	  (setf (aref grid row col) char)))
+      (loop for row from 0 below nrows
+	    do (format t "~&")
+	       (loop for col from 0 below ncols
+		     for cell = (aref grid row col)
+		     if cell
+		       do (format t "~a" cell)
+		     else
+		       do (format t ".")))
+      (format t "~2%")))
+
+  (defun compute-price-sides (graph node-cluster)
+    ;; (print-node-cluster graph (isqrt (length (nodes graph))) (isqrt (length (nodes graph))) node-cluster)
+    (let* ((compare-segments #'(lambda (segment-a segment-b)
+				 (if (equal (segment-start segment-a) (segment-start segment-b))
+				     (utils:compare-lists (segment-end segment-a) (segment-end segment-b))
+				     (utils:compare-lists (segment-start segment-a) (segment-start segment-b)))))
+	   (segments-not-merged (sort (mapcan #'(lambda (node-id) (get-node-segments graph node-id)) node-cluster) compare-segments))
+	   (segments (reduce #'merge-segment-in-list segments-not-merged :initial-value nil)))
+      (* (length node-cluster) ; area
+	 (length segments))))
+
+  (defun solve (file problem-step)
+    (let* ((lines (uiop:read-file-lines file))
+	   (graph (parse-graph lines))
+	   (not-visited (loop for node-idx from 0 below (length (nodes graph)) collect node-idx))
+	   (compute-price
+	     (if (= problem-step 1)
+		 #'compute-price-perimeter
+		 #'compute-price-sides)))
+      (loop while not-visited 
+	    ;; find the nodes in the same cluster
+	    for newly-visited = (reachable-from graph (pop not-visited))
+	    ;; remove those from the not-visited list
+	    do (mapcar #'(lambda (node-idx) (setf not-visited (remove node-idx not-visited))) newly-visited)
+	    sum (funcall compute-price graph newly-visited))))
+#+end_src
+
 ** Utils
 :PROPERTIES:
 :CUSTOM_ID: utils
