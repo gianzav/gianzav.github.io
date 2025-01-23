@@ -154,16 +154,16 @@ that could be useful for the next days.
     (and (&gt;= diff min-distance) (&lt;= diff max-distance) )))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">distance-ok-p</span> (sequence <span class="org-type">&amp;optional</span> (min-distance 1) (max-distance 3))
-  (<span class="org-warning">check-pairs</span> sequence #'(<span class="org-keyword">lambda</span> (x y) (pair-distance-ok-p x y min-distance max-distance))))
+  (check-pairs sequence #'(<span class="org-keyword">lambda</span> (x y) (pair-distance-ok-p x y min-distance max-distance))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">check-safety</span> (sequence)
   <span class="org-doc">"A sequence of numbers is safe if it is monotonically decreasing or</span>
 <span class="org-doc">  increasing, and any adjacent numbers differ by at least one and at</span>
 <span class="org-doc">  most three."</span>
   (<span class="org-keyword">cond</span> ((&lt; (first sequence) (second sequence))
-         (<span class="org-warning">check-pairs</span> sequence #'increasing-and-distance-p))
+         (check-pairs sequence #'increasing-and-distance-p))
         ((&gt; (first sequence) (second sequence))
-         (<span class="org-warning">check-pairs</span> sequence #'decreasing-and-distance-p))
+         (check-pairs sequence #'decreasing-and-distance-p))
         (t nil)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">increasing-and-distance-p</span> (x y)
@@ -182,7 +182,7 @@ that could be useful for the next days.
     (format t <span class="org-string">"~a~%"</span> (solve-second sequences))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-first</span> (sequences)
-  (reduce #'+ (mapcar #'(<span class="org-keyword">lambda</span> (seq) (<span class="org-keyword">if</span> (<span class="org-warning">check-safety</span> seq) 1 0)) sequences)))
+  (reduce #'+ (mapcar #'(<span class="org-keyword">lambda</span> (seq) (<span class="org-keyword">if</span> (check-safety seq) 1 0)) sequences)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-second</span> (sequences)
   (reduce #'+ (mapcar #'(<span class="org-keyword">lambda</span> (seq) (<span class="org-keyword">if</span> (some #'check-safety (sequences-without-one-element seq)) 1 0)) sequences)))
@@ -350,7 +350,7 @@ chars. The actual matching on automata is handled in the following way
           do
           (<span class="org-keyword">destructuring-bind</span>
            (result char-read)
-           (<span class="org-warning">check-multiple-automaton</span> automaton-list (subseq input i))
+           (check-multiple-automaton automaton-list (subseq input i))
            (<span class="org-keyword">cond</span>
             (result
              (setq matches (append matches (list (subseq input i (+ i char-read)))))
@@ -571,13 +571,13 @@ solution I could think of.
                       (<span class="org-keyword">let</span> ((rules (parse-ordering-rules raw-rules))
                             (sequences (mapcar #'parse-sequence raw-sequences)))
                         (reduce #'+ (mapcar #'middle-element
-                                            (remove-if-not #'(<span class="org-keyword">lambda</span> (sequence) (<span class="org-warning">check-ordering</span> rules sequence)) sequences))))))
+                                            (remove-if-not #'(<span class="org-keyword">lambda</span> (sequence) (check-ordering rules sequence)) sequences))))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-2</span> (file)
   (<span class="org-keyword">destructuring-bind</span> (raw-rules raw-sequences) (preprocess-file file)
                       (<span class="org-keyword">let*</span> ((rules (parse-ordering-rules raw-rules))
                              (sequences (mapcar #'parse-sequence raw-sequences))
-                             (not-ordered (remove-if #'(<span class="org-keyword">lambda</span> (sequence) (<span class="org-warning">check-ordering</span> rules sequence)) sequences)))
+                             (not-ordered (remove-if #'(<span class="org-keyword">lambda</span> (sequence) (check-ordering rules sequence)) sequences)))
                         (reduce #'+ (mapcar
                                      #'middle-element
                                      (mapcar
@@ -1640,7 +1640,7 @@ B = \frac{py \cdot ax - ay \cdot px}{ax \cdot by - ay \cdot bx}
           do
              (<span class="org-keyword">destructuring-bind</span>
                  (result char-read)
-                 (<span class="org-warning">check-multiple-automaton</span> automaton-list (subseq input i))
+                 (check-multiple-automaton automaton-list (subseq input i))
                (<span class="org-keyword">cond</span>
                  (result
                   (setq matches (append matches (list (subseq input i (+ i char-read)))))

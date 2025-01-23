@@ -50,3 +50,5 @@ needed, you can send me an email at =zavan.gianluca[at]outlook.com=.
   Most Beautiful Program Ever Written"]] by William Byrd
   - To dive deeper, check [[http://minikanren.org/][miniKanren]]
 - [[https://thesephist.com/]]: a nice blog
+- [[https://github.com/kanaka/mal?tab=readme-ov-file][Make a Lisp]]
+- [[https://protohackers.com/problems]]: something I might do someday (/probably not/)
