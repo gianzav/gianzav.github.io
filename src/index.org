@@ -39,15 +39,17 @@ You can find me on [[https://github.com/gianzav][Github]] and
 [[https://it.linkedin.com/in/gianluca-zavan-0a3031293][Linkedin]]. If
 needed, you can send me an email at =zavan.gianluca[at]outlook.com=.
 
-* Things worth a look
+* Some projects of mine
+- [[./aoc2024.html][Advent of code 2024]]: my solutions in CL to some of
+  the problems of AOC 2024
+- [[./maybe-monad.org][The Maybe monad in Scheme]]
+
+* Things worth a look in the web
 :PROPERTIES:
 :CUSTOM_ID: things-worth-a-look
 :END:
-- [[./aoc2024.html][Advent of code 2024]]: my solutions in CL to some of
-  the problems of AOC 2024
 - [[./common-lisp-resources.html][Common Lisp resources]]
-- [[https://www.youtube.com/watch?v=OyfBQmvr2Hc&pp=ygUadGhlIG1vc3QgYmVhdXRpZnVsIHByb2dyYW0%3D]["The
-  Most Beautiful Program Ever Written"]] by William Byrd
+- [[https://www.youtube.com/watch?v=OyfBQmvr2Hc&pp=ygUadGhlIG1vc3QgYmVhdXRpZnVsIHByb2dyYW0%3D]["The Most Beautiful Program Ever Written"]] by William Byrd
   - To dive deeper, check [[http://minikanren.org/][miniKanren]]
 - [[https://thesephist.com/]]: a nice blog
 - [[https://github.com/kanaka/mal?tab=readme-ov-file][Make a Lisp]]

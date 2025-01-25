@@ -1,0 +1,154 @@
+#+STARTUP: indent
+#+title: The Maybe monad in Scheme
+
+
+I recently watched this video from Computerphile [[https://www.youtube.com/watch?v=t1e8gqXLbsU&pp=ygUPd2hhdCBpcyBhIG1vbmFk][What is a Monad?]], and since I'm trying to use more and more functional programming in my free-time, I thought it might be interesting to implement the simple ~Maybe~ monad from Haskell in Scheme (more specifically, Guile Scheme) because of it's simplicity, flexibility and power given by the ~syntax-macro~ special form.
+
+To set things clear, the ~Maybe~ monad is in practice a special type that can be constructed in two ways:
+
+- ~Just x~ which represents "just" (/aha/) the value ~x~
+- ~Nothing~ which represents an error or something unexpected
+
+In the video, Graham Hutton to justify the usage of ~Maybe~, defines a function which performs an division between two integers, that returns ~Nothing~ if a number is divided by 0.
+
+In the following, I'm going to stick to the examples made in the video. The goal will then be to build an ~evaluator~ function able to evaluate expressions of the form:
+
+- ~(val x)~ where ~x~ is an integer value, that has to be evaluated as ~x~ itself
+- ~(div x y)~ that has to be evaluated as ~(quotient x y)~
+
+By using the ~Maybe~ monad, ~evaluator~ will automatically handle the possible error that comes from the division by 0.
+
+*Please Note:* to perform pattern matching, I'm going to use the ~(ice-9 match)~ library which is provided by default in Guile Scheme.
+
+Let's start by defining the basic expressions that can be evaluated:
+
+#+begin_src scheme
+  (define (val expr) `(val ,expr)) ;; (val 1) => ('val 1)
+  (define (div x y) `(div ,x ,y))  ;; (div 1 2) => ('div 1 2)
+#+end_src
+
+These helper functions build a list where the first element can be one of ~val~ or ~div~, which enables easier pattern matching.
+
+Now we can define how a ~Maybe~ is defined. To do this, a predicate ~maybe?~ comes handy to show explicitly what makes a ~Maybe~ exactly:
+
+#+begin_src scheme
+  (define (maybe? x)
+    (match x
+      (('just _) #t)
+      ('nothing #t)
+      (_ #f)))
+#+end_src
+
+Great, so this enforces that a ~Maybe~ can be represented only by a pair ~('just x)~ or the symbol ~'nothing~. Mind that ~maybe?~ is not strictly necessary, but makes things clearer.
+We need now a way to construct cleanly a ~Just~ and a ~Nothing~:
+
+#+begin_src scheme
+  (define (just x) `(just ,x))
+  (define nothing 'nothing)
+#+end_src
+
+#+RESULTS:
+: #<unspecified>
+
+At this point, a ~safediv~ function that performs the integer division safely can be defined simply as:
+
+#+begin_src scheme
+  (define (safediv x y)
+    (if (= y 0)
+        nothing
+        (just (quotient x y))))
+#+end_src
+
+Is it all about the ~Maybe~ monad? Not really, there still is a missing piece. A monad requires two operations on it to be defined, which are ~return~ and ~>>=~ (wiew the second one as a kind of "pipe" between monads). The operations need to respect three laws (written in Scheme notation):
+
+1. ~(>>= (return x) f)~ should be equivalent to ~(f x)~, where ~f~ is a function
+2. ~(>>= m return)~ should be equivalent to ~m~, where ~m~ is a monad
+3. ~(>>= (>>= m f) g)~ should be equivalent to ~(>>= m (lambda (x) (>>= (f x) g)))~
+
+The first law states that ~return~ is a left-identity w.r.t. ~>>=~, the second that ~return~ is a right-identity w.r.t. ~>>=~ and the third expresses the associativity of ~>>=~. These laws come from category theory.
+
+My intuition for this is that a monad is a kind of wrapper around some hidden state, which gets exposed when the ~>>=~ operation is applied. To make things concrete, let's go back to the ~Maybe~ monad: what is important is that when we use the ~>>=~ operation, if we start with a ~Nothing~, which is how we model an error, this is propagated along the chain of ~>>=~ so that an error at an early step doesn't get lost. The implementation is very simple:
+
+#+begin_src scheme
+  (define (>>= m f)
+    (match m
+      ((nothing) nothing)
+      (('just x) (f x))))
+#+end_src
+
+The function ~>>=~ takes as input a monad ~m~ and a function ~f~: if ~m~ is already ~nothing~, then ~nothing~ is returned, otherwise a ~just~ is built with the result of the function ~f~ applied on the content of the monad. This example makes very clear that the monad is passed as a "black box" to ~>==~, which is able to look inside and apply the function ~f~ before building a new monad with ~just~. At this point defining ~return~ is straigthforward:
+
+#+begin_src scheme
+  (define (return x) (just x))
+#+end_src
+
+We have all the ingredients to evaluate safely an expression like ~(div (val 3) (val 0))~:
+
+#+begin_src scheme
+  (define (evaluate expr) ;; returns a (just [result]) if everything goes fine, otherwise 'nothing
+    (match expr
+      (('val x)
+       (return x))
+      (('div x y)
+       (>== (evaluate x) (lambda (m)
+                           (>== (evaluate y) (lambda (n)
+                                               (safediv m n))))))
+#+end_src
+
+I know that the above code is not very readable, so let me break it down:
+
+- ~evaluate~ takes as input an expression ~expr~, which in our case will be a ~(val x)~ or a ~(div x y)~
+- If ~expr~ is a ~(val x)~ then we can use the ~return~ operation to build a ~(just x)~
+- Otherwise, ~x~ and ~y~ should be recursively evaluated (they can be an arbitrarily complex expression of ~div~ and ~val~)
+  - ~x~ is evaluated, and the result (a ~Maybe~ monad) is passed to the next step of the computation with ~>>=~
+  - This "next step" is implemented with a function that takes an argument ~m~ (which will be bound to the evaluation of ~x~) and evaluates ~y~
+  - The result of the evaluation of ~y~ is passed to the next step, which finally performs ~safediv~
+
+All this work translates to "evaluate ~x~ and store the result in ~m~, evaluate ~y~ and store the result in ~n~. Finally perform ~safediv~ with m and n". Notice that ~safediv~ takes as input integer values, while ~evaluate~ returns a monad: we are able to get to the integer values ~m~ and ~n~ to pass to ~safediv~ thanks to ~>>=~, which performs all the wrapping/unwrapping with the monad.
+
+Of course, this way of writing functions that use monads is not feasible in the long term, because we would end up with more and more lambdas that make it difficult to understand the code. That's why Haskell comes with the handy do-notation, that make it possible to simplify greatly the code. In Haskell, the chain of ~>>=~ applications can be expressed instead with:
+
+#+begin_src haskell
+  do m <- evaluate x
+     n <- evaluate y
+     safediv m n 
+#+end_src
+
+Too bad that Scheme does not have it... /Or does it?/
+
+Thanks to the powerful macro system provided by Scheme, extending the language with the do-notation is a piece of cake:
+
+#+begin_src scheme
+(define-syntax do
+  (syntax-rules (<-)
+    ((_ (var <- value) rest rest* ...) ;; binding as in Haskell's do-notation
+     (>>= value (lambda (var)
+		  (do rest rest* ...))))
+    ((_ expr expr* ...) ;; base case, no bindings
+     (begin expr expr* ...))))
+#+end_src
+
+How does this work?
+
+- In the first clause, we are performing pattern matching to check if the programmer provided a binding in a similar way as it's done in Haskell
+  - The binding is performed exactly how it was done in the definition of ~evaluate~: ~value~, which is a monad, is passed to ~>>=~ which will make the value inside the monad available. This value is bound to ~var~ in a lambda function
+  - ~do~ is then recursively called with the rest of the arguments that were passed to it
+- In the second clause, there is no binding present, so the expression is simply returned as-is
+
+If you have never seen Scheme (or any Lisp) in action, this might be a bit weird: ~do~ *is function that takes code as input and returns code as output, letting us to define a new syntax for the programming language*.
+
+At this point, ~evaluate~ can be defined as:
+
+#+begin_src scheme
+(define (evaluate expr)
+  (match expr
+    (('val x)
+     (return x))
+    (('div x y)
+     (do (m <- (evaluate x))
+	 (n <- (evaluate y))
+       (safediv m n)))))
+#+end_src
+
+
+Hope you found this interesting!
