@@ -43,7 +43,7 @@ needed, you can send me an email at =zavan.gianluca[at]outlook.com=.
 - [[./aoc2024.html][Advent of code 2024]]: my solutions in CL to some of
   the problems of AOC 2024
 - [[./maybe-monad.org][The Maybe monad in Scheme]]
-
+  
 * Things worth a look in the web
 :PROPERTIES:
 :CUSTOM_ID: things-worth-a-look
@@ -54,3 +54,10 @@ needed, you can send me an email at =zavan.gianluca[at]outlook.com=.
 - [[https://thesephist.com/]]: a nice blog
 - [[https://github.com/kanaka/mal?tab=readme-ov-file][Make a Lisp]]
 - [[https://protohackers.com/problems]]: something I might do someday (/probably not/)
+- [[https://github.com/BartoszMilewski/DaoFP][The Dao of Functional Programming]]
+  
+
+** Things that I want to understand
+
+- [[https://blog.sigplan.org/2021/08/12/reflective-towers-of-interpreters/][Reflective Towers of Interpretes]]
+- [[https://bartoszmilewski.com/2025/01/04/legalizing-comonad-composition/][This blogpost]]
