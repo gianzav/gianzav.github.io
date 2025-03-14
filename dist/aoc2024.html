@@ -67,15 +67,14 @@
 <li><a href="#day-7">Day 7</a></li>
 <li><a href="#day-8">Day 8</a></li>
 <li><a href="#day-9">Day 9</a></li>
-<li><a href="#org3260a71">Day 10</a></li>
-<li><a href="#org6a8a71d">Day 11</a></li>
-<li><a href="#org0c31b1c">Day 12</a></li>
-<li><a href="#orgfb41196">Day 13</a></li>
+<li><a href="#orgd1b4882">Day 10</a></li>
+<li><a href="#orgb7d178a">Day 11</a></li>
+<li><a href="#org66d93fb">Day 12</a></li>
+<li><a href="#orgf8fd1e4">Day 13</a></li>
 <li><a href="#utils">Utils</a></li>
 </ul>
 </div>
 </div>
-
 <div id="outline-container-day-1" class="outline-2">
 <h2 id="day-1">Day 1</h2>
 <div class="outline-text-2" id="text-day-1">
@@ -92,21 +91,21 @@
 <span class="org-comment-delimiter">;; </span><span class="org-comment">from https://lispcookbook.github.io/cl-cookbook/strings.html#breaking-strings-into-graphenes-sentences-lines-and-words</span>
 (<span class="org-keyword">defun</span> <span class="org-function-name">split-by-one-space</span> (string)
   (<span class="org-keyword">loop</span> for i = 0 then (1+ j)
-        as j = (position #\Space string <span class="org-builtin">:start</span> i)
-        collect (subseq string i j)
-        while j))
+          as j = (position #\Space string <span class="org-builtin">:start</span> i)
+          collect (subseq string i j)
+          while j))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">total-distance</span> (list-1 list-2)
   (<span class="org-keyword">let</span> ((sorted-1 (sort (copy-seq list-1) #'&lt;))
-        (sorted-2 (sort (copy-seq list-2) #'&lt;)))
+          (sorted-2 (sort (copy-seq list-2) #'&lt;)))
     (reduce #'+ (mapcar #'(<span class="org-keyword">lambda</span> (x y) (abs (- x y))) sorted-1 sorted-2))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">total-similarity</span> (list-1 list-2)
   (<span class="org-keyword">let</span> ((occurrences (make-hash-table)))
     (<span class="org-keyword">dolist</span> (item list-1)
-      (setf (gethash item occurrences) 0))
+        (setf (gethash item occurrences) 0))
     (<span class="org-keyword">dolist</span> (item list-2)
-      (<span class="org-keyword">when</span> (gethash item occurrences) (incf (gethash item occurrences))))
+        (<span class="org-keyword">when</span> (gethash item occurrences) (incf (gethash item occurrences))))
     (reduce #'+ (mapcar #'(<span class="org-keyword">lambda</span> (item) (* item (gethash item occurrences))) list-1))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">main</span> ()
@@ -117,7 +116,6 @@
 </div>
 </div>
 </div>
-
 <div id="outline-container-day-2" class="outline-2">
 <h2 id="day-2">Day 2</h2>
 <div class="outline-text-2" id="text-day-2">
@@ -130,11 +128,11 @@ that could be useful for the next days.
 <pre class="src src-lisp">(load <span class="org-string">"../utils.lisp"</span>)
 
 (<span class="org-keyword">defparameter</span> <span class="org-variable-name">*test*</span>'((7 6 4 2 1)
-                      (1 2 7 8 9)
-                      (9 7 6 2 1)
-                      (1 3 2 4 5)
-                      (8 6 4 4 1)
-                      (1 3 6 7 9)))
+                        (1 2 7 8 9)
+                        (9 7 6 2 1)
+                        (1 3 2 4 5)
+                        (8 6 4 4 1)
+                        (1 3 6 7 9)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">parse-file</span> (lines)
   (mapcar #'(<span class="org-keyword">lambda</span> (line) (mapcar #'parse-integer (utils:split-by-one-space line))) lines))
@@ -146,7 +144,7 @@ that could be useful for the next days.
 (<span class="org-keyword">defun</span> <span class="org-function-name">check-pairs</span> (sequence <span class="org-type">&amp;optional</span> (comparison-func #'&lt;=))
   (<span class="org-keyword">loop</span> for i from 1 below (length sequence) do
     (<span class="org-keyword">unless</span> (funcall comparison-func (nth (1- i) sequence) (nth i sequence))
-      (<span class="org-keyword">return-from</span> check-pairs nil)))
+        (<span class="org-keyword">return-from</span> check-pairs nil)))
   t)
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">pair-distance-ok-p</span> (x y <span class="org-type">&amp;optional</span> (min-distance 1) (max-distance 3))
@@ -161,10 +159,10 @@ that could be useful for the next days.
 <span class="org-doc">  increasing, and any adjacent numbers differ by at least one and at</span>
 <span class="org-doc">  most three."</span>
   (<span class="org-keyword">cond</span> ((&lt; (first sequence) (second sequence))
-         (check-pairs sequence #'increasing-and-distance-p))
-        ((&gt; (first sequence) (second sequence))
-         (check-pairs sequence #'decreasing-and-distance-p))
-        (t nil)))
+           (check-pairs sequence #'increasing-and-distance-p))
+          ((&gt; (first sequence) (second sequence))
+           (check-pairs sequence #'decreasing-and-distance-p))
+          (t nil)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">increasing-and-distance-p</span> (x y)
   (and (&lt; x y) (pair-distance-ok-p x y)))
@@ -174,7 +172,7 @@ that could be useful for the next days.
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">sequences-without-one-element</span> (sequence)
   (<span class="org-keyword">loop</span> for i from 0 below (length sequence) collect
-                                             (append (subseq sequence 0 i) (subseq sequence (1+ i) (length sequence)))))
+                                               (append (subseq sequence 0 i) (subseq sequence (1+ i) (length sequence)))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve</span> (input-file)
   (<span class="org-keyword">let</span> ((sequences (read-and-parse-file input-file)))
@@ -190,7 +188,6 @@ that could be useful for the next days.
 </div>
 </div>
 </div>
-
 <div id="outline-container-day-3" class="outline-2">
 <h2 id="day-3">Day 3</h2>
 <div class="outline-text-2" id="text-day-3">
@@ -199,7 +196,7 @@ that could be useful for the next days.
 <h3 id="easy-sane-version">Easy, sane version</h3>
 <div class="outline-text-3" id="text-easy-sane-version">
 <p>
-<a id="org3283811"></a>
+<a id="orga428baa"></a>
 </p>
 
 <p>
@@ -221,17 +218,17 @@ Then do the parsing and calculations in CL:
 (<span class="org-keyword">defun</span> <span class="org-function-name">get-valid-muls</span> (mixed <span class="org-type">&amp;optional</span> (valid-region t))
   (<span class="org-keyword">let</span> ((valid '()) (valid-region valid-region))
     (<span class="org-keyword">loop</span> for string in mixed do
-      (<span class="org-keyword">cond</span>
-        ((string= string <span class="org-string">"do()"</span>) (setq valid-region t))
-        ((string= string <span class="org-string">"don't()"</span>) (setq valid-region nil))
-        (valid-region (setq valid (append valid (list string))))))
+        (<span class="org-keyword">cond</span>
+          ((string= string <span class="org-string">"do()"</span>) (setq valid-region t))
+          ((string= string <span class="org-string">"don't()"</span>) (setq valid-region nil))
+          (valid-region (setq valid (append valid (list string))))))
     (values valid valid-region)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">parse-mul</span> (mul-string)
   (<span class="org-keyword">let*</span> ((comma (position <span class="org-string">","</span> mul-string <span class="org-builtin">:test</span> #'string=))
-         (left (parse-integer (subseq mul-string 4 comma)))
-         (right (parse-integer
-                 (subseq mul-string (1+ comma) (position <span class="org-string">")"</span> mul-string <span class="org-builtin">:test</span> #'string=)))))
+           (left (parse-integer (subseq mul-string 4 comma)))
+           (right (parse-integer
+                   (subseq mul-string (1+ comma) (position <span class="org-string">")"</span> mul-string <span class="org-builtin">:test</span> #'string=)))))
     (* left right)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">mul-and-add-line</span> (mul-line)
@@ -239,8 +236,8 @@ Then do the parsing and calculations in CL:
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">parse-mul</span> (mul-string)
   (<span class="org-keyword">let*</span> ((comma (position <span class="org-string">","</span> mul-string <span class="org-builtin">:test</span> #'string=))
-         (left (parse-integer (subseq mul-string 4 comma)))
-         (right (parse-integer (subseq mul-string (1+ comma) (position <span class="org-string">")"</span> mul-string <span class="org-builtin">:test</span> #'string=)))))
+           (left (parse-integer (subseq mul-string 4 comma)))
+           (right (parse-integer (subseq mul-string (1+ comma) (position <span class="org-string">")"</span> mul-string <span class="org-builtin">:test</span> #'string=)))))
     (* left right)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-1-preprocessed</span> (file)
@@ -254,7 +251,6 @@ Then do the parsing and calculations in CL:
 </div>
 </div>
 </div>
-
 <div id="outline-container-the-hard-way" class="outline-3">
 <h3 id="the-hard-way">The hard way</h3>
 <div class="outline-text-3" id="text-the-hard-way">
@@ -268,16 +264,16 @@ an example of how an automaton is defined:
 <pre class="src src-lisp">(<span class="org-keyword">defstruct</span> <span class="org-type">automaton</span> (init nil) (end nil) (delta '()))
 
 (<span class="org-keyword">defparameter</span> <span class="org-variable-name">*delta*</span>
-              '((0 - <span class="org-string">"m"</span> -&gt; 1)
-                (1 - <span class="org-string">"u"</span> -&gt; 2)
-                (2 - <span class="org-string">"l"</span> -&gt; 3)
-                (3 - <span class="org-string">"("</span> -&gt; 4)
-                (4 - number -&gt; 5)
-                (5 - number -&gt; 5)
-                (5 - <span class="org-string">","</span> -&gt; 6)
-                (6 - number -&gt; 7)
-                (7 - number -&gt; 7)
-                (7 - <span class="org-string">")"</span> -&gt; 8)))
+                '((0 - <span class="org-string">"m"</span> -&gt; 1)
+                  (1 - <span class="org-string">"u"</span> -&gt; 2)
+                  (2 - <span class="org-string">"l"</span> -&gt; 3)
+                  (3 - <span class="org-string">"("</span> -&gt; 4)
+                  (4 - number -&gt; 5)
+                  (5 - number -&gt; 5)
+                  (5 - <span class="org-string">","</span> -&gt; 6)
+                  (6 - number -&gt; 7)
+                  (7 - number -&gt; 7)
+                  (7 - <span class="org-string">")"</span> -&gt; 8)))
 </pre>
 </div>
 
@@ -313,9 +309,9 @@ chars. The actual matching on automata is handled in the following way
     (<span class="org-keyword">cond</span>
      ((equal delta nil) nil)
      (to-apply
-      (target-state to-apply))
+        (target-state to-apply))
      ((and (position input <span class="org-string">"0123456789"</span> <span class="org-builtin">:test</span> #'string=) (rule-with-number (rules-with-state delta state)))
-      (target-state (rule-with-number (rules-with-state delta state))))
+        (target-state (rule-with-number (rules-with-state delta state))))
      (t nil))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">apply-delta-string</span> (delta state input end-state)
@@ -324,38 +320,38 @@ chars. The actual matching on automata is handled in the following way
 (<span class="org-keyword">defun</span> <span class="org-function-name">apply-delta-string-aux</span> (delta state input end-state position)
   <span class="org-doc">"Apply delta on a string"</span>
   (<span class="org-keyword">cond</span> ((equal state end-state) (list t position))
-        ((equal state nil) (list nil (<span class="org-keyword">if</span> (&gt; position 1) (1- position) position)))
-        (t (apply-delta-string-aux delta (apply-delta-char delta state (subseq input 0 1)) (subseq input 1) end-state (1+ position)))))
+          ((equal state nil) (list nil (<span class="org-keyword">if</span> (&gt; position 1) (1- position) position)))
+          (t (apply-delta-string-aux delta (apply-delta-char delta state (subseq input 0 1)) (subseq input 1) end-state (1+ position)))))
 
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">check-multiple-automaton</span> (automaton-list input)
   (<span class="org-keyword">let</span> ((max 0))
     (<span class="org-keyword">loop</span> for automaton in automaton-list do
-          (<span class="org-keyword">let</span> ((possible-match
-                 (apply-delta-string
-                  (automaton-delta automaton)
-                  (automaton-init automaton)
-                  input
-                  (automaton-end automaton))))
-            (<span class="org-keyword">cond</span>
-             ((first possible-match) (<span class="org-keyword">return-from</span> check-multiple-automaton possible-match))
-             (t (<span class="org-keyword">if</span> (&gt; (second possible-match) max) (setq max (second possible-match)))))
-            ))
+            (<span class="org-keyword">let</span> ((possible-match
+                   (apply-delta-string
+                    (automaton-delta automaton)
+                    (automaton-init automaton)
+                    input
+                    (automaton-end automaton))))
+              (<span class="org-keyword">cond</span>
+               ((first possible-match) (<span class="org-keyword">return-from</span> check-multiple-automaton possible-match))
+               (t (<span class="org-keyword">if</span> (&gt; (second possible-match) max) (setq max (second possible-match)))))
+              ))
     (list nil max)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">apply-on-automaton-list</span> (automaton-list input)
   <span class="org-doc">"Run the automaton on the input string and return the list of matches"</span>
   (<span class="org-keyword">let</span> ((i 0) (matches '()))
     (<span class="org-keyword">loop</span> while (&lt; i (length input))
-          do
-          (<span class="org-keyword">destructuring-bind</span>
-           (result char-read)
-           (check-multiple-automaton automaton-list (subseq input i))
-           (<span class="org-keyword">cond</span>
-            (result
-             (setq matches (append matches (list (subseq input i (+ i char-read)))))
-             (incf i char-read))
-            (t (incf i char-read)))))
+            do
+            (<span class="org-keyword">destructuring-bind</span>
+             (result char-read)
+             (check-multiple-automaton automaton-list (subseq input i))
+             (<span class="org-keyword">cond</span>
+              (result
+               (setq matches (append matches (list (subseq input i (+ i char-read)))))
+               (incf i char-read))
+              (t (incf i char-read)))))
     matches))
 </pre>
 </div>
@@ -367,49 +363,49 @@ for the matching. The solution is completed as following:
 
 <div class="org-src-container">
 <pre class="src src-lisp">(<span class="org-keyword">defparameter</span> <span class="org-variable-name">*mul-automaton*</span> (make-automaton <span class="org-builtin">:init</span> 0 <span class="org-builtin">:end</span> 8 <span class="org-builtin">:delta</span>
-                                              '((0 - <span class="org-string">"m"</span> -&gt; 1)
-                                                (1 - <span class="org-string">"u"</span> -&gt; 2)
-                                                (2 - <span class="org-string">"l"</span> -&gt; 3)
-                                                (3 - <span class="org-string">"("</span> -&gt; 4)
-                                                (4 - number -&gt; 5)
-                                                (5 - number -&gt; 5)
-                                                (5 - <span class="org-string">","</span> -&gt; 6)
-                                                (6 - number -&gt; 7)
-                                                (7 - number -&gt; 7)
-                                                (7 - <span class="org-string">")"</span> -&gt; 8))))
+                                                '((0 - <span class="org-string">"m"</span> -&gt; 1)
+                                                  (1 - <span class="org-string">"u"</span> -&gt; 2)
+                                                  (2 - <span class="org-string">"l"</span> -&gt; 3)
+                                                  (3 - <span class="org-string">"("</span> -&gt; 4)
+                                                  (4 - number -&gt; 5)
+                                                  (5 - number -&gt; 5)
+                                                  (5 - <span class="org-string">","</span> -&gt; 6)
+                                                  (6 - number -&gt; 7)
+                                                  (7 - number -&gt; 7)
+                                                  (7 - <span class="org-string">")"</span> -&gt; 8))))
 
 (<span class="org-keyword">defparameter</span> <span class="org-variable-name">*do-automaton*</span> (make-automaton <span class="org-builtin">:init</span> 0 <span class="org-builtin">:end</span> 4 <span class="org-builtin">:delta</span>
-                                             '((0 - <span class="org-string">"d"</span> -&gt; 1)
-                                               (1 - <span class="org-string">"o"</span> -&gt; 2)
-                                               (2 -&gt; <span class="org-string">"("</span> -&gt; 3)
-                                               (3 -&gt; <span class="org-string">")"</span> -&gt; 4))))
-
-(<span class="org-keyword">defparameter</span> <span class="org-variable-name">*dont-automaton*</span> (make-automaton <span class="org-builtin">:init</span> 0 <span class="org-builtin">:end</span> 7 <span class="org-builtin">:delta</span>
                                                '((0 - <span class="org-string">"d"</span> -&gt; 1)
                                                  (1 - <span class="org-string">"o"</span> -&gt; 2)
-                                                 (2 - <span class="org-string">"n"</span> -&gt; 3)
-                                                 (3 - <span class="org-string">"'"</span> -&gt; 4)
-                                                 (4 - <span class="org-string">"t"</span> -&gt; 5)
-                                                 (5 - <span class="org-string">"("</span> -&gt; 6)
-                                                 (6 - <span class="org-string">")"</span> -&gt; 7))))
+                                                 (2 -&gt; <span class="org-string">"("</span> -&gt; 3)
+                                                 (3 -&gt; <span class="org-string">")"</span> -&gt; 4))))
+
+(<span class="org-keyword">defparameter</span> <span class="org-variable-name">*dont-automaton*</span> (make-automaton <span class="org-builtin">:init</span> 0 <span class="org-builtin">:end</span> 7 <span class="org-builtin">:delta</span>
+                                                 '((0 - <span class="org-string">"d"</span> -&gt; 1)
+                                                   (1 - <span class="org-string">"o"</span> -&gt; 2)
+                                                   (2 - <span class="org-string">"n"</span> -&gt; 3)
+                                                   (3 - <span class="org-string">"'"</span> -&gt; 4)
+                                                   (4 - <span class="org-string">"t"</span> -&gt; 5)
+                                                   (5 - <span class="org-string">"("</span> -&gt; 6)
+                                                   (6 - <span class="org-string">")"</span> -&gt; 7))))
 
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-1</span> (file)
   (<span class="org-keyword">let*</span> ((lines (uiop:read-file-lines file))
-         (parsed-lines (mapcar #'(<span class="org-keyword">lambda</span> (line) (apply-on-automaton *mul-automaton* line)) lines)))
+           (parsed-lines (mapcar #'(<span class="org-keyword">lambda</span> (line) (apply-on-automaton *mul-automaton* line)) lines)))
     (reduce #'+ (mapcar #'mul-and-add-line parsed-lines))
     ))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-2</span> (file)
   (<span class="org-keyword">let*</span> ((lines (uiop:read-file-lines file))
-         (valid-region t)
-         (valid-muls '()))
+           (valid-region t)
+           (valid-muls '()))
     (<span class="org-keyword">loop</span> for line in lines do
-          (<span class="org-keyword">multiple-value-bind</span> (valid last-valid-region)
-                               (get-valid-muls
-                                (apply-on-automaton-list (list *mul-automaton* *do-automaton* *dont-automaton*) line) valid-region)
-                               (push valid valid-muls)
-                               (setq valid-region last-valid-region)))
+            (<span class="org-keyword">multiple-value-bind</span> (valid last-valid-region)
+                                 (get-valid-muls
+                                  (apply-on-automaton-list (list *mul-automaton* *do-automaton* *dont-automaton*) line) valid-region)
+                                 (push valid valid-muls)
+                                 (setq valid-region last-valid-region)))
     (reduce #'+ (mapcar #'mul-and-add-line valid-muls))))
 </pre>
 </div>
@@ -422,7 +418,6 @@ exercise <i>for future me, maybe</i>.
 </div>
 </div>
 </div>
-
 <div id="outline-container-day-4" class="outline-2">
 <h2 id="day-4">Day 4</h2>
 <div class="outline-text-2" id="text-day-4">
@@ -433,69 +428,69 @@ exercise <i>for future me, maybe</i>.
 (<span class="org-keyword">defun</span> <span class="org-function-name">get-diagonals</span> (lines <span class="org-type">&amp;optional</span> (len 4))
   <span class="org-doc">"From bottom right to top left"</span>
   (<span class="org-keyword">loop</span> for i from (1- len) below (length lines)
-        collect
-        (<span class="org-keyword">loop</span> for j from (1- len) below (length (nth i lines))
-              collect
-              (utils:string-join <span class="org-string">""</span>
-                                 (<span class="org-keyword">loop</span> for k from 0 to (1- len)
-                                       collect (subseq (nth (- i k) lines) (- j k) (1+ (- j k))))))))
+          collect
+          (<span class="org-keyword">loop</span> for j from (1- len) below (length (nth i lines))
+                collect
+                (utils:string-join <span class="org-string">""</span>
+                                   (<span class="org-keyword">loop</span> for k from 0 to (1- len)
+                                         collect (subseq (nth (- i k) lines) (- j k) (1+ (- j k))))))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">get-squares</span> (lines <span class="org-type">&amp;optional</span> (dim 3))
   (<span class="org-keyword">loop</span> for i from 0 to (- (length lines) dim)
-        nconc
-        (<span class="org-keyword">loop</span> for j from 0 to (- (length (nth i lines)) dim)
-              collect
-              (utils:string-join (list #\Newline)
-                                 (<span class="org-keyword">loop</span> for k from 0 below dim collect (subseq (nth (+ k i) lines) j (+ j dim)))))))
+          nconc
+          (<span class="org-keyword">loop</span> for j from 0 to (- (length (nth i lines)) dim)
+                collect
+                (utils:string-join (list #\Newline)
+                                   (<span class="org-keyword">loop</span> for k from 0 below dim collect (subseq (nth (+ k i) lines) j (+ j dim)))))))
 
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">get-anti-diagonals</span> (lines <span class="org-type">&amp;optional</span> (len 4))
   <span class="org-doc">"From bottom left to top right."</span>
   (<span class="org-keyword">loop</span> for i from (1- len) below (length lines) collect
-        (<span class="org-keyword">loop</span> for j from 0 below (- (length (nth i lines)) (1- len))
-              collect
-              (utils:string-join <span class="org-string">""</span>
-                                 (<span class="org-keyword">loop</span> for k from 0 to (1- len)
-                                       collect (subseq (nth (- i k) lines) (+ j k) (1+ (+ j k))))))))
+          (<span class="org-keyword">loop</span> for j from 0 below (- (length (nth i lines)) (1- len))
+                collect
+                (utils:string-join <span class="org-string">""</span>
+                                   (<span class="org-keyword">loop</span> for k from 0 to (1- len)
+                                         collect (subseq (nth (- i k) lines) (+ j k) (1+ (+ j k))))))))
 
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">get-vertical</span> (lines)
   (<span class="org-keyword">let</span> ((vertical '()))
     (<span class="org-keyword">loop</span> for line in lines do
-          (<span class="org-keyword">loop</span> for i from 0 below (length line) do
-                (<span class="org-keyword">cond</span>
-                 ((nth i vertical) (setf (nth i vertical) (concatenate 'string (nth i vertical) (subseq line i (1+ i)))))
-                 (t (setf vertical (append vertical (list (subseq line i (1+ i)))))))))
+            (<span class="org-keyword">loop</span> for i from 0 below (length line) do
+                  (<span class="org-keyword">cond</span>
+                   ((nth i vertical) (setf (nth i vertical) (concatenate 'string (nth i vertical) (subseq line i (1+ i)))))
+                   (t (setf vertical (append vertical (list (subseq line i (1+ i)))))))))
     vertical))
 
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">count-horizontal</span> (lines word)
   (+
    (reduce #'+
-           (mapcar #'(<span class="org-keyword">lambda</span> (line) (count word (utils:regex-match-all word line) <span class="org-builtin">:test</span> #'string=)) lines))
+             (mapcar #'(<span class="org-keyword">lambda</span> (line) (count word (utils:regex-match-all word line) <span class="org-builtin">:test</span> #'string=)) lines))
    (reduce #'+
-           (mapcar #'(<span class="org-keyword">lambda</span> (line) (count (reverse word) (utils:regex-match-all (reverse word) line) <span class="org-builtin">:test</span> #'string=)) lines))))
+             (mapcar #'(<span class="org-keyword">lambda</span> (line) (count (reverse word) (utils:regex-match-all (reverse word) line) <span class="org-builtin">:test</span> #'string=)) lines))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">count-main-diagonals</span> (lines word)
   (+
    (reduce #'+
-           (mapcar #'(<span class="org-keyword">lambda</span> (line) (count word line <span class="org-builtin">:test</span> #'string=)) (get-diagonals lines (length word))))
+             (mapcar #'(<span class="org-keyword">lambda</span> (line) (count word line <span class="org-builtin">:test</span> #'string=)) (get-diagonals lines (length word))))
    (reduce #'+
-           (mapcar #'(<span class="org-keyword">lambda</span> (line) (count (reverse word) line <span class="org-builtin">:test</span> #'string=)) (get-diagonals lines (length word))))))
+             (mapcar #'(<span class="org-keyword">lambda</span> (line) (count (reverse word) line <span class="org-builtin">:test</span> #'string=)) (get-diagonals lines (length word))))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">count-anti-diagonals</span> (lines word)
   (+
    (reduce #'+
-           (mapcar #'(<span class="org-keyword">lambda</span> (line) (count word line <span class="org-builtin">:test</span> #'string=)) (get-anti-diagonals lines (length word))))
+             (mapcar #'(<span class="org-keyword">lambda</span> (line) (count word line <span class="org-builtin">:test</span> #'string=)) (get-anti-diagonals lines (length word))))
    (reduce #'+
-           (mapcar #'(<span class="org-keyword">lambda</span> (line) (count (reverse word) line <span class="org-builtin">:test</span> #'string=)) (get-anti-diagonals lines (length word))))))
+             (mapcar #'(<span class="org-keyword">lambda</span> (line) (count (reverse word) line <span class="org-builtin">:test</span> #'string=)) (get-anti-diagonals lines (length word))))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">count-vertical</span> (lines word)
   (+
    (reduce #'+
-           (mapcar #'(<span class="org-keyword">lambda</span> (line) (count word (utils:regex-match-all word line) <span class="org-builtin">:test</span> #'string=)) (get-vertical lines)))
+             (mapcar #'(<span class="org-keyword">lambda</span> (line) (count word (utils:regex-match-all word line) <span class="org-builtin">:test</span> #'string=)) (get-vertical lines)))
    (reduce #'+
-           (mapcar #'(<span class="org-keyword">lambda</span> (line) (count (reverse word) (utils:regex-match-all (reverse word) line) <span class="org-builtin">:test</span> #'string=)) (get-vertical lines)))))
+             (mapcar #'(<span class="org-keyword">lambda</span> (line) (count (reverse word) (utils:regex-match-all (reverse word) line) <span class="org-builtin">:test</span> #'string=)) (get-vertical lines)))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-1</span> (file)
   (<span class="org-keyword">let</span> ((lines (uiop:read-file-lines file)))
@@ -513,17 +508,16 @@ exercise <i>for future me, maybe</i>.
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-2</span> (file)
   (<span class="org-keyword">let</span> ((lines (uiop:read-file-lines file)) (total 0))
     (<span class="org-keyword">loop</span> for square in (get-squares lines (length <span class="org-string">"MAS"</span>))
-          do
-          (<span class="org-keyword">let*</span> ((square-lines (uiop:split-string square <span class="org-builtin">:separator</span> '(#\Newline)))
-                 (partial (+ (count-main-diagonals square-lines <span class="org-string">"MAS"</span>)
-                             (count-anti-diagonals square-lines <span class="org-string">"MAS"</span>))))
-            (<span class="org-keyword">if</span> (= 2 partial) (incf total)))) <span class="org-comment-delimiter">;; </span><span class="org-comment">count one only if both diagonals match</span>
+            do
+            (<span class="org-keyword">let*</span> ((square-lines (uiop:split-string square <span class="org-builtin">:separator</span> '(#\Newline)))
+                   (partial (+ (count-main-diagonals square-lines <span class="org-string">"MAS"</span>)
+                               (count-anti-diagonals square-lines <span class="org-string">"MAS"</span>))))
+              (<span class="org-keyword">if</span> (= 2 partial) (incf total)))) <span class="org-comment-delimiter">;; </span><span class="org-comment">count one only if both diagonals match</span>
     total))
 </pre>
 </div>
 </div>
 </div>
-
 <div id="outline-container-day-5" class="outline-2">
 <h2 id="day-5">Day 5</h2>
 <div class="outline-text-2" id="text-day-5">
@@ -541,22 +535,22 @@ solution I could think of.
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">check-ordering</span> (rules sequence)
   (<span class="org-keyword">loop</span> for i from 1 below (length sequence)
-        do (<span class="org-keyword">if</span> (some #'(<span class="org-keyword">lambda</span> (elem) (find elem (gethash (nth i sequence) rules))) (subseq sequence 0 i))
-               (<span class="org-keyword">return-from</span> check-ordering nil)))
+          do (<span class="org-keyword">if</span> (some #'(<span class="org-keyword">lambda</span> (elem) (find elem (gethash (nth i sequence) rules))) (subseq sequence 0 i))
+                 (<span class="org-keyword">return-from</span> check-ordering nil)))
   t)
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">parse-ordering-rules</span> (rules)
   (<span class="org-keyword">let</span> ((parsed (make-hash-table)))
     (<span class="org-keyword">loop</span> for rule in rules
-          do (<span class="org-keyword">let*</span> ((pipe-pos (position <span class="org-string">"|"</span> rule <span class="org-builtin">:test</span> #'string=))
-                    (left (parse-integer (subseq rule 0 pipe-pos)))
-                    (right (parse-integer (subseq rule (1+ pipe-pos)))))
-               (push right (gethash left parsed))))
+            do (<span class="org-keyword">let*</span> ((pipe-pos (position <span class="org-string">"|"</span> rule <span class="org-builtin">:test</span> #'string=))
+                      (left (parse-integer (subseq rule 0 pipe-pos)))
+                      (right (parse-integer (subseq rule (1+ pipe-pos)))))
+                 (push right (gethash left parsed))))
     parsed))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">preprocess-file</span> (file)
   (<span class="org-keyword">let*</span> ((lines (uiop:read-file-lines file))
-         (empty-line-pos (position <span class="org-string">""</span> lines <span class="org-builtin">:test</span> #'string=)))
+           (empty-line-pos (position <span class="org-string">""</span> lines <span class="org-builtin">:test</span> #'string=)))
     (list (subseq lines 0 empty-line-pos) (subseq lines (1+ empty-line-pos)))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">compare</span> (x y rules)
@@ -568,27 +562,26 @@ solution I could think of.
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-1</span> (file)
   (<span class="org-keyword">destructuring-bind</span> (raw-rules raw-sequences) (preprocess-file file)
-                      (<span class="org-keyword">let</span> ((rules (parse-ordering-rules raw-rules))
-                            (sequences (mapcar #'parse-sequence raw-sequences)))
-                        (reduce #'+ (mapcar #'middle-element
-                                            (remove-if-not #'(<span class="org-keyword">lambda</span> (sequence) (check-ordering rules sequence)) sequences))))))
+                        (<span class="org-keyword">let</span> ((rules (parse-ordering-rules raw-rules))
+                              (sequences (mapcar #'parse-sequence raw-sequences)))
+                          (reduce #'+ (mapcar #'middle-element
+                                              (remove-if-not #'(<span class="org-keyword">lambda</span> (sequence) (check-ordering rules sequence)) sequences))))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-2</span> (file)
   (<span class="org-keyword">destructuring-bind</span> (raw-rules raw-sequences) (preprocess-file file)
-                      (<span class="org-keyword">let*</span> ((rules (parse-ordering-rules raw-rules))
-                             (sequences (mapcar #'parse-sequence raw-sequences))
-                             (not-ordered (remove-if #'(<span class="org-keyword">lambda</span> (sequence) (check-ordering rules sequence)) sequences)))
-                        (reduce #'+ (mapcar
-                                     #'middle-element
-                                     (mapcar
-                                      #'(<span class="org-keyword">lambda</span> (sequence)
-                                          (sort sequence #'(<span class="org-keyword">lambda</span> (x y) (compare x y rules))))
-                                      not-ordered))))))
+                        (<span class="org-keyword">let*</span> ((rules (parse-ordering-rules raw-rules))
+                               (sequences (mapcar #'parse-sequence raw-sequences))
+                               (not-ordered (remove-if #'(<span class="org-keyword">lambda</span> (sequence) (check-ordering rules sequence)) sequences)))
+                          (reduce #'+ (mapcar
+                                       #'middle-element
+                                       (mapcar
+                                        #'(<span class="org-keyword">lambda</span> (sequence)
+                                            (sort sequence #'(<span class="org-keyword">lambda</span> (x y) (compare x y rules))))
+                                        not-ordered))))))
 </pre>
 </div>
 </div>
 </div>
-
 <div id="outline-container-day-6" class="outline-2">
 <h2 id="day-6">Day 6</h2>
 <div class="outline-text-2" id="text-day-6">
@@ -600,8 +593,8 @@ But hey! Still learning the language, so everything is accepted right?
 
 <div class="org-src-container">
 <pre class="src src-lisp">(<span class="org-keyword">defparameter</span> <span class="org-variable-name">*test*</span>
-              (uiop:split-string
-               <span class="org-string">"....#.....</span>
+                (uiop:split-string
+                 <span class="org-string">"....#.....</span>
 <span class="org-string">.........#</span>
 <span class="org-string">..........</span>
 <span class="org-string">..#.......</span>
@@ -618,111 +611,110 @@ But hey! Still learning the language, so everything is accepted right?
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">parse-grid</span> (rows) <span class="org-comment-delimiter">;; </span><span class="org-comment">assumed to be list of strings</span>
   (<span class="org-keyword">let*</span> ((nrows (length rows))
-         (ncols (length (first rows)))
-         (grid (make-array (list nrows ncols)))
-         (guard-position '(0 0))
-         (facing 'up))
+           (ncols (length (first rows)))
+           (grid (make-array (list nrows ncols)))
+           (guard-position '(0 0))
+           (facing 'up))
     (<span class="org-keyword">loop</span> for i from 0 below nrows
-          do (<span class="org-keyword">loop</span> for j from 0 below ncols
-                   do (<span class="org-keyword">let</span> ((current-char (schar (nth i rows) j)))
-                        (setf (aref grid i j) current-char)
-                        (<span class="org-keyword">cond</span>
-                         ((char= current-char #\^) (setf facing 'up) (setf guard-position (list i j)))
-                         ((char= current-char #\v) (setf facing 'down) (setf guard-position (list i j)))
-                         ((char= current-char #\&gt;) (setf facing 'right) (setf guard-position (list i j)))
-                         ((char= current-char #\&lt;) (setf facing 'left) (setf guard-position (list i j)))
-                         (t t)))))
+            do (<span class="org-keyword">loop</span> for j from 0 below ncols
+                     do (<span class="org-keyword">let</span> ((current-char (schar (nth i rows) j)))
+                          (setf (aref grid i j) current-char)
+                          (<span class="org-keyword">cond</span>
+                           ((char= current-char #\^) (setf facing 'up) (setf guard-position (list i j)))
+                           ((char= current-char #\v) (setf facing 'down) (setf guard-position (list i j)))
+                           ((char= current-char #\&gt;) (setf facing 'right) (setf guard-position (list i j)))
+                           ((char= current-char #\&lt;) (setf facing 'left) (setf guard-position (list i j)))
+                           (t t)))))
     (make-game-map <span class="org-builtin">:grid</span> grid <span class="org-builtin">:guard-position</span> guard-position <span class="org-builtin">:guard-facing</span> facing)))
 
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">take-step</span> (map current-position facing <span class="org-type">&amp;optional</span> (added-obstacle-position nil added-obstacle-p))
   (<span class="org-keyword">let*</span> ((nrows (array-dimension (game-map-grid map) 0))
-         (ncols (array-dimension (game-map-grid map) 1))
-         (next-row 0)
-         (next-col 0))
+           (ncols (array-dimension (game-map-grid map) 1))
+           (next-row 0)
+           (next-col 0))
     (<span class="org-keyword">cond</span>
      ((eq facing 'up)
-      (setf next-row (1- (first current-position)))
-      (setf next-col (second current-position)))
+        (setf next-row (1- (first current-position)))
+        (setf next-col (second current-position)))
      ((eq facing 'down)
-      (setf next-row (1+ (first current-position)))
-      (setf next-col (second current-position)))
+        (setf next-row (1+ (first current-position)))
+        (setf next-col (second current-position)))
      ((eq facing 'left)
-      (setf next-row (first current-position))
-      (setf next-col (1- (second current-position))))
+        (setf next-row (first current-position))
+        (setf next-col (1- (second current-position))))
      ((eq facing 'right)
-      (setf next-row (first current-position))
-      (setf next-col (1+ (second current-position)))))
+        (setf next-row (first current-position))
+        (setf next-col (1+ (second current-position)))))
 
     (<span class="org-keyword">when</span> (or (&gt;= next-row nrows) (&lt; next-row 0) (&gt;= next-col ncols) (&lt; next-col 0))
-      (<span class="org-keyword">return-from</span> take-step nil))
+        (<span class="org-keyword">return-from</span> take-step nil))
 
     (<span class="org-keyword">if</span> (or (and added-obstacle-p (equal added-obstacle-position (list next-row next-col)))
-            (char= #\# (aref (game-map-grid map) next-row next-col)))
-        (<span class="org-keyword">cond</span>
-         ((eq facing 'down)
-          (list 'left (list (1- next-row) (1- next-col))))
-         ((eq facing 'up)
-          (list 'right (list (1+ next-row) (1+ next-col))))
-         ((eq facing 'left)
-          (list 'up (list (1- next-row) (1+ next-col))))
-         ((eq facing 'right)
-          (list 'down (list (1+ next-row) (1- next-col)))))
-      (list facing (list next-row next-col)))
+              (char= #\# (aref (game-map-grid map) next-row next-col)))
+          (<span class="org-keyword">cond</span>
+           ((eq facing 'down)
+            (list 'left (list (1- next-row) (1- next-col))))
+           ((eq facing 'up)
+            (list 'right (list (1+ next-row) (1+ next-col))))
+           ((eq facing 'left)
+            (list 'up (list (1- next-row) (1+ next-col))))
+           ((eq facing 'right)
+            (list 'down (list (1+ next-row) (1- next-col)))))
+        (list facing (list next-row next-col)))
     ))
 
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-1</span> (file)
   (<span class="org-keyword">let*</span> ((map (parse-grid (uiop:read-file-lines file)))
-         (position (copy-list (game-map-guard-position map)))
-         (facing (game-map-guard-facing map))
-         (counter 0)
-         (visited (make-array (array-dimensions (game-map-grid map)) <span class="org-builtin">:initial-element</span> nil)))
+           (position (copy-list (game-map-guard-position map)))
+           (facing (game-map-guard-facing map))
+           (counter 0)
+           (visited (make-array (array-dimensions (game-map-grid map)) <span class="org-builtin">:initial-element</span> nil)))
     (<span class="org-keyword">loop</span> while position 
-          do (<span class="org-keyword">unless</span> (aref visited (first position) (second position)) (incf counter))
-          (setf (aref visited (first position) (second position)) t)
-          (<span class="org-keyword">let</span> ((result (take-step map position facing)))
-            (<span class="org-keyword">if</span> result
-                (<span class="org-keyword">destructuring-bind</span> (new-facing new-position) result
-                                    (setf position new-position)
-                                    (setf facing new-facing))
-              (setf position nil))))
+            do (<span class="org-keyword">unless</span> (aref visited (first position) (second position)) (incf counter))
+            (setf (aref visited (first position) (second position)) t)
+            (<span class="org-keyword">let</span> ((result (take-step map position facing)))
+              (<span class="org-keyword">if</span> result
+                  (<span class="org-keyword">destructuring-bind</span> (new-facing new-position) result
+                                      (setf position new-position)
+                                      (setf facing new-facing))
+                (setf position nil))))
     counter))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-2</span> (file)
   (<span class="org-keyword">let*</span> ((map (parse-grid (uiop:read-file-lines file)))
-         (position (copy-list (game-map-guard-position map)))
-         (facing (game-map-guard-facing map))
-         (obstacles 0)
-         (nrows (array-dimension (game-map-grid map) 0))
-         (ncols (array-dimension (game-map-grid map) 1))
-         (loop-detected nil)
-         (visited-facing (make-array (list nrows ncols) <span class="org-builtin">:initial-element</span> nil)))
+           (position (copy-list (game-map-guard-position map)))
+           (facing (game-map-guard-facing map))
+           (obstacles 0)
+           (nrows (array-dimension (game-map-grid map) 0))
+           (ncols (array-dimension (game-map-grid map) 1))
+           (loop-detected nil)
+           (visited-facing (make-array (list nrows ncols) <span class="org-builtin">:initial-element</span> nil)))
     (<span class="org-keyword">loop</span> for i from 0 below nrows
-          do (<span class="org-keyword">loop</span> for j from 0 below ncols
-                   do (<span class="org-keyword">loop</span> initially (setf position (copy-list (game-map-guard-position map)))
-                            (setf facing (game-map-guard-facing map))
-                            (setf loop-detected nil)
-                            (setf visited-facing (make-array (list nrows ncols) <span class="org-builtin">:initial-element</span> nil))
-                            while (and position (not loop-detected))
-                            do (<span class="org-keyword">let</span> ((result (take-step map position facing (list i j))))
-                                 (<span class="org-keyword">if</span> result
-                                     (<span class="org-keyword">destructuring-bind</span> (new-facing new-position) result
-                                                         (<span class="org-keyword">when</span> (and (aref visited-facing (first new-position) (second new-position))
-                                                                    (equal new-facing (aref visited-facing (first new-position) (second new-position))))
-                                                           (setf loop-detected t))
-                                                         (setf (aref visited-facing (first position) (second position)) facing)
-                                                         (setf position new-position)
-                                                         (setf facing new-facing))
-                                   (setf position nil)))
-                            finally (<span class="org-keyword">when</span> loop-detected
-                                      (incf obstacles)))))
+            do (<span class="org-keyword">loop</span> for j from 0 below ncols
+                     do (<span class="org-keyword">loop</span> initially (setf position (copy-list (game-map-guard-position map)))
+                              (setf facing (game-map-guard-facing map))
+                              (setf loop-detected nil)
+                              (setf visited-facing (make-array (list nrows ncols) <span class="org-builtin">:initial-element</span> nil))
+                              while (and position (not loop-detected))
+                              do (<span class="org-keyword">let</span> ((result (take-step map position facing (list i j))))
+                                   (<span class="org-keyword">if</span> result
+                                       (<span class="org-keyword">destructuring-bind</span> (new-facing new-position) result
+                                                           (<span class="org-keyword">when</span> (and (aref visited-facing (first new-position) (second new-position))
+                                                                      (equal new-facing (aref visited-facing (first new-position) (second new-position))))
+                                                             (setf loop-detected t))
+                                                           (setf (aref visited-facing (first position) (second position)) facing)
+                                                           (setf position new-position)
+                                                           (setf facing new-facing))
+                                     (setf position nil)))
+                              finally (<span class="org-keyword">when</span> loop-detected
+                                        (incf obstacles)))))
     obstacles))
 </pre>
 </div>
 </div>
 </div>
-
 <div id="outline-container-day-7" class="outline-2">
 <h2 id="day-7">Day 7</h2>
 <div class="outline-text-2" id="text-day-7">
@@ -742,39 +734,38 @@ the new <code>concatenate</code> operator is also considered. Abstraction FTW!
   (<span class="org-keyword">cond</span>
    ((= 1 (length terms)) terms)
    (t (<span class="org-keyword">loop</span> for operator in operators
-            nconc (<span class="org-keyword">let</span> ((partial (funcall operator (first terms) (second terms))))
-                    (possible-results (cons partial (cdr (cdr terms))) operators))))))
+              nconc (<span class="org-keyword">let</span> ((partial (funcall operator (first terms) (second terms))))
+                      (possible-results (cons partial (cdr (cdr terms))) operators))))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">equation-valid-p</span> (equation operators)
   (some #'(<span class="org-keyword">lambda</span> (possible) (= possible (equation-result equation))) (possible-results (equation-terms equation) operators)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">parse-equation</span> (line)
   (<span class="org-keyword">let*</span> ((terms (utils:split-by-one-space line))
-         (colon-pos (position #\: (car terms) <span class="org-builtin">:test</span> #'char=)))
+           (colon-pos (position #\: (car terms) <span class="org-builtin">:test</span> #'char=)))
     (make-equation <span class="org-builtin">:result</span> (parse-integer (subseq (car terms) 0 colon-pos))
-                   <span class="org-builtin">:terms</span> (mapcar #'parse-integer (cdr terms)))))
+                     <span class="org-builtin">:terms</span> (mapcar #'parse-integer (cdr terms)))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">concatenation</span> (term1 term2)
   (parse-integer (concatenate 'string (princ-to-string term1) (princ-to-string term2))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-1</span> (file)
   (<span class="org-keyword">let*</span> ((lines (uiop:read-file-lines file))
-         (equations (mapcar #'parse-equation lines))
-         (valid-equations
-          (remove-if-not #'(<span class="org-keyword">lambda</span> (equation) (equation-valid-p equation (list #'+ #'*))) equations)))
+           (equations (mapcar #'parse-equation lines))
+           (valid-equations
+            (remove-if-not #'(<span class="org-keyword">lambda</span> (equation) (equation-valid-p equation (list #'+ #'*))) equations)))
     (reduce #'+ (mapcar #'(<span class="org-keyword">lambda</span> (equation) (equation-result equation)) valid-equations))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-2</span> (file)
   (<span class="org-keyword">let*</span> ((lines (uiop:read-file-lines file))
-         (equations (mapcar #'parse-equation lines))
-         (valid-equations
-          (remove-if-not #'(<span class="org-keyword">lambda</span> (equation) (equation-valid-p equation (list #'+ #'* #'concatenation))) equations)))
+           (equations (mapcar #'parse-equation lines))
+           (valid-equations
+            (remove-if-not #'(<span class="org-keyword">lambda</span> (equation) (equation-valid-p equation (list #'+ #'* #'concatenation))) equations)))
     (reduce #'+ (mapcar #'(<span class="org-keyword">lambda</span> (equation) (equation-result equation)) valid-equations))))
 </pre>
 </div>
 </div>
 </div>
-
 <div id="outline-container-day-8" class="outline-2">
 <h2 id="day-8">Day 8</h2>
 <div class="outline-text-2" id="text-day-8">
@@ -791,41 +782,41 @@ and making small edits would've solved the problem anyway.
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">parse-grid</span> (lines)
   (<span class="org-keyword">let</span> ((frequencies (make-hash-table))
-        (nrows (length lines))
-        (ncols (length (first lines))))
+          (nrows (length lines))
+          (ncols (length (first lines))))
     (<span class="org-keyword">loop</span> for row from 0 below nrows
-          nconc (<span class="org-keyword">loop</span> for col from 0 below ncols
-                      do (<span class="org-keyword">let</span> ((current-char (char (nth row lines) col)))
-                           (<span class="org-keyword">when</span> (char-not-equal current-char #\.)
-                             (push (list row col) (gethash current-char frequencies))))))
+            nconc (<span class="org-keyword">loop</span> for col from 0 below ncols
+                        do (<span class="org-keyword">let</span> ((current-char (char (nth row lines) col)))
+                             (<span class="org-keyword">when</span> (char-not-equal current-char #\.)
+                               (push (list row col) (gethash current-char frequencies))))))
     (make-grid <span class="org-builtin">:antennas</span> frequencies <span class="org-builtin">:nrows</span> nrows <span class="org-builtin">:ncols</span> ncols)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">get-antinodes-positions</span> (antenna-1 antenna-2 <span class="org-type">&amp;key</span> (delta-x 1) (delta-y 1) (min-antinode-offset 1) (max-antinode-offset 1))
   (<span class="org-keyword">destructuring-bind</span> (a1 a2)
-                      (<span class="org-keyword">if</span> (utils:compare-lists antenna-1 antenna-2)
-                          (list antenna-1 antenna-2)
-                        (list antenna-2 antenna-1))
-                      (<span class="org-keyword">let*</span> ((a1-x (second a1)) (a1-y (first a1))
-                             (a2-x (second a2)) (a2-y (first a2))
-                             (delta-x (<span class="org-keyword">if</span> (functionp delta-x)
-                                          (funcall delta-x a1 a2)
-                                        delta-x))
-                             (delta-y (<span class="org-keyword">if</span> (functionp delta-y)
-                                          (funcall delta-y a1 a2)
-                                        delta-y)))
-                        (<span class="org-keyword">loop</span> for i from min-antinode-offset to max-antinode-offset
-                              for computed-delta-x = (* i delta-x)
-                              for computed-delta-y = (* i delta-y)
-                              if (&lt;= a1-x a2-x)
-                              nconc (list (list (- a1-y computed-delta-y) (- a1-x computed-delta-x))
-                                          (list (+ a2-y computed-delta-y) (+ a2-x computed-delta-x)))
-                              else
-                              nconc (list (list (- a1-y computed-delta-y) (+ a1-x computed-delta-x))
-                                          (list (+ a2-y computed-delta-y) (- a2-x computed-delta-x)))))))
+                        (<span class="org-keyword">if</span> (utils:compare-lists antenna-1 antenna-2)
+                            (list antenna-1 antenna-2)
+                          (list antenna-2 antenna-1))
+                        (<span class="org-keyword">let*</span> ((a1-x (second a1)) (a1-y (first a1))
+                               (a2-x (second a2)) (a2-y (first a2))
+                               (delta-x (<span class="org-keyword">if</span> (functionp delta-x)
+                                            (funcall delta-x a1 a2)
+                                          delta-x))
+                               (delta-y (<span class="org-keyword">if</span> (functionp delta-y)
+                                            (funcall delta-y a1 a2)
+                                          delta-y)))
+                          (<span class="org-keyword">loop</span> for i from min-antinode-offset to max-antinode-offset
+                                for computed-delta-x = (* i delta-x)
+                                for computed-delta-y = (* i delta-y)
+                                if (&lt;= a1-x a2-x)
+                                nconc (list (list (- a1-y computed-delta-y) (- a1-x computed-delta-x))
+                                            (list (+ a2-y computed-delta-y) (+ a2-x computed-delta-x)))
+                                else
+                                nconc (list (list (- a1-y computed-delta-y) (+ a1-x computed-delta-x))
+                                            (list (+ a2-y computed-delta-y) (- a2-x computed-delta-x)))))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">out-of-bounds-p</span> (position nrows ncols)
   (<span class="org-keyword">let</span> ((col (second position))
-        (row (first position)))
+          (row (first position)))
     (or (&lt; col 0) (&lt; row 0) (&gt;= col ncols) (&gt;= row nrows))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">counted-p</span> (position counted)
@@ -842,70 +833,69 @@ and making small edits would've solved the problem anyway.
     (<span class="org-keyword">cond</span>
      ((= 1 (length antennas)) 0)
      (t (<span class="org-keyword">loop</span> for antenna in (cdr antennas)
-              do (<span class="org-keyword">loop</span> for antinode-pos in (get-antinodes-positions
-                                            antenna
-                                            (car antennas)
-                                            <span class="org-builtin">:delta-x</span> delta-x
-                                            <span class="org-builtin">:delta-y</span> delta-y
-                                            <span class="org-builtin">:min-antinode-offset</span> min-antinode-offset
-                                            <span class="org-builtin">:max-antinode-offset</span> max-antinode-offset)
-                       when (and
-                             (not (out-of-bounds antinode-pos nrows ncols))
-                             (not (counted-p antinode-pos counted)))
-                       do <span class="org-comment">; (format t "~a~%" antinode-pos)</span>
-                       (incf counter)
-                       (set-counted antinode-pos counted)))
-        (incf counter (count-antinodes
-                       (cdr antennas)
-                       nrows
-                       ncols
-                       counted
-                       <span class="org-builtin">:delta-x</span> delta-x
-                       <span class="org-builtin">:delta-y</span> delta-y
-                       <span class="org-builtin">:min-antinode-offset</span> min-antinode-offset
-                       <span class="org-builtin">:max-antinode-offset</span> max-antinode-offset))))
+                do (<span class="org-keyword">loop</span> for antinode-pos in (get-antinodes-positions
+                                              antenna
+                                              (car antennas)
+                                              <span class="org-builtin">:delta-x</span> delta-x
+                                              <span class="org-builtin">:delta-y</span> delta-y
+                                              <span class="org-builtin">:min-antinode-offset</span> min-antinode-offset
+                                              <span class="org-builtin">:max-antinode-offset</span> max-antinode-offset)
+                         when (and
+                               (not (out-of-bounds antinode-pos nrows ncols))
+                               (not (counted-p antinode-pos counted)))
+                         do <span class="org-comment">; (format t "~a~%" antinode-pos)</span>
+                         (incf counter)
+                         (set-counted antinode-pos counted)))
+          (incf counter (count-antinodes
+                         (cdr antennas)
+                         nrows
+                         ncols
+                         counted
+                         <span class="org-builtin">:delta-x</span> delta-x
+                         <span class="org-builtin">:delta-y</span> delta-y
+                         <span class="org-builtin">:min-antinode-offset</span> min-antinode-offset
+                         <span class="org-builtin">:max-antinode-offset</span> max-antinode-offset))))
     counter))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">print-counted</span> (counted)
   (<span class="org-keyword">loop</span> for i from 0 below (array-dimension counted 1)
-        do (<span class="org-keyword">when</span> (&gt; i 0) (format t <span class="org-string">"~%"</span>))
-        (<span class="org-keyword">loop</span> for j from 0 below (array-dimension counted 0)
-              do (<span class="org-keyword">if</span> (aref counted i j)
-                     (format t <span class="org-string">"#"</span>)
-                   (format t <span class="org-string">"."</span>)))))
+          do (<span class="org-keyword">when</span> (&gt; i 0) (format t <span class="org-string">"~%"</span>))
+          (<span class="org-keyword">loop</span> for j from 0 below (array-dimension counted 0)
+                do (<span class="org-keyword">if</span> (aref counted i j)
+                       (format t <span class="org-string">"#"</span>)
+                     (format t <span class="org-string">"."</span>)))))
 
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-1</span> (file)
   (<span class="org-keyword">let*</span> ((lines (uiop:read-file-lines file))
-         (grid (parse-grid lines))
-         (nrows (grid-nrows grid))
-         (ncols (grid-ncols grid))
-         (counted (make-array (list nrows ncols) <span class="org-builtin">:initial-element</span> nil)))
+           (grid (parse-grid lines))
+           (nrows (grid-nrows grid))
+           (ncols (grid-ncols grid))
+           (counted (make-array (list nrows ncols) <span class="org-builtin">:initial-element</span> nil)))
     (<span class="org-keyword">loop</span> for antennas being the hash-value of (grid-antennas grid)
-          sum (count-antinodes antennas nrows ncols counted
-                               <span class="org-builtin">:delta-x</span> #'(<span class="org-keyword">lambda</span> (pos1 pos2) (abs (- (second pos1) (second pos2))))
-                               <span class="org-builtin">:delta-y</span> #'(<span class="org-keyword">lambda</span> (pos1 pos2) (abs (- (first pos1) (first pos2))))
-                               <span class="org-builtin">:min-antinode-offset</span> 1
-                               <span class="org-builtin">:max-antinode-offset</span> 1))))
+            sum (count-antinodes antennas nrows ncols counted
+                                 <span class="org-builtin">:delta-x</span> #'(<span class="org-keyword">lambda</span> (pos1 pos2) (abs (- (second pos1) (second pos2))))
+                                 <span class="org-builtin">:delta-y</span> #'(<span class="org-keyword">lambda</span> (pos1 pos2) (abs (- (first pos1) (first pos2))))
+                                 <span class="org-builtin">:min-antinode-offset</span> 1
+                                 <span class="org-builtin">:max-antinode-offset</span> 1))))
 
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-2</span> (file)
   (<span class="org-keyword">let*</span> ((lines (uiop:read-file-lines file))
-         (grid (parse-grid lines))
-         (nrows (grid-nrows grid))
-         (ncols (grid-ncols grid))
-         (counted (make-array (list nrows ncols) <span class="org-builtin">:initial-element</span> nil)))
+           (grid (parse-grid lines))
+           (nrows (grid-nrows grid))
+           (ncols (grid-ncols grid))
+           (counted (make-array (list nrows ncols) <span class="org-builtin">:initial-element</span> nil)))
     (<span class="org-keyword">loop</span> for antennas being the hash-value of (grid-antennas grid)
-          sum (count-antinodes antennas nrows ncols counted
-                               <span class="org-builtin">:delta-x</span> #'(<span class="org-keyword">lambda</span> (pos1 pos2) (abs (- (second pos1) (second pos2))))
-                               <span class="org-builtin">:delta-y</span> #'(<span class="org-keyword">lambda</span> (pos1 pos2) (abs (- (first pos1) (first pos2))))
-                               <span class="org-builtin">:min-antinode-offset</span> 0
-                               <span class="org-builtin">:max-antinode-offset</span> nrows))))
+            sum (count-antinodes antennas nrows ncols counted
+                                 <span class="org-builtin">:delta-x</span> #'(<span class="org-keyword">lambda</span> (pos1 pos2) (abs (- (second pos1) (second pos2))))
+                                 <span class="org-builtin">:delta-y</span> #'(<span class="org-keyword">lambda</span> (pos1 pos2) (abs (- (first pos1) (first pos2))))
+                                 <span class="org-builtin">:min-antinode-offset</span> 0
+                                 <span class="org-builtin">:max-antinode-offset</span> nrows))))
 </pre>
 </div>
 </div>
 </div>
-
 <div id="outline-container-day-9" class="outline-2">
 <h2 id="day-9">Day 9</h2>
 <div class="outline-text-2" id="text-day-9">
@@ -914,87 +904,87 @@ and making small edits would've solved the problem anyway.
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">parse-disk-map</span> (line)
   (<span class="org-keyword">let</span> ((id 0)
-        (parsed nil))
+          (parsed nil))
     (<span class="org-keyword">loop</span> for char across line
-          for num = (digit-char-p char)
-          for pos from 0 below (length line)
-          if (oddp pos)
-            do (<span class="org-keyword">loop</span> for j from 1 to num do (push 'dot parsed))
-          else
-            do (<span class="org-keyword">loop</span> for j from 1 to num do (push id parsed))
-               (incf id))
+            for num = (digit-char-p char)
+            for pos from 0 below (length line)
+            if (oddp pos)
+              do (<span class="org-keyword">loop</span> for j from 1 to num do (push 'dot parsed))
+            else
+              do (<span class="org-keyword">loop</span> for j from 1 to num do (push id parsed))
+                 (incf id))
     (reverse parsed)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">get-empty-space-positions</span> (disk-map)
   (<span class="org-keyword">loop</span> with in-empty-space = nil
-        with start-pos = 0
-        with end-pos = 0
-        for file in disk-map
-        for pos from 0 below (length disk-map)
-        when (and (not in-empty-space) (eq file 'dot))
-          do (setf in-empty-space t)
-             (setf start-pos pos)
-        when (and in-empty-space (not (eq file 'dot)))
-          do (setf in-empty-space nil)
-             (setf end-pos pos)
-          and collect (list start-pos end-pos)))
+          with start-pos = 0
+          with end-pos = 0
+          for file in disk-map
+          for pos from 0 below (length disk-map)
+          when (and (not in-empty-space) (eq file 'dot))
+            do (setf in-empty-space t)
+               (setf start-pos pos)
+          when (and in-empty-space (not (eq file 'dot)))
+            do (setf in-empty-space nil)
+               (setf end-pos pos)
+            and collect (list start-pos end-pos)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">get-file-positions</span> (disk-map)
   (<span class="org-keyword">loop</span> with file-positions = (make-hash-table)
-        with file-id = 0
-        with start-pos = 0
-        with end-pos = 0
-        with in-empty-space = nil
-        for file in disk-map
-        for pos from 0 below (length disk-map)
-        when (and (not (eq file 'dot)) in-empty-space (/= file file-id))
-          do (setf file-id file)
-             (setf start-pos pos)
-             (setf in-empty-space nil)
-        when (and (not (eq file 'dot)) in-empty-space (/= file file-id))
-          do (setf file-id file)
-             (setf start-pos pos)
-             (setf in-empty-space nil)
-        when (and (not (eq file 'dot)) (not in-empty-space) (/= file file-id))
-          do (setf end-pos pos)
-             (setf (gethash file-id file-positions) (list start-pos end-pos))
-             (setf file-id file)
-             (setf start-pos pos)
-        when (and (not in-empty-space) (eq file 'dot))
-          do (setf in-empty-space t)
-             (setf end-pos pos)
-             (setf (gethash file-id file-positions) (list start-pos end-pos))
-        finally (setf (gethash file-id file-positions) (list start-pos (1+ pos)))
-                (<span class="org-keyword">return</span> file-positions)))
+          with file-id = 0
+          with start-pos = 0
+          with end-pos = 0
+          with in-empty-space = nil
+          for file in disk-map
+          for pos from 0 below (length disk-map)
+          when (and (not (eq file 'dot)) in-empty-space (/= file file-id))
+            do (setf file-id file)
+               (setf start-pos pos)
+               (setf in-empty-space nil)
+          when (and (not (eq file 'dot)) in-empty-space (/= file file-id))
+            do (setf file-id file)
+               (setf start-pos pos)
+               (setf in-empty-space nil)
+          when (and (not (eq file 'dot)) (not in-empty-space) (/= file file-id))
+            do (setf end-pos pos)
+               (setf (gethash file-id file-positions) (list start-pos end-pos))
+               (setf file-id file)
+               (setf start-pos pos)
+          when (and (not in-empty-space) (eq file 'dot))
+            do (setf in-empty-space t)
+               (setf end-pos pos)
+               (setf (gethash file-id file-positions) (list start-pos end-pos))
+          finally (setf (gethash file-id file-positions) (list start-pos (1+ pos)))
+                  (<span class="org-keyword">return</span> file-positions)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">move-file-block</span> (disk-map last-empty-pos)
   (<span class="org-keyword">when</span> disk-map
     (<span class="org-keyword">let*</span> ((dot-pos (position 'dot (subseq disk-map last-empty-pos)))
-           (empty-pos (<span class="org-keyword">when</span> dot-pos (+ last-empty-pos dot-pos))))
-      (<span class="org-keyword">cond</span>
-        ((and empty-pos (= empty-pos (1- (length disk-map))))
-         (list (butlast disk-map) empty-pos nil))
-        (empty-pos
-         (list (append
-                (subseq disk-map 0 empty-pos)
-                (last disk-map)
-                (butlast (subseq disk-map (1+ empty-pos))))
-               empty-pos
-               nil))
-        (t (list disk-map empty-pos t))))))
+             (empty-pos (<span class="org-keyword">when</span> dot-pos (+ last-empty-pos dot-pos))))
+        (<span class="org-keyword">cond</span>
+          ((and empty-pos (= empty-pos (1- (length disk-map))))
+           (list (butlast disk-map) empty-pos nil))
+          (empty-pos
+           (list (append
+                  (subseq disk-map 0 empty-pos)
+                  (last disk-map)
+                  (butlast (subseq disk-map (1+ empty-pos))))
+                 empty-pos
+                 nil))
+          (t (list disk-map empty-pos t))))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">move-file-blocks</span> (disk-map)
   (<span class="org-keyword">loop</span> with last-disk-map = (copy-list disk-map)
-        with fixpoint = nil
-        with last-empty-pos = 0
-        while (not fixpoint)
-        do (<span class="org-keyword">destructuring-bind</span>
-               (new-disk-map empty-pos fixpoint-p)
-               (move-file-block last-disk-map last-empty-pos)
-             (setf last-empty-pos empty-pos)
-             (setf fixpoint fixpoint-p)
-             (setf last-disk-map new-disk-map))
-        finally (<span class="org-keyword">return</span> last-disk-map)))
+          with fixpoint = nil
+          with last-empty-pos = 0
+          while (not fixpoint)
+          do (<span class="org-keyword">destructuring-bind</span>
+                 (new-disk-map empty-pos fixpoint-p)
+                 (move-file-block last-disk-map last-empty-pos)
+               (setf last-empty-pos empty-pos)
+               (setf fixpoint fixpoint-p)
+               (setf last-disk-map new-disk-map))
+          finally (<span class="org-keyword">return</span> last-disk-map)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">empty-intervals-before</span> (position empty-intervals)
   (remove-if #'(<span class="org-keyword">lambda</span> (pos) (&gt;= (first pos) (second position))) empty-intervals))
@@ -1004,79 +994,78 @@ and making small edits would've solved the problem anyway.
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">move-exact-file-blocks</span> (file-intervals empty-intervals)
   (<span class="org-keyword">let</span> ((file-ids (sort (<span class="org-keyword">loop</span> for k being the hash-key of file-intervals collect k) #'&gt;))
-        (remaining-empty-intervals (copy-list empty-intervals))
-        (new-file-intervals (make-hash-table)))
+          (remaining-empty-intervals (copy-list empty-intervals))
+          (new-file-intervals (make-hash-table)))
     (<span class="org-keyword">loop</span> for id in file-ids
-          for file-interval = (gethash id file-intervals)
-          for fit = (find-fitting-position
-                     file-interval
-                     (empty-intervals-before file-interval remaining-empty-intervals))
-          if fit
-            do (<span class="org-keyword">let*</span> ((fitting-interval (nth fit remaining-empty-intervals))
-                      (filled-from (first fitting-interval))
-                      (filled-to (+ filled-from (- (second file-interval) (first file-interval))))
-                      (filled-interval (list filled-from filled-to))
-                      (leftover-interval (list filled-to (second fitting-interval))))
-                 (setf (gethash id new-file-intervals) filled-interval)
-                 (<span class="org-keyword">if</span> (equal leftover-interval fitting-interval)
-                     <span class="org-comment-delimiter">;; </span><span class="org-comment">if the fitting interval is filled, remove it from the empty intervals list</span>
-                     (setf remaining-empty-intervals (remove (nth fit remaining-empty-intervals) remaining-empty-intervals))
-                     <span class="org-comment-delimiter">;; </span><span class="org-comment">otherwise replace the empty interva with the leftover interval after moving the file block</span>
-                     (setf remaining-empty-intervals
-                           (replace remaining-empty-intervals (list leftover-interval)
-                                    <span class="org-builtin">:start1</span> fit 
-                                    <span class="org-builtin">:end1</span> (1+ fit)))))
-          else
-            do (setf (gethash id new-file-intervals) (gethash id file-intervals)))
+            for file-interval = (gethash id file-intervals)
+            for fit = (find-fitting-position
+                       file-interval
+                       (empty-intervals-before file-interval remaining-empty-intervals))
+            if fit
+              do (<span class="org-keyword">let*</span> ((fitting-interval (nth fit remaining-empty-intervals))
+                        (filled-from (first fitting-interval))
+                        (filled-to (+ filled-from (- (second file-interval) (first file-interval))))
+                        (filled-interval (list filled-from filled-to))
+                        (leftover-interval (list filled-to (second fitting-interval))))
+                   (setf (gethash id new-file-intervals) filled-interval)
+                   (<span class="org-keyword">if</span> (equal leftover-interval fitting-interval)
+                       <span class="org-comment-delimiter">;; </span><span class="org-comment">if the fitting interval is filled, remove it from the empty intervals list</span>
+                       (setf remaining-empty-intervals (remove (nth fit remaining-empty-intervals) remaining-empty-intervals))
+                       <span class="org-comment-delimiter">;; </span><span class="org-comment">otherwise replace the empty interva with the leftover interval after moving the file block</span>
+                       (setf remaining-empty-intervals
+                             (replace remaining-empty-intervals (list leftover-interval)
+                                      <span class="org-builtin">:start1</span> fit 
+                                      <span class="org-builtin">:end1</span> (1+ fit)))))
+            else
+              do (setf (gethash id new-file-intervals) (gethash id file-intervals)))
     new-file-intervals))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">hash-map-to-alist</span> (hash-map)
   (<span class="org-keyword">loop</span> for key being the hash-key of hash-map
-          using (hash-value value)
-        collect (cons key (list value))))
+            using (hash-value value)
+          collect (cons key (list value))))
 
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-1</span> (file)
   (<span class="org-keyword">let*</span> ((line (uiop:read-file-line file))
-         (disk-map (parse-disk-map line))
-         (moved-disk-map (move-file-blocks disk-map)))
+           (disk-map (parse-disk-map line))
+           (moved-disk-map (move-file-blocks disk-map)))
     (<span class="org-keyword">loop</span> for position from 0 below (length moved-disk-map)
-          for file-id in moved-disk-map
-          sum (* position file-id))))
+            for file-id in moved-disk-map
+            sum (* position file-id))))
 
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-2</span> (file)
   (<span class="org-keyword">let*</span> ((disk-map (parse-disk-map (uiop:read-file-line file)))
-         (empty-spaces (get-empty-space-positions disk-map))
-         (file-positions (get-file-positions disk-map))
-         (moved-file-positions (move-exact-file-blocks file-positions empty-spaces))
-         (sorted (sort (hash-map-to-alist moved-file-positions) #'&lt; <span class="org-builtin">:key</span> #'(<span class="org-keyword">lambda</span> (id-pos) (caadr id-pos)))))
+           (empty-spaces (get-empty-space-positions disk-map))
+           (file-positions (get-file-positions disk-map))
+           (moved-file-positions (move-exact-file-blocks file-positions empty-spaces))
+           (sorted (sort (hash-map-to-alist moved-file-positions) #'&lt; <span class="org-builtin">:key</span> #'(<span class="org-keyword">lambda</span> (id-pos) (caadr id-pos)))))
     (<span class="org-keyword">loop</span> for file in sorted
-          for start = (caadr file) <span class="org-comment">; I felt fancy, just to take the first element of the second element</span>
-          for end = (1- (cadadr file)) <span class="org-comment">; I felt even fancier</span>
-          for pos-sum = (* (/ (+ start end) 2) (+ (- end start) 1))
-          sum (* (car file) pos-sum))))
+            for start = (caadr file) <span class="org-comment">; I felt fancy, just to take the first element of the second element</span>
+            for end = (1- (cadadr file)) <span class="org-comment">; I felt even fancier</span>
+            for pos-sum = (* (/ (+ start end) 2) (+ (- end start) 1))
+            sum (* (car file) pos-sum))))
 </pre>
 </div>
 </div>
 </div>
-
-<div id="outline-container-org3260a71" class="outline-2">
-<h2 id="org3260a71">Day 10</h2>
-<div class="outline-text-2" id="text-org3260a71">
+<div id="outline-container-orgd1b4882" class="outline-2">
+<h2 id="orgd1b4882">Day 10</h2>
+<div class="outline-text-2" id="text-orgd1b4882">
 <div class="org-src-container">
 <pre class="src src-lisp">(load <span class="org-string">"../utils.lisp"</span>)
 
 (<span class="org-keyword">defclass</span> <span class="org-type">graph</span> ()
   ((nodes <span class="org-builtin">:documentation</span> <span class="org-doc">"List of node labels. The node id is the position of the node in the list."</span>
-          <span class="org-builtin">:accessor</span> nodes
-          <span class="org-builtin">:initarg</span> <span class="org-builtin">:nodes</span>)
+            <span class="org-builtin">:accessor</span> nodes
+            <span class="org-builtin">:initarg</span> <span class="org-builtin">:nodes</span>)
    (edges <span class="org-builtin">:documentation</span> <span class="org-doc">"Hash map of the edges. The keys are the node</span>
 <span class="org-doc">   ids and the edges are pairs (q c) where q is the id of a node and c</span>
 <span class="org-doc">   is the cost of the edge"</span>
-          <span class="org-builtin">:accessor</span> edges
-          <span class="org-builtin">:initarg</span> <span class="org-builtin">:edges</span>
-          <span class="org-builtin">:initform</span> (make-hash-table))))
+            <span class="org-builtin">:accessor</span> edges
+            <span class="org-builtin">:initarg</span> <span class="org-builtin">:edges</span>
+            <span class="org-builtin">:initform</span> (make-hash-table))))
 
 (<span class="org-keyword">defmethod</span> <span class="org-function-name">neighbors</span> ((graph graph) node)
   (gethash node (edges graph)))
@@ -1086,20 +1075,20 @@ and making small edits would've solved the problem anyway.
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">dfs-search</span> (graph node visited <span class="org-type">&amp;optional</span> (feasible #'identity) (paths nil))
   (<span class="org-keyword">let</span> ((reachable
-          (mapcan
-           #'(<span class="org-keyword">lambda</span> (neighbor-cost)
-               (<span class="org-keyword">let</span> ((neighbor (first neighbor-cost)))
-                 (<span class="org-keyword">when</span> (and paths (funcall feasible neighbor-cost) (gethash neighbor visited))
-                   (incf (gethash neighbor paths))
-                   (dfs-search graph neighbor visited feasible paths))
-                 (<span class="org-keyword">when</span> (and (funcall feasible neighbor-cost) (not (gethash neighbor visited)))
-                   (setf (gethash neighbor visited) t)
-                   (<span class="org-keyword">cond</span>
-                     (paths
-                      (setf (gethash neighbor paths) (gethash node paths))
-                      (dfs-search graph neighbor visited feasible paths))
-                     (t (dfs-search graph neighbor visited feasible))))))
-           (neighbors graph node))))
+            (mapcan
+             #'(<span class="org-keyword">lambda</span> (neighbor-cost)
+                 (<span class="org-keyword">let</span> ((neighbor (first neighbor-cost)))
+                   (<span class="org-keyword">when</span> (and paths (funcall feasible neighbor-cost) (gethash neighbor visited))
+                     (incf (gethash neighbor paths))
+                     (dfs-search graph neighbor visited feasible paths))
+                   (<span class="org-keyword">when</span> (and (funcall feasible neighbor-cost) (not (gethash neighbor visited)))
+                     (setf (gethash neighbor visited) t)
+                     (<span class="org-keyword">cond</span>
+                       (paths
+                        (setf (gethash neighbor paths) (gethash node paths))
+                        (dfs-search graph neighbor visited feasible paths))
+                       (t (dfs-search graph neighbor visited feasible))))))
+             (neighbors graph node))))
     (values (cons node reachable) paths)))
 
 (<span class="org-keyword">defgeneric</span> <span class="org-function-name">reachable-from</span> (graph node <span class="org-type">&amp;optional</span> count-all-paths)
@@ -1107,26 +1096,26 @@ and making small edits would've solved the problem anyway.
 
 (<span class="org-keyword">defmethod</span> <span class="org-function-name">reachable-from</span> ((graph graph) node <span class="org-type">&amp;optional</span> (count-all-paths nil))
   (<span class="org-keyword">if</span> count-all-paths
-      (<span class="org-keyword">let</span> ((paths (make-hash-table)))
-        (setf (gethash node paths) 1)
+        (<span class="org-keyword">let</span> ((paths (make-hash-table)))
+          (setf (gethash node paths) 1)
+          (dfs-search graph
+                      node
+                      (make-hash-table)
+                      #'(<span class="org-keyword">lambda</span> (neighbor-cost) (eq 1 (second neighbor-cost)))
+                      paths))
         (dfs-search graph
                     node
                     (make-hash-table)
-                    #'(<span class="org-keyword">lambda</span> (neighbor-cost) (eq 1 (second neighbor-cost)))
-                    paths))
-      (dfs-search graph
-                  node
-                  (make-hash-table)
-                  #'(<span class="org-keyword">lambda</span> (neighbor-cost) (eq 1 (second neighbor-cost))))))
+                    #'(<span class="org-keyword">lambda</span> (neighbor-cost) (eq 1 (second neighbor-cost))))))
 
 (<span class="org-keyword">defmethod</span> <span class="org-function-name">nodes-with-label</span> ((graph graph) label)
   (<span class="org-keyword">loop</span> for node in (nodes graph)
-        for idx from 0 below (length (nodes graph))
-        when (eq node label) collect idx))
+          for idx from 0 below (length (nodes graph))
+          when (eq node label) collect idx))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">parse-lines</span> (lines)
   (<span class="org-keyword">loop</span> for line in lines
-        collect (<span class="org-keyword">loop</span> for char across line collect (digit-char-p char))))
+          collect (<span class="org-keyword">loop</span> for char across line collect (digit-char-p char))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">edge-cost</span> (lines row col direction)
   (<span class="org-keyword">cond</span>
@@ -1142,54 +1131,53 @@ and making small edits would've solved the problem anyway.
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">parse-graph</span> (lines)
   (<span class="org-keyword">let</span> ((graph (make-instance 'graph <span class="org-builtin">:nodes</span> nil))
-        (nrows (length lines))
-        (ncols (length (first lines))))
+          (nrows (length lines))
+          (ncols (length (first lines))))
     (<span class="org-keyword">loop</span> for row from 0 below nrows
-          do (<span class="org-keyword">loop</span> for col from 0 below ncols
-                   for current = (+ (* row ncols) col)
-                   for top = (+ (* (1- row) ncols) col)
-                   for left = (+ (* row ncols) (1- col))
-                   for right = (+ (* row ncols) (1+ col))
-                   for bottom = (+ (* (1+ row) ncols) col)
-                   do (setf (nodes graph) (append (nodes graph) (list (nth col (nth row lines))))) 
-                   when (&gt;= (1- row) 0)
-                     do (add-neighbor graph current top (edge-cost lines row col 'top))
-                   when (&lt; (1+ row) nrows)
-                     do (add-neighbor graph current bottom (edge-cost lines row col 'bottom))
-                   when (&gt;= (1- col) 0)
-                     do (add-neighbor graph current left (edge-cost lines row col 'left))
-                   when (&lt; (1+ col) ncols)
-                     do (add-neighbor graph current right (edge-cost lines row col 'right))))
+            do (<span class="org-keyword">loop</span> for col from 0 below ncols
+                     for current = (+ (* row ncols) col)
+                     for top = (+ (* (1- row) ncols) col)
+                     for left = (+ (* row ncols) (1- col))
+                     for right = (+ (* row ncols) (1+ col))
+                     for bottom = (+ (* (1+ row) ncols) col)
+                     do (setf (nodes graph) (append (nodes graph) (list (nth col (nth row lines))))) 
+                     when (&gt;= (1- row) 0)
+                       do (add-neighbor graph current top (edge-cost lines row col 'top))
+                     when (&lt; (1+ row) nrows)
+                       do (add-neighbor graph current bottom (edge-cost lines row col 'bottom))
+                     when (&gt;= (1- col) 0)
+                       do (add-neighbor graph current left (edge-cost lines row col 'left))
+                     when (&lt; (1+ col) ncols)
+                       do (add-neighbor graph current right (edge-cost lines row col 'right))))
     graph))
 
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-1</span> (file)
   (<span class="org-keyword">let*</span> ((lines (parse-lines (uiop:read-file-lines file)))
-         (graph (parse-graph lines)))
+           (graph (parse-graph lines)))
     (reduce #'+ (mapcar #'(<span class="org-keyword">lambda</span> (list) (count 9 list))
-                        (<span class="org-keyword">loop</span> for node in (nodes-with-label graph 0)
-                              collect (mapcar
-                                       #'(<span class="org-keyword">lambda</span> (node-idx) (nth node-idx (nodes graph)))
-                                       (reachable-from graph node)))))))
+                          (<span class="org-keyword">loop</span> for node in (nodes-with-label graph 0)
+                                collect (mapcar
+                                         #'(<span class="org-keyword">lambda</span> (node-idx) (nth node-idx (nodes graph)))
+                                         (reachable-from graph node)))))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-2</span> (file)
   (<span class="org-keyword">let*</span> ((lines (parse-lines (uiop:read-file-lines file)))
-         (graph (parse-graph lines)))
+           (graph (parse-graph lines)))
     (reduce #'+
-            (<span class="org-keyword">loop</span> for node in (nodes-with-label graph 0)
-                  nconc (<span class="org-keyword">multiple-value-bind</span>
-                              (reachable paths) (reachable-from graph node t)
-                          (<span class="org-keyword">loop</span> for node-idx in reachable
-                                when (eq 9 (nth node-idx (nodes graph)))
-                                  collect (gethash node-idx paths)))))))
+              (<span class="org-keyword">loop</span> for node in (nodes-with-label graph 0)
+                    nconc (<span class="org-keyword">multiple-value-bind</span>
+                                (reachable paths) (reachable-from graph node t)
+                            (<span class="org-keyword">loop</span> for node-idx in reachable
+                                  when (eq 9 (nth node-idx (nodes graph)))
+                                    collect (gethash node-idx paths)))))))
 </pre>
 </div>
 </div>
 </div>
-
-<div id="outline-container-org6a8a71d" class="outline-2">
-<h2 id="org6a8a71d">Day 11</h2>
-<div class="outline-text-2" id="text-org6a8a71d">
+<div id="outline-container-orgb7d178a" class="outline-2">
+<h2 id="orgb7d178a">Day 11</h2>
+<div class="outline-text-2" id="text-orgb7d178a">
 <div class="org-src-container">
 <pre class="src src-lisp">(load <span class="org-string">"../utils.lisp"</span>)
 
@@ -1198,18 +1186,18 @@ and making small edits would've solved the problem anyway.
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">apply-rule</span> (number)
   (<span class="org-keyword">let*</span> ((number-string (princ-to-string number))
-         (num-of-digits (length number-string)))
+           (num-of-digits (length number-string)))
    (<span class="org-keyword">cond</span>
     ((= number 0) (list 1))
     ((evenp num-of-digits)
      (list (parse-integer (subseq number-string 0 (/ num-of-digits 2)))
-           (parse-integer (subseq number-string (/ num-of-digits 2)))))
+             (parse-integer (subseq number-string (/ num-of-digits 2)))))
     (t (list (* 2024 number))))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">apply-rule-to-list-aux</span> (number-list times)
   (<span class="org-keyword">if</span> (= 0 times)
-      (length number-list)
-      (apply-rule-to-list (mapcan #'apply-rule number-list) (1- times))))
+        (length number-list)
+        (apply-rule-to-list (mapcan #'apply-rule number-list) (1- times))))
 
 (utils:apply-memoization 'apply-rule-to-list-aux)
 
@@ -1220,46 +1208,45 @@ and making small edits would've solved the problem anyway.
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-1</span> (file)
   (<span class="org-keyword">let*</span> ((line (uiop:read-file-line file))
-         (number-list (parse-numbers line)))
+           (number-list (parse-numbers line)))
     (apply-rule-to-list number-list 25)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-2</span> (file)
   (<span class="org-keyword">let*</span> ((line (uiop:read-file-line file))
-         (number-list (parse-numbers line)))
+           (number-list (parse-numbers line)))
     (apply-rule-to-list number-list 75)))
 </pre>
 </div>
 </div>
 </div>
-
-<div id="outline-container-org0c31b1c" class="outline-2">
-<h2 id="org0c31b1c">Day 12</h2>
-<div class="outline-text-2" id="text-org0c31b1c">
+<div id="outline-container-org66d93fb" class="outline-2">
+<h2 id="org66d93fb">Day 12</h2>
+<div class="outline-text-2" id="text-org66d93fb">
 <div class="org-src-container">
 <pre class="src src-lisp">(load <span class="org-string">"../utils.lisp"</span>)
 
 (<span class="org-keyword">defclass</span> <span class="org-type">edge</span> ()
   ((from <span class="org-builtin">:accessor</span> from
-         <span class="org-builtin">:initarg</span> <span class="org-builtin">:from</span>)
+           <span class="org-builtin">:initarg</span> <span class="org-builtin">:from</span>)
    (to <span class="org-builtin">:accessor</span> to
-       <span class="org-builtin">:initarg</span> <span class="org-builtin">:to</span>)
+         <span class="org-builtin">:initarg</span> <span class="org-builtin">:to</span>)
    (cost <span class="org-builtin">:accessor</span> cost
-         <span class="org-builtin">:initarg</span> <span class="org-builtin">:cost</span>
-         <span class="org-builtin">:initform</span> 0)
+           <span class="org-builtin">:initarg</span> <span class="org-builtin">:cost</span>
+           <span class="org-builtin">:initform</span> 0)
    (label <span class="org-builtin">:accessor</span> label
-          <span class="org-builtin">:initarg</span> <span class="org-builtin">:label</span>
-          <span class="org-builtin">:initform</span> nil)))
+            <span class="org-builtin">:initarg</span> <span class="org-builtin">:label</span>
+            <span class="org-builtin">:initform</span> nil)))
 
 (<span class="org-keyword">defclass</span> <span class="org-type">graph</span> ()
   ((nodes <span class="org-builtin">:documentation</span> <span class="org-doc">"List of node labels. The node id is the position of the node in the list."</span>
-          <span class="org-builtin">:accessor</span> nodes
-          <span class="org-builtin">:initarg</span> <span class="org-builtin">:nodes</span>)
+            <span class="org-builtin">:accessor</span> nodes
+            <span class="org-builtin">:initarg</span> <span class="org-builtin">:nodes</span>)
    (edges <span class="org-builtin">:documentation</span> <span class="org-doc">"Hash map of the edges. The keys are the node</span>
 <span class="org-doc">   ids and the edges are pairs (q c) where q is the id of a node and c</span>
 <span class="org-doc">   is the cost of the edge"</span>
-          <span class="org-builtin">:accessor</span> edges
-          <span class="org-builtin">:initarg</span> <span class="org-builtin">:edges</span>
-          <span class="org-builtin">:initform</span> (make-hash-table))))
+            <span class="org-builtin">:accessor</span> edges
+            <span class="org-builtin">:initarg</span> <span class="org-builtin">:edges</span>
+            <span class="org-builtin">:initform</span> (make-hash-table))))
 
 (<span class="org-keyword">defgeneric</span> <span class="org-function-name">neighbors</span> (graph node)
   (<span class="org-builtin">:documentation</span> <span class="org-doc">"Returns the neighbors of node in graph."</span>))
@@ -1279,45 +1266,45 @@ and making small edits would've solved the problem anyway.
 (<span class="org-keyword">defun</span> <span class="org-function-name">transform-point</span> (point)
   (<span class="org-keyword">destructuring-bind</span> (row col) point
     (list (list row col)
-          (list row (1+ col))
-          (list (1+ row) col)
-          (list (1+ row) (1+ col)))))
+            (list row (1+ col))
+            (list (1+ row) col)
+            (list (1+ row) (1+ col)))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">parse-graph</span> (lines)
   <span class="org-doc">"Parses a text matrix and builds a graph where two nodes are connected by an edge only if they have the same label."</span>
   (<span class="org-keyword">let</span> ((graph (make-instance 'graph <span class="org-builtin">:nodes</span> nil))
-        (nrows (length lines))
-        (ncols (length (first lines))))
+          (nrows (length lines))
+          (ncols (length (first lines))))
     (<span class="org-keyword">loop</span> for row from 0 below nrows
-          do (<span class="org-keyword">loop</span> for col from 0 below ncols
-                   for current = (+ (* row ncols) col)
-                   for top = (+ (* (1- row) ncols) col)
-                   for left = (+ (* row ncols) (1- col))
-                   for right = (+ (* row ncols) (1+ col))
-                   for bottom = (+ (* (1+ row) ncols) col)
-                   do (push (list (elt (elt lines row) col) (transform-point (list row col))) (nodes graph))
-                      <span class="org-comment-delimiter">;; </span><span class="org-comment">add an edge only if the labels are equal</span>
-                   when (and (&gt;= (1- row) 0 ) (equal (elt (elt lines row) col) (elt (elt lines (1- row)) col)))
-                     do (add-neighbor graph current top <span class="org-builtin">:label</span> 'top)
-                   when (and (&lt; (1+ row) nrows) (equal (elt (elt lines row) col) (elt (elt lines (1+ row)) col)))
-                     do (add-neighbor graph current bottom <span class="org-builtin">:label</span> 'bottom)
-                   when (and (&gt;= (1- col) 0) (equal (elt (elt lines row) col) (elt (elt lines row) (1- col))))
-                     do (add-neighbor graph current left <span class="org-builtin">:label</span> 'left)
-                   when (and (&lt; (1+ col) ncols) (equal (elt (elt lines row) col) (elt (elt lines row) (1+ col))))
-                     do (add-neighbor graph current right <span class="org-builtin">:label</span> 'right)))
+            do (<span class="org-keyword">loop</span> for col from 0 below ncols
+                     for current = (+ (* row ncols) col)
+                     for top = (+ (* (1- row) ncols) col)
+                     for left = (+ (* row ncols) (1- col))
+                     for right = (+ (* row ncols) (1+ col))
+                     for bottom = (+ (* (1+ row) ncols) col)
+                     do (push (list (elt (elt lines row) col) (transform-point (list row col))) (nodes graph))
+                        <span class="org-comment-delimiter">;; </span><span class="org-comment">add an edge only if the labels are equal</span>
+                     when (and (&gt;= (1- row) 0 ) (equal (elt (elt lines row) col) (elt (elt lines (1- row)) col)))
+                       do (add-neighbor graph current top <span class="org-builtin">:label</span> 'top)
+                     when (and (&lt; (1+ row) nrows) (equal (elt (elt lines row) col) (elt (elt lines (1+ row)) col)))
+                       do (add-neighbor graph current bottom <span class="org-builtin">:label</span> 'bottom)
+                     when (and (&gt;= (1- col) 0) (equal (elt (elt lines row) col) (elt (elt lines row) (1- col))))
+                       do (add-neighbor graph current left <span class="org-builtin">:label</span> 'left)
+                     when (and (&lt; (1+ col) ncols) (equal (elt (elt lines row) col) (elt (elt lines row) (1+ col))))
+                       do (add-neighbor graph current right <span class="org-builtin">:label</span> 'right)))
     (setf (nodes graph) (reverse (nodes graph)))
     graph))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">dfs-search</span> (graph node visited <span class="org-type">&amp;optional</span> (feasible #'identity))
   (setf (gethash node visited) t)
   (<span class="org-keyword">let</span> ((reachable
-          (mapcan
-           #'(<span class="org-keyword">lambda</span> (edge)
-               (<span class="org-keyword">let</span> ((neighbor (to edge)))
-                 (<span class="org-keyword">when</span> (and (funcall feasible neighbor) (not (gethash neighbor visited)))
-                   (setf (gethash neighbor visited) t)
-                   (dfs-search graph neighbor visited feasible))))
-           (neighbors graph node))))
+            (mapcan
+             #'(<span class="org-keyword">lambda</span> (edge)
+                 (<span class="org-keyword">let</span> ((neighbor (to edge)))
+                   (<span class="org-keyword">when</span> (and (funcall feasible neighbor) (not (gethash neighbor visited)))
+                     (setf (gethash neighbor visited) t)
+                     (dfs-search graph neighbor visited feasible))))
+             (neighbors graph node))))
     (values (cons node reachable))))
 
 (<span class="org-keyword">defgeneric</span> <span class="org-function-name">reachable-from</span> (graph node)
@@ -1329,37 +1316,37 @@ and making small edits would've solved the problem anyway.
 (<span class="org-keyword">defun</span> <span class="org-function-name">compute-price-perimeter</span> (graph node-cluster)
   (* (length node-cluster) <span class="org-comment">; area</span>
      (reduce #'+ <span class="org-comment">; perimeter, which is the sum of 4 - number of neighbors of node, over all nodes in the cluster</span>
-             (mapcar #'(<span class="org-keyword">lambda</span> (node-idx) (- 4 (length (neighbors graph node-idx)))) node-cluster))))
+               (mapcar #'(<span class="org-keyword">lambda</span> (node-idx) (- 4 (length (neighbors graph node-idx)))) node-cluster))))
 
 (<span class="org-keyword">defstruct</span> <span class="org-type">segment</span> start end mergeable)
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">get-node-segments</span> (graph node-id)
   (utils:let+ (((_ points) (elt (nodes graph) node-id))
-               (segments nil)
-               (neighbors (neighbors graph node-id))
-               ((top-left top-right bot-left bot-right) points)
-               (label-equal #'(<span class="org-keyword">lambda</span> (dir edge) (equal dir (label edge))))
-               (mergeable (mapcar #'label neighbors)))
+                 (segments nil)
+                 (neighbors (neighbors graph node-id))
+                 ((top-left top-right bot-left bot-right) points)
+                 (label-equal #'(<span class="org-keyword">lambda</span> (dir edge) (equal dir (label edge))))
+                 (mergeable (mapcar #'label neighbors)))
     (<span class="org-keyword">unless</span> (find 'top neighbors <span class="org-builtin">:test</span> label-equal)
-      (push (make-segment <span class="org-builtin">:start</span> top-left
-                          <span class="org-builtin">:end</span> top-right
-                          <span class="org-builtin">:mergeable</span> (remove-if-not #'(<span class="org-keyword">lambda</span> (dir) (or (equal dir 'left) (equal dir 'right))) mergeable))
-            segments))
+        (push (make-segment <span class="org-builtin">:start</span> top-left
+                            <span class="org-builtin">:end</span> top-right
+                            <span class="org-builtin">:mergeable</span> (remove-if-not #'(<span class="org-keyword">lambda</span> (dir) (or (equal dir 'left) (equal dir 'right))) mergeable))
+              segments))
     (<span class="org-keyword">unless</span> (find 'bottom neighbors <span class="org-builtin">:test</span> label-equal)
-      (push (make-segment <span class="org-builtin">:start</span> bot-left
-                          <span class="org-builtin">:end</span> bot-right
-                          <span class="org-builtin">:mergeable</span> (remove-if-not #'(<span class="org-keyword">lambda</span> (dir) (or (equal dir 'left) (equal dir 'right))) mergeable))
-            segments))
+        (push (make-segment <span class="org-builtin">:start</span> bot-left
+                            <span class="org-builtin">:end</span> bot-right
+                            <span class="org-builtin">:mergeable</span> (remove-if-not #'(<span class="org-keyword">lambda</span> (dir) (or (equal dir 'left) (equal dir 'right))) mergeable))
+              segments))
     (<span class="org-keyword">unless</span> (find 'right neighbors <span class="org-builtin">:test</span> label-equal)
-      (push (make-segment <span class="org-builtin">:start</span> top-right
-                          <span class="org-builtin">:end</span> bot-right
-                          <span class="org-builtin">:mergeable</span> (remove-if-not #'(<span class="org-keyword">lambda</span> (dir) (or (equal dir 'top) (equal dir 'bottom))) mergeable))
-            segments))
+        (push (make-segment <span class="org-builtin">:start</span> top-right
+                            <span class="org-builtin">:end</span> bot-right
+                            <span class="org-builtin">:mergeable</span> (remove-if-not #'(<span class="org-keyword">lambda</span> (dir) (or (equal dir 'top) (equal dir 'bottom))) mergeable))
+              segments))
     (<span class="org-keyword">unless</span> (find 'left neighbors <span class="org-builtin">:test</span> label-equal)
-      (push (make-segment <span class="org-builtin">:start</span> top-left
-                          <span class="org-builtin">:end</span> bot-left
-                          <span class="org-builtin">:mergeable</span> (remove-if-not #'(<span class="org-keyword">lambda</span> (dir) (or (equal dir 'top) (equal dir 'bottom))) mergeable))
-            segments))
+        (push (make-segment <span class="org-builtin">:start</span> top-left
+                            <span class="org-builtin">:end</span> bot-left
+                            <span class="org-builtin">:mergeable</span> (remove-if-not #'(<span class="org-keyword">lambda</span> (dir) (or (equal dir 'top) (equal dir 'bottom))) mergeable))
+              segments))
     segments))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">merge-segments</span> (segment-a segment-b)
@@ -1367,93 +1354,92 @@ and making small edits would've solved the problem anyway.
     ((eq nil segment-a) segment-b)
     ((eq nil segment-b) segment-a)
     (t (<span class="org-keyword">let</span> ((a-start (segment-start segment-a))
-             (a-end (segment-end segment-a))
-             (b-start (segment-start segment-b))
-             (b-end (segment-end segment-b)))
-         (<span class="org-keyword">if</span> (not (equal a-end b-start))
-             (<span class="org-warning">error</span> <span class="org-string">"End of segment-a doesn't match with start of segment-b."</span>)
-             (make-segment <span class="org-builtin">:start</span> a-start
-                           <span class="org-builtin">:end</span> b-end
-                           <span class="org-builtin">:mergeable</span> (intersection (segment-mergeable segment-a) (segment-mergeable segment-b))))))))
+               (a-end (segment-end segment-a))
+               (b-start (segment-start segment-b))
+               (b-end (segment-end segment-b)))
+           (<span class="org-keyword">if</span> (not (equal a-end b-start))
+               (<span class="org-warning">error</span> <span class="org-string">"End of segment-a doesn't match with start of segment-b."</span>)
+               (make-segment <span class="org-builtin">:start</span> a-start
+                             <span class="org-builtin">:end</span> b-end
+                             <span class="org-builtin">:mergeable</span> (intersection (segment-mergeable segment-a) (segment-mergeable segment-b))))))))
 
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">segment-compatible-p</span> (new-segment segment)
   (<span class="org-keyword">if</span> segment
-      (and
-       <span class="org-comment-delimiter">;; </span><span class="org-comment">segment ends where new-segment starts</span>
-       (equal (segment-start new-segment) (segment-end segment))
-       (or
-        <span class="org-comment-delimiter">;; </span><span class="org-comment">new-segment is exactly on the x axis w.r.t. segment</span>
-        (and (equal (car (segment-start segment)) (car (segment-end segment)))
-             (equal (car (segment-end segment)) (car (segment-start new-segment)))
-             (equal (car (segment-start new-segment)) (car (segment-end new-segment)))
-             (find 'right (segment-mergeable segment)))
-        <span class="org-comment-delimiter">;; </span><span class="org-comment">new-segment is exactly on the y axis w.r.t. segment</span>
-        (and (equal (cdr (segment-start segment)) (cdr (segment-end segment)))
-             (equal (cdr (segment-end segment)) (cdr (segment-start new-segment)))
-             (equal (cdr (segment-start new-segment)) (cdr (segment-end new-segment)))
-             (find 'bottom (segment-mergeable segment)))))
-      nil))
+        (and
+         <span class="org-comment-delimiter">;; </span><span class="org-comment">segment ends where new-segment starts</span>
+         (equal (segment-start new-segment) (segment-end segment))
+         (or
+          <span class="org-comment-delimiter">;; </span><span class="org-comment">new-segment is exactly on the x axis w.r.t. segment</span>
+          (and (equal (car (segment-start segment)) (car (segment-end segment)))
+               (equal (car (segment-end segment)) (car (segment-start new-segment)))
+               (equal (car (segment-start new-segment)) (car (segment-end new-segment)))
+               (find 'right (segment-mergeable segment)))
+          <span class="org-comment-delimiter">;; </span><span class="org-comment">new-segment is exactly on the y axis w.r.t. segment</span>
+          (and (equal (cdr (segment-start segment)) (cdr (segment-end segment)))
+               (equal (cdr (segment-end segment)) (cdr (segment-start new-segment)))
+               (equal (cdr (segment-start new-segment)) (cdr (segment-end new-segment)))
+               (find 'bottom (segment-mergeable segment)))))
+        nil))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">merge-segment-in-list</span> (segment-list new-segment)
   (<span class="org-keyword">let*</span> ((segment-compatible-p #'(<span class="org-keyword">lambda</span> (segment) (segment-compatible-p new-segment segment)))
-         (to-merge-pos (position-if segment-compatible-p segment-list)))
+           (to-merge-pos (position-if segment-compatible-p segment-list)))
     (<span class="org-keyword">if</span> to-merge-pos
-        (values (append (subseq segment-list 0 to-merge-pos)
-                        (list (merge-segments (elt segment-list to-merge-pos) new-segment))
-                        (subseq segment-list (1+ to-merge-pos)))
-                t)
-        (values (cons new-segment segment-list) nil))))
+          (values (append (subseq segment-list 0 to-merge-pos)
+                          (list (merge-segments (elt segment-list to-merge-pos) new-segment))
+                          (subseq segment-list (1+ to-merge-pos)))
+                  t)
+          (values (cons new-segment segment-list) nil))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">print-node-cluster</span> (graph nrows ncols node-cluster)
   (<span class="org-keyword">let</span> ((grid (make-array (list nrows ncols) <span class="org-builtin">:initial-element</span> nil)))
     (<span class="org-keyword">dolist</span> (node node-cluster)
-      (utils:let+ (((char points) (elt (nodes graph) node))
-                   ((row col) (first points)))
-        (setf (aref grid row col) char)))
+        (utils:let+ (((char points) (elt (nodes graph) node))
+                     ((row col) (first points)))
+          (setf (aref grid row col) char)))
     (<span class="org-keyword">loop</span> for row from 0 below nrows
-          do (format t <span class="org-string">"~&amp;"</span>)
-             (<span class="org-keyword">loop</span> for col from 0 below ncols
-                   for cell = (aref grid row col)
-                   if cell
-                     do (format t <span class="org-string">"~a"</span> cell)
-                   else
-                     do (format t <span class="org-string">"."</span>)))
+            do (format t <span class="org-string">"~&amp;"</span>)
+               (<span class="org-keyword">loop</span> for col from 0 below ncols
+                     for cell = (aref grid row col)
+                     if cell
+                       do (format t <span class="org-string">"~a"</span> cell)
+                     else
+                       do (format t <span class="org-string">"."</span>)))
     (format t <span class="org-string">"~2%"</span>)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">compute-price-sides</span> (graph node-cluster)
   <span class="org-comment-delimiter">;; </span><span class="org-comment">(print-node-cluster graph (isqrt (length (nodes graph))) (isqrt (length (nodes graph))) node-cluster)</span>
   (<span class="org-keyword">let*</span> ((compare-segments #'(<span class="org-keyword">lambda</span> (segment-a segment-b)
-                               (<span class="org-keyword">if</span> (equal (segment-start segment-a) (segment-start segment-b))
-                                   (utils:compare-lists (segment-end segment-a) (segment-end segment-b))
-                                   (utils:compare-lists (segment-start segment-a) (segment-start segment-b)))))
-         (segments-not-merged (sort (mapcan #'(<span class="org-keyword">lambda</span> (node-id) (get-node-segments graph node-id)) node-cluster) compare-segments))
-         (segments (reduce #'merge-segment-in-list segments-not-merged <span class="org-builtin">:initial-value</span> nil)))
+                                 (<span class="org-keyword">if</span> (equal (segment-start segment-a) (segment-start segment-b))
+                                     (utils:compare-lists (segment-end segment-a) (segment-end segment-b))
+                                     (utils:compare-lists (segment-start segment-a) (segment-start segment-b)))))
+           (segments-not-merged (sort (mapcan #'(<span class="org-keyword">lambda</span> (node-id) (get-node-segments graph node-id)) node-cluster) compare-segments))
+           (segments (reduce #'merge-segment-in-list segments-not-merged <span class="org-builtin">:initial-value</span> nil)))
     (* (length node-cluster) <span class="org-comment">; area</span>
-       (length segments))))
+         (length segments))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve</span> (file problem-step)
   (<span class="org-keyword">let*</span> ((lines (uiop:read-file-lines file))
-         (graph (parse-graph lines))
-         (not-visited (<span class="org-keyword">loop</span> for node-idx from 0 below (length (nodes graph)) collect node-idx))
-         (compute-price
-           (<span class="org-keyword">if</span> (= problem-step 1)
-               #'compute-price-perimeter
-               #'compute-price-sides)))
+           (graph (parse-graph lines))
+           (not-visited (<span class="org-keyword">loop</span> for node-idx from 0 below (length (nodes graph)) collect node-idx))
+           (compute-price
+             (<span class="org-keyword">if</span> (= problem-step 1)
+                 #'compute-price-perimeter
+                 #'compute-price-sides)))
     (<span class="org-keyword">loop</span> while not-visited 
-          <span class="org-comment-delimiter">;; </span><span class="org-comment">find the nodes in the same cluster</span>
-          for newly-visited = (reachable-from graph (pop not-visited))
-          <span class="org-comment-delimiter">;; </span><span class="org-comment">remove those from the not-visited list</span>
-          do (mapcar #'(<span class="org-keyword">lambda</span> (node-idx) (setf not-visited (remove node-idx not-visited))) newly-visited)
-          sum (funcall compute-price graph newly-visited))))
+            <span class="org-comment-delimiter">;; </span><span class="org-comment">find the nodes in the same cluster</span>
+            for newly-visited = (reachable-from graph (pop not-visited))
+            <span class="org-comment-delimiter">;; </span><span class="org-comment">remove those from the not-visited list</span>
+            do (mapcar #'(<span class="org-keyword">lambda</span> (node-idx) (setf not-visited (remove node-idx not-visited))) newly-visited)
+            sum (funcall compute-price graph newly-visited))))
 </pre>
 </div>
 </div>
 </div>
-
-<div id="outline-container-orgfb41196" class="outline-2">
-<h2 id="orgfb41196">Day 13</h2>
-<div class="outline-text-2" id="text-orgfb41196">
+<div id="outline-container-orgf8fd1e4" class="outline-2">
+<h2 id="orgf8fd1e4">Day 13</h2>
+<div class="outline-text-2" id="text-orgf8fd1e4">
 <p>
 The problem consists of a function optimization under some numerical
 constraints. In particular, the <i>number of tokens</i> is defined by \(3A +
@@ -1482,7 +1468,7 @@ B = \frac{py \cdot ax - ay \cdot px}{ax \cdot by - ay \cdot bx}
 \end{cases}
 
 <p>
-<b>P.S.</b> The homemade regex engine from <a href="#org3283811">day 3</a> strikes again!
+<b>P.S.</b> The homemade regex engine from <a href="#orga428baa">day 3</a> strikes again!
 </p>
 
 <div class="org-src-container">
@@ -1490,42 +1476,41 @@ B = \frac{py \cdot ax - ay \cdot px}{ax \cdot by - ay \cdot bx}
 
 (<span class="org-keyword">defparameter</span> <span class="org-variable-name">*number-automaton*</span>
   (utils:make-automaton <span class="org-builtin">:init</span> 1 <span class="org-builtin">:end</span> 2
-                        <span class="org-builtin">:delta</span> '((1 - number -&gt; 2)
-                                 (2 - number -&gt; 2))))
+                          <span class="org-builtin">:delta</span> '((1 - number -&gt; 2)
+                                   (2 - number -&gt; 2))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">parse</span> (lines)
   (<span class="org-keyword">let</span> ((machines (utils:split lines <span class="org-builtin">:delimiter</span> <span class="org-string">""</span>)))
     (<span class="org-keyword">loop</span> for machine-data in machines
-          collect (<span class="org-keyword">loop</span> for string in machine-data
-                        nconc (mapcar #'parse-integer
-                                        (utils:apply-on-automaton-list
-                                         (list *number-automaton*)
-                                         string))))))
+            collect (<span class="org-keyword">loop</span> for string in machine-data
+                          nconc (mapcar #'parse-integer
+                                          (utils:apply-on-automaton-list
+                                           (list *number-automaton*)
+                                           string))))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-equations</span> (ax ay bx by px py)
   (<span class="org-keyword">let*</span> ((b (/ (- (* py ax) (* ay px))
-               (- (* ax by) (* ay bx))))
-         (a (/ (- px (* bx b))
-               ax)))
+                 (- (* ax by) (* ay bx))))
+           (a (/ (- px (* bx b))
+                 ax)))
     (values a b)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve</span> (file step)
   (<span class="org-keyword">let*</span> ((lines (uiop:read-file-lines file))
-         (machine-params (parse lines)))
+           (machine-params (parse lines)))
     (<span class="org-keyword">loop</span> with coins = 0
-          for (ax ay bx by px py) in machine-params
-          for (a b) = (multiple-value-list
-                       (solve-equations ax ay bx by
-                                        (<span class="org-keyword">if</span> (= step 2) (+ 10000000000000 px) px)
-                                        (<span class="org-keyword">if</span> (= step 2) (+ 10000000000000 py) py)))
-          when (and (integerp a) (integerp b))
-            do (incf coins (+ (* 3 a) b))
-          finally (<span class="org-keyword">return</span> coins))))
+            for (ax ay bx by px py) in machine-params
+            for (a b) = (multiple-value-list
+                         (solve-equations ax ay bx by
+                                          (<span class="org-keyword">if</span> (= step 2) (+ 10000000000000 px) px)
+                                          (<span class="org-keyword">if</span> (= step 2) (+ 10000000000000 py) py)))
+            when (and (integerp a) (integerp b))
+              do (incf coins (+ (* 3 a) b))
+            finally (<span class="org-keyword">return</span> coins))))
 </pre>
 </div>
 </div>
 </div>
-
 <div id="outline-container-utils" class="outline-2">
 <h2 id="utils">Utils</h2>
 <div class="outline-text-2" id="text-utils">
@@ -1548,15 +1533,15 @@ B = \frac{py \cdot ax - ay \cdot px}{ax \cdot by - ay \cdot bx}
 (<span class="org-keyword">defun</span> <span class="org-function-name">string-join</span> (fill-in strings)
   (<span class="org-keyword">let</span> ((joined (first strings)))
     (<span class="org-keyword">dolist</span> (s (rest strings))
-      (setf joined (concatenate 'string joined fill-in s)))
+        (setf joined (concatenate 'string joined fill-in s)))
     joined))
 
 <span class="org-comment-delimiter">;; </span><span class="org-comment">from https://lispcookbook.github.io/cl-cookbook/strings.html#breaking-strings-into-graphenes-sentences-lines-and-words</span>
 (<span class="org-keyword">defun</span> <span class="org-function-name">split-by-one-space</span> (string)
   (<span class="org-keyword">loop</span> for i = 0 then (1+ j)
-        as j = (position #\Space string <span class="org-builtin">:start</span> i)
-        collect (subseq string i j)
-        while j))
+          as j = (position #\Space string <span class="org-builtin">:start</span> i)
+          collect (subseq string i j)
+          while j))
 
 (<span class="org-keyword">defstruct</span> <span class="org-type">automaton</span> (init nil) (end nil) (delta '()))
 
@@ -1582,18 +1567,18 @@ B = \frac{py \cdot ax - ay \cdot px}{ax \cdot by - ay \cdot bx}
   <span class="org-doc">"Apply delta on a single char string."</span>
   (<span class="org-keyword">let</span> ((to-apply (rule-with-input (rules-with-state delta state) input)))
     (<span class="org-keyword">cond</span>
-      ((equal delta nil) nil)
-      (to-apply
-       (target-state to-apply))
-      ((and (position input <span class="org-string">"0123456789"</span> <span class="org-builtin">:test</span> #'string=) (rule-with-number (rules-with-state delta state)))
-       (target-state (rule-with-number (rules-with-state delta state))))
-      (t nil))))
+        ((equal delta nil) nil)
+        (to-apply
+         (target-state to-apply))
+        ((and (position input <span class="org-string">"0123456789"</span> <span class="org-builtin">:test</span> #'string=) (rule-with-number (rules-with-state delta state)))
+         (target-state (rule-with-number (rules-with-state delta state))))
+        (t nil))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">apply-delta-string-aux</span> (delta state input end-state position)
   <span class="org-doc">"Apply delta on a string"</span>
   (<span class="org-keyword">cond</span> ((equal state end-state) (list t position))
-        ((equal state nil) (list nil (<span class="org-keyword">if</span> (&gt; position 1) (1- position) position)))
-        (t (apply-delta-string-aux delta (apply-delta-char delta state (subseq input 0 1)) (subseq input 1) end-state (1+ position)))))
+          ((equal state nil) (list nil (<span class="org-keyword">if</span> (&gt; position 1) (1- position) position)))
+          (t (apply-delta-string-aux delta (apply-delta-char delta state (subseq input 0 1)) (subseq input 1) end-state (1+ position)))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">apply-delta-string</span> (delta state input end-state)
   (apply-delta-string-aux delta state (concatenate 'string input (princ-to-string (code-char 1))) end-state 0))
@@ -1602,57 +1587,57 @@ B = \frac{py \cdot ax - ay \cdot px}{ax \cdot by - ay \cdot bx}
   <span class="org-doc">"Run the automaton on the input string and return the list of matches"</span>
   (<span class="org-keyword">let</span> ((i 0) (matches '()))
     (<span class="org-keyword">loop</span> while (&lt; i (length input))
-          do
-             <span class="org-comment-delimiter">;; </span><span class="org-comment">(format t "~a~%" (subseq input i))</span>
-             (<span class="org-keyword">destructuring-bind</span> (result char-read)
-                 (apply-delta-string
-                  (automaton-delta automaton)
-                  (automaton-init automaton)
-                  (subseq input i)
-                  (automaton-end automaton))
-               <span class="org-comment-delimiter">;; </span><span class="org-comment">(format t "char read: ~a~%" char-read)</span>
-               (<span class="org-keyword">cond</span>
-                 (result
-                   (setq matches (append matches (list (subseq input i (+ i char-read)))))
-                   (incf i char-read))
-                 (t (incf i char-read)))))
-        matches))
+            do
+               <span class="org-comment-delimiter">;; </span><span class="org-comment">(format t "~a~%" (subseq input i))</span>
+               (<span class="org-keyword">destructuring-bind</span> (result char-read)
+                   (apply-delta-string
+                    (automaton-delta automaton)
+                    (automaton-init automaton)
+                    (subseq input i)
+                    (automaton-end automaton))
+                 <span class="org-comment-delimiter">;; </span><span class="org-comment">(format t "char read: ~a~%" char-read)</span>
+                 (<span class="org-keyword">cond</span>
+                   (result
+                     (setq matches (append matches (list (subseq input i (+ i char-read)))))
+                     (incf i char-read))
+                   (t (incf i char-read)))))
+          matches))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">check-multiple-automaton</span> (automaton-list input)
   (<span class="org-keyword">let</span> ((max 0))
     (<span class="org-keyword">loop</span> for automaton in automaton-list do
-      (<span class="org-keyword">let</span> ((possible-match
-              (apply-delta-string
-               (automaton-delta automaton)
-               (automaton-init automaton)
-               input
-               (automaton-end automaton))))
-        (<span class="org-keyword">cond</span>
-          ((first possible-match) (<span class="org-keyword">return-from</span> check-multiple-automaton possible-match))
-          (t (<span class="org-keyword">if</span> (&gt; (second possible-match) max) (setq max (second possible-match)))))
-        ))
+        (<span class="org-keyword">let</span> ((possible-match
+                (apply-delta-string
+                 (automaton-delta automaton)
+                 (automaton-init automaton)
+                 input
+                 (automaton-end automaton))))
+          (<span class="org-keyword">cond</span>
+            ((first possible-match) (<span class="org-keyword">return-from</span> check-multiple-automaton possible-match))
+            (t (<span class="org-keyword">if</span> (&gt; (second possible-match) max) (setq max (second possible-match)))))
+          ))
     (list nil max)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">apply-on-automaton-list</span> (automaton-list input)
   <span class="org-doc">"Run the automaton on the input string and return the list of matches"</span>
   (<span class="org-keyword">let</span> ((i 0) (matches '()))
     (<span class="org-keyword">loop</span> while (&lt; i (length input))
-          do
-             (<span class="org-keyword">destructuring-bind</span>
-                 (result char-read)
-                 (check-multiple-automaton automaton-list (subseq input i))
-               (<span class="org-keyword">cond</span>
-                 (result
-                  (setq matches (append matches (list (subseq input i (+ i char-read)))))
-                  (incf i char-read))
-                 (t (incf i char-read)))))
+            do
+               (<span class="org-keyword">destructuring-bind</span>
+                   (result char-read)
+                   (check-multiple-automaton automaton-list (subseq input i))
+                 (<span class="org-keyword">cond</span>
+                   (result
+                    (setq matches (append matches (list (subseq input i (+ i char-read)))))
+                    (incf i char-read))
+                   (t (incf i char-read)))))
     matches))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">compile-regex</span> (regex)
   (<span class="org-keyword">let</span> ((delta
-          (<span class="org-keyword">loop</span> for index from 0
-                for char across regex
-                collect (list index '- char '-&gt; (1+ index)))))
+            (<span class="org-keyword">loop</span> for index from 0
+                  for char across regex
+                  collect (list index '- char '-&gt; (1+ index)))))
     (make-automaton <span class="org-builtin">:init</span> 0 <span class="org-builtin">:end</span> (length regex) <span class="org-builtin">:delta</span> delta)))
 
 
@@ -1674,16 +1659,16 @@ B = \frac{py \cdot ax - ay \cdot px}{ax \cdot by - ay \cdot bx}
 <span class="org-doc">For normal let the syntax stays the same, while for a destructuring-bind the syntax is</span>
 <span class="org-doc">(let+ (((a b) '(1 2)))) which is like (destructuring-bind (a b) '(1 2))."</span>
   (<span class="org-keyword">let</span> ((stack nil)
-        (compiled nil))
+          (compiled nil))
     (<span class="org-keyword">loop</span> for binding in bindings
-          if (listp (car binding)) <span class="org-comment">; multiple symbols to bind</span>
-            do (push `(<span class="org-keyword">destructuring-bind</span> ,@binding) stack)
-          else <span class="org-comment">; normal let</span>
-            do (push `(<span class="org-keyword">let</span> ,(list binding)) stack))
+            if (listp (car binding)) <span class="org-comment">; multiple symbols to bind</span>
+              do (push `(<span class="org-keyword">destructuring-bind</span> ,@binding) stack)
+            else <span class="org-comment">; normal let</span>
+              do (push `(<span class="org-keyword">let</span> ,(list binding)) stack))
     <span class="org-comment-delimiter">;; </span><span class="org-comment">last binding gets the actual body</span>
     (setf compiled (append (pop stack) body))
     (<span class="org-keyword">loop</span> while stack <span class="org-comment">; build the nested expression by unwinding the stack</span>
-          do (setf compiled (append (pop stack) (list compiled))))
+            do (setf compiled (append (pop stack) (list compiled))))
     compiled))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">compare-lists</span> (list1 list2 <span class="org-type">&amp;optional</span> (pred #'&lt;))
@@ -1694,18 +1679,18 @@ B = \frac{py \cdot ax - ay \cdot px}{ax \cdot by - ay \cdot bx}
 (<span class="org-keyword">defun</span> <span class="org-function-name">string*</span> (string times)
   (<span class="org-keyword">let</span> ((product <span class="org-string">""</span>))
     (<span class="org-keyword">dotimes</span> (i times product)
-      (setf product (concatenate 'string product string)))))
+        (setf product (concatenate 'string product string)))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">memoize</span> (fn)
   (<span class="org-keyword">let</span> ((cache (make-hash-table <span class="org-builtin">:test</span> #'equal)))
-        #'(<span class="org-keyword">lambda</span> (<span class="org-type">&amp;rest</span> args)
-            (<span class="org-keyword">multiple-value-bind</span>
-                  (result in-cache)
-                (gethash args cache)
-                (<span class="org-keyword">if</span> in-cache
-                    result
-                    (setf (gethash args cache)
-                          (apply fn args)))))))
+          #'(<span class="org-keyword">lambda</span> (<span class="org-type">&amp;rest</span> args)
+              (<span class="org-keyword">multiple-value-bind</span>
+                    (result in-cache)
+                  (gethash args cache)
+                  (<span class="org-keyword">if</span> in-cache
+                      result
+                      (setf (gethash args cache)
+                            (apply fn args)))))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">apply-memoization</span> (fname)
   (setf (fdefinition fname) (memoize (symbol-function fname))))
