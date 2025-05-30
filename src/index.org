@@ -44,6 +44,7 @@ needed, you can send me an email at =zavan.gianluca[at]outlook.com=.
   the problems of AOC 2024
 - [[./maybe-monad.org][The Maybe monad in Scheme]]
 - [[https://github.com/gianzav/ogmready][An Object-Graph Mapper]]
+- [[https://github.com/gianzav/aco][Haskell implementation of Ant Colony Optimization]]
 
 * Things worth a look in the web
 :PROPERTIES:
