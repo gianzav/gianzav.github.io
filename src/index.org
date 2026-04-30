@@ -11,40 +11,40 @@
 :PROPERTIES:
 :CUSTOM_ID: about
 :END:
-I'm a Master's student in Artificial Intelligence & Cybersecurity at the
-University of Udine (Italy) and Klagenfurt (Austria). I'm a member of
-[[https://www.madrhacks.org/][MadrHacks]], the ethical hacking team of
-the University of Udine, one of the top teams in Italy on
-[[https://ctftime.org/team/114509/][CTFtime]].
 
-I plan to graduate in April 2025, with a thesis titled "Automated
-planning for production routines", written at Infineon Villach.
+I'm a PhD student in Symbolic Artificial Intelligence at the
+University of Klagenfurt. I'm a former member of [[https://www.madrhacks.org/][MadrHacks]], the
+ethical hacking team of the University of Udine.
 
-Even if changing constantly, my main interests are (not in order):
+I graduated with honors at the University of Udine and the University
+of Klagenfurt. My thesis, titled "Automated planning for production
+routines", was the result of a collaboration with Infineon AG.
+
+My main interests are:
 
 - Artificial Intelligence, both symbolic and sub-symbolic
 - Software security
-- Programming (currently learning Common Lisp)
+- Programming languages
 - Beatboxing
 - Videogames
 - Tabletop games
 - Reading all kinds of stuff
 - Music with lots of synths and robot voices (Daft Punk I'm looking at
   you)
-- Learning new stuff
-- Exiting (Neo)Vim
+- Exiting (Neo)Vim, but Emacs is also my friend now
 - Linux, I use Arch btw
 
-You can find me on [[https://github.com/gianzav][Github]] and
-[[https://it.linkedin.com/in/gianluca-zavan-0a3031293][Linkedin]]. If
-needed, you can send me an email at =zavan.gianluca[at]outlook.com=.
+You can find me on [[https://github.com/gianzav][Github]] and [[https://it.linkedin.com/in/gianluca-zavan-0a3031293][Linkedin]]. You can send me an
+email at =zavan.gianluca[at]outlook.com=.
 
 * Some projects of mine
 - [[./aoc2024.html][Advent of code 2024]]: my solutions in CL to some of
   the problems of AOC 2024
 - [[./maybe-monad.org][The Maybe monad in Scheme]]
-- [[https://github.com/gianzav/ogmready][An Object-Graph Mapper]]
+- [[https://github.com/gianzav/ogmready][An Object-Graph Mapper to work with Ontologies in Python]]
 - [[https://github.com/gianzav/aco][Haskell implementation of Ant Colony Optimization]]
+- [[https://github.com/gianzav/clingo-problems][Modelling of NP-hard problems in Answer Set Programming]]
+  
 
 * Things worth a look in the web
 :PROPERTIES:
