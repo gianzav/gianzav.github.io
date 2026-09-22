@@ -6,6 +6,10 @@ body {
     flex-direction: column;
 }
 
+#profile-picture {
+    height: 200px;
+}
+
 
 html {
     background-color: #fae9ca;
@@ -15,6 +19,12 @@ html {
 
 header {
     text-align: center;
+}
+
+#about {
+    flex-direction: row;
+    display: flex;
+    max-width: 100%;
 }
 
 .title {

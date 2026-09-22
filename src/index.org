@@ -12,6 +12,19 @@
 :CUSTOM_ID: about
 :END:
 
+#+BEGIN_EXPORT html
+<div style="margin: 20px; float: right; display: flex; flex-direction: column; max-width: 40%;">
+#+END_EXPORT
+
+#+ATTR_HTML: :id profile-picture
+[[file:img/me-with-a-cup.png]]
+
+This is me showing you a cup from 3000 BC.
+
+#+BEGIN_EXPORT html
+</div>
+#+END_EXPORT
+
 I'm a PhD student in Symbolic Artificial Intelligence at the
 University of Klagenfurt. I'm a former member of [[https://www.madrhacks.org/][MadrHacks]], the
 ethical hacking team of the University of Udine.

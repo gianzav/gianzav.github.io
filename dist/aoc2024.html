@@ -3,12 +3,13 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
+<!-- 2026-09-22 Tue 19:22 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Advent of Code 2024 in Common Lisp</title>
 <meta name="generator" content="Org Mode" />
-<link rel="stylesheet"
-                  href="./style.css" type="text/css"/>
+<link rel="stylesheet" href="
+style.css" type="text/css"/>
 <script>
   window.MathJax = {
     tex: {
@@ -67,10 +68,10 @@
 <li><a href="#day-7">Day 7</a></li>
 <li><a href="#day-8">Day 8</a></li>
 <li><a href="#day-9">Day 9</a></li>
-<li><a href="#orgd1b4882">Day 10</a></li>
-<li><a href="#orgb7d178a">Day 11</a></li>
-<li><a href="#org66d93fb">Day 12</a></li>
-<li><a href="#orgf8fd1e4">Day 13</a></li>
+<li><a href="#org9456e22">Day 10</a></li>
+<li><a href="#orgdca3297">Day 11</a></li>
+<li><a href="#orgcca224a">Day 12</a></li>
+<li><a href="#org34d30c3">Day 13</a></li>
 <li><a href="#utils">Utils</a></li>
 </ul>
 </div>
@@ -88,8 +89,8 @@
 (<span class="org-keyword">defun</span> <span class="org-function-name">read-and-parse-input</span> (input-file)
   (parse-input (uiop:read-file-lines input-file)))
 
-<span class="org-comment-delimiter">;; </span><span class="org-comment">from https://lispcookbook.github.io/cl-cookbook/strings.html#breaking-strings-into-graphenes-sentences-lines-and-words</span>
-(<span class="org-keyword">defun</span> <span class="org-function-name">split-by-one-space</span> (string)
+<span class="org-comment-delimiter">;; </span><span class="org-comment">from https://lispcookbook.github.io/cl-cookbook/strings.html#breaking-strings-into-graphenes-sentences-lines-and-words
+</span>(<span class="org-keyword">defun</span> <span class="org-function-name">split-by-one-space</span> (string)
   (<span class="org-keyword">loop</span> for i = 0 then (1+ j)
           as j = (position #\Space string <span class="org-builtin">:start</span> i)
           collect (subseq string i j)
@@ -120,7 +121,7 @@
 <h2 id="day-2">Day 2</h2>
 <div class="outline-text-2" id="text-day-2">
 <p>
-In <code>utils.lisp</code> I'll move general functions defined over the AOC and
+In <code>utils.lisp</code> I&rsquo;ll move general functions defined over the AOC and
 that could be useful for the next days.
 </p>
 
@@ -152,16 +153,16 @@ that could be useful for the next days.
     (and (&gt;= diff min-distance) (&lt;= diff max-distance) )))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">distance-ok-p</span> (sequence <span class="org-type">&amp;optional</span> (min-distance 1) (max-distance 3))
-  (check-pairs sequence #'(<span class="org-keyword">lambda</span> (x y) (pair-distance-ok-p x y min-distance max-distance))))
+  (<span class="org-warning">check-pairs</span> sequence #'(<span class="org-keyword">lambda</span> (x y) (pair-distance-ok-p x y min-distance max-distance))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">check-safety</span> (sequence)
-  <span class="org-doc">"A sequence of numbers is safe if it is monotonically decreasing or</span>
-<span class="org-doc">  increasing, and any adjacent numbers differ by at least one and at</span>
-<span class="org-doc">  most three."</span>
+  <span class="org-doc">"A sequence of numbers is safe if it is monotonically decreasing or
+  increasing, and any adjacent numbers differ by at least one and at
+  most three."</span>
   (<span class="org-keyword">cond</span> ((&lt; (first sequence) (second sequence))
-           (check-pairs sequence #'increasing-and-distance-p))
+           (<span class="org-warning">check-pairs</span> sequence #'increasing-and-distance-p))
           ((&gt; (first sequence) (second sequence))
-           (check-pairs sequence #'decreasing-and-distance-p))
+           (<span class="org-warning">check-pairs</span> sequence #'decreasing-and-distance-p))
           (t nil)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">increasing-and-distance-p</span> (x y)
@@ -180,7 +181,7 @@ that could be useful for the next days.
     (format t <span class="org-string">"~a~%"</span> (solve-second sequences))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-first</span> (sequences)
-  (reduce #'+ (mapcar #'(<span class="org-keyword">lambda</span> (seq) (<span class="org-keyword">if</span> (check-safety seq) 1 0)) sequences)))
+  (reduce #'+ (mapcar #'(<span class="org-keyword">lambda</span> (seq) (<span class="org-keyword">if</span> (<span class="org-warning">check-safety</span> seq) 1 0)) sequences)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-second</span> (sequences)
   (reduce #'+ (mapcar #'(<span class="org-keyword">lambda</span> (seq) (<span class="org-keyword">if</span> (some #'check-safety (sequences-without-one-element seq)) 1 0)) sequences)))
@@ -196,7 +197,7 @@ that could be useful for the next days.
 <h3 id="easy-sane-version">Easy, sane version</h3>
 <div class="outline-text-3" id="text-easy-sane-version">
 <p>
-<a id="orga428baa"></a>
+<a id="org61c6395"></a>
 </p>
 
 <p>
@@ -255,7 +256,7 @@ Then do the parsing and calculations in CL:
 <h3 id="the-hard-way">The hard way</h3>
 <div class="outline-text-3" id="text-the-hard-way">
 <p>
-So, actually I didn't want to install a regex library, so I implemented
+So, actually I didn&rsquo;t want to install a regex library, so I implemented
 my wonky regex engine by hard-coding the needed DFAs. The following is
 an example of how an automaton is defined:
 </p>
@@ -346,7 +347,7 @@ chars. The actual matching on automata is handled in the following way
             do
             (<span class="org-keyword">destructuring-bind</span>
              (result char-read)
-             (check-multiple-automaton automaton-list (subseq input i))
+             (<span class="org-warning">check-multiple-automaton</span> automaton-list (subseq input i))
              (<span class="org-keyword">cond</span>
               (result
                (setq matches (append matches (list (subseq input i (+ i char-read)))))
@@ -357,7 +358,7 @@ chars. The actual matching on automata is handled in the following way
 </div>
 
 <p>
-With <code>apply-on-automaton-list</code> it's possible to use multiple automata
+With <code>apply-on-automaton-list</code> it&rsquo;s possible to use multiple automata
 for the matching. The solution is completed as following:
 </p>
 
@@ -495,14 +496,14 @@ exercise <i>for future me, maybe</i>.
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-1</span> (file)
   (<span class="org-keyword">let</span> ((lines (uiop:read-file-lines file)))
     (+
-     <span class="org-comment-delimiter">;; </span><span class="org-comment">horizontal</span>
-     (count-horizontal lines <span class="org-string">"XMAS"</span>)
-     <span class="org-comment-delimiter">;; </span><span class="org-comment">main diagonals</span>
-     (count-main-diagonals lines <span class="org-string">"XMAS"</span>)
-     <span class="org-comment-delimiter">;; </span><span class="org-comment">anti-diagonals</span>
-     (count-anti-diagonals lines <span class="org-string">"XMAS"</span>)
-     <span class="org-comment-delimiter">;; </span><span class="org-comment">vertical</span>
-     (count-vertical lines <span class="org-string">"XMAS"</span>)
+     <span class="org-comment-delimiter">;; </span><span class="org-comment">horizontal
+</span>     (count-horizontal lines <span class="org-string">"XMAS"</span>)
+     <span class="org-comment-delimiter">;; </span><span class="org-comment">main diagonals
+</span>     (count-main-diagonals lines <span class="org-string">"XMAS"</span>)
+     <span class="org-comment-delimiter">;; </span><span class="org-comment">anti-diagonals
+</span>     (count-anti-diagonals lines <span class="org-string">"XMAS"</span>)
+     <span class="org-comment-delimiter">;; </span><span class="org-comment">vertical
+</span>     (count-vertical lines <span class="org-string">"XMAS"</span>)
      )))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-2</span> (file)
@@ -512,8 +513,8 @@ exercise <i>for future me, maybe</i>.
             (<span class="org-keyword">let*</span> ((square-lines (uiop:split-string square <span class="org-builtin">:separator</span> '(#\Newline)))
                    (partial (+ (count-main-diagonals square-lines <span class="org-string">"MAS"</span>)
                                (count-anti-diagonals square-lines <span class="org-string">"MAS"</span>))))
-              (<span class="org-keyword">if</span> (= 2 partial) (incf total)))) <span class="org-comment-delimiter">;; </span><span class="org-comment">count one only if both diagonals match</span>
-    total))
+              (<span class="org-keyword">if</span> (= 2 partial) (incf total)))) <span class="org-comment-delimiter">;; </span><span class="org-comment">count one only if both diagonals match
+</span>    total))
 </pre>
 </div>
 </div>
@@ -565,13 +566,13 @@ solution I could think of.
                         (<span class="org-keyword">let</span> ((rules (parse-ordering-rules raw-rules))
                               (sequences (mapcar #'parse-sequence raw-sequences)))
                           (reduce #'+ (mapcar #'middle-element
-                                              (remove-if-not #'(<span class="org-keyword">lambda</span> (sequence) (check-ordering rules sequence)) sequences))))))
+                                              (remove-if-not #'(<span class="org-keyword">lambda</span> (sequence) (<span class="org-warning">check-ordering</span> rules sequence)) sequences))))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve-2</span> (file)
   (<span class="org-keyword">destructuring-bind</span> (raw-rules raw-sequences) (preprocess-file file)
                         (<span class="org-keyword">let*</span> ((rules (parse-ordering-rules raw-rules))
                                (sequences (mapcar #'parse-sequence raw-sequences))
-                               (not-ordered (remove-if #'(<span class="org-keyword">lambda</span> (sequence) (check-ordering rules sequence)) sequences)))
+                               (not-ordered (remove-if #'(<span class="org-keyword">lambda</span> (sequence) (<span class="org-warning">check-ordering</span> rules sequence)) sequences)))
                           (reduce #'+ (mapcar
                                        #'middle-element
                                        (mapcar
@@ -594,23 +595,23 @@ But hey! Still learning the language, so everything is accepted right?
 <div class="org-src-container">
 <pre class="src src-lisp">(<span class="org-keyword">defparameter</span> <span class="org-variable-name">*test*</span>
                 (uiop:split-string
-                 <span class="org-string">"....#.....</span>
-<span class="org-string">.........#</span>
-<span class="org-string">..........</span>
-<span class="org-string">..#.......</span>
-<span class="org-string">.......#..</span>
-<span class="org-string">..........</span>
-<span class="org-string">.#..^.....</span>
-<span class="org-string">........#.</span>
-<span class="org-string">#.........</span>
-<span class="org-string">......#..."</span> <span class="org-builtin">:separator</span> '(#\Newline)))
+                 <span class="org-string">"....#.....
+.........#
+..........
+..#.......
+.......#..
+..........
+.#..^.....
+........#.
+#.........
+......#..."</span> <span class="org-builtin">:separator</span> '(#\Newline)))
 
 
-<span class="org-comment-delimiter">;; </span><span class="org-comment">position can be 'up 'down 'left 'right</span>
-(<span class="org-keyword">defstruct</span> <span class="org-type">game-map</span> (grid nil) (guard-position nil) (guard-facing nil))
+<span class="org-comment-delimiter">;; </span><span class="org-comment">position can be 'up 'down 'left 'right
+</span>(<span class="org-keyword">defstruct</span> <span class="org-type">game-map</span> (grid nil) (guard-position nil) (guard-facing nil))
 
-(<span class="org-keyword">defun</span> <span class="org-function-name">parse-grid</span> (rows) <span class="org-comment-delimiter">;; </span><span class="org-comment">assumed to be list of strings</span>
-  (<span class="org-keyword">let*</span> ((nrows (length rows))
+(<span class="org-keyword">defun</span> <span class="org-function-name">parse-grid</span> (rows) <span class="org-comment-delimiter">;; </span><span class="org-comment">assumed to be list of strings
+</span>  (<span class="org-keyword">let*</span> ((nrows (length rows))
            (ncols (length (first rows)))
            (grid (make-array (list nrows ncols)))
            (guard-position '(0 0))
@@ -772,7 +773,7 @@ the new <code>concatenate</code> operator is also considered. Abstraction FTW!
 <p>
 I tried to make <code>get-antinodes-positions</code> and <code>count-antinodes</code> as most
 general as possible even if I know that just copy-pasting the functions
-and making small edits would've solved the problem anyway.
+and making small edits would&rsquo;ve solved the problem anyway.
 </p>
 
 <div class="org-src-container">
@@ -843,8 +844,8 @@ and making small edits would've solved the problem anyway.
                          when (and
                                (not (out-of-bounds antinode-pos nrows ncols))
                                (not (counted-p antinode-pos counted)))
-                         do <span class="org-comment">; (format t "~a~%" antinode-pos)</span>
-                         (incf counter)
+                         do <span class="org-comment">; (format t "~a~%" antinode-pos)
+</span>                         (incf counter)
                          (set-counted antinode-pos counted)))
           (incf counter (count-antinodes
                          (cdr antennas)
@@ -1009,10 +1010,10 @@ and making small edits would've solved the problem anyway.
                         (leftover-interval (list filled-to (second fitting-interval))))
                    (setf (gethash id new-file-intervals) filled-interval)
                    (<span class="org-keyword">if</span> (equal leftover-interval fitting-interval)
-                       <span class="org-comment-delimiter">;; </span><span class="org-comment">if the fitting interval is filled, remove it from the empty intervals list</span>
-                       (setf remaining-empty-intervals (remove (nth fit remaining-empty-intervals) remaining-empty-intervals))
-                       <span class="org-comment-delimiter">;; </span><span class="org-comment">otherwise replace the empty interva with the leftover interval after moving the file block</span>
-                       (setf remaining-empty-intervals
+                       <span class="org-comment-delimiter">;; </span><span class="org-comment">if the fitting interval is filled, remove it from the empty intervals list
+</span>                       (setf remaining-empty-intervals (remove (nth fit remaining-empty-intervals) remaining-empty-intervals))
+                       <span class="org-comment-delimiter">;; </span><span class="org-comment">otherwise replace the empty interva with the leftover interval after moving the file block
+</span>                       (setf remaining-empty-intervals
                              (replace remaining-empty-intervals (list leftover-interval)
                                       <span class="org-builtin">:start1</span> fit 
                                       <span class="org-builtin">:end1</span> (1+ fit)))))
@@ -1042,17 +1043,17 @@ and making small edits would've solved the problem anyway.
            (moved-file-positions (move-exact-file-blocks file-positions empty-spaces))
            (sorted (sort (hash-map-to-alist moved-file-positions) #'&lt; <span class="org-builtin">:key</span> #'(<span class="org-keyword">lambda</span> (id-pos) (caadr id-pos)))))
     (<span class="org-keyword">loop</span> for file in sorted
-            for start = (caadr file) <span class="org-comment">; I felt fancy, just to take the first element of the second element</span>
-            for end = (1- (cadadr file)) <span class="org-comment">; I felt even fancier</span>
-            for pos-sum = (* (/ (+ start end) 2) (+ (- end start) 1))
+            for start = (caadr file) <span class="org-comment">; I felt fancy, just to take the first element of the second element
+</span>            for end = (1- (cadadr file)) <span class="org-comment">; I felt even fancier
+</span>            for pos-sum = (* (/ (+ start end) 2) (+ (- end start) 1))
             sum (* (car file) pos-sum))))
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-orgd1b4882" class="outline-2">
-<h2 id="orgd1b4882">Day 10</h2>
-<div class="outline-text-2" id="text-orgd1b4882">
+<div id="outline-container-org9456e22" class="outline-2">
+<h2 id="org9456e22">Day 10</h2>
+<div class="outline-text-2" id="text-org9456e22">
 <div class="org-src-container">
 <pre class="src src-lisp">(load <span class="org-string">"../utils.lisp"</span>)
 
@@ -1060,9 +1061,9 @@ and making small edits would've solved the problem anyway.
   ((nodes <span class="org-builtin">:documentation</span> <span class="org-doc">"List of node labels. The node id is the position of the node in the list."</span>
             <span class="org-builtin">:accessor</span> nodes
             <span class="org-builtin">:initarg</span> <span class="org-builtin">:nodes</span>)
-   (edges <span class="org-builtin">:documentation</span> <span class="org-doc">"Hash map of the edges. The keys are the node</span>
-<span class="org-doc">   ids and the edges are pairs (q c) where q is the id of a node and c</span>
-<span class="org-doc">   is the cost of the edge"</span>
+   (edges <span class="org-builtin">:documentation</span> <span class="org-doc">"Hash map of the edges. The keys are the node
+   ids and the edges are pairs (q c) where q is the id of a node and c
+   is the cost of the edge"</span>
             <span class="org-builtin">:accessor</span> edges
             <span class="org-builtin">:initarg</span> <span class="org-builtin">:edges</span>
             <span class="org-builtin">:initform</span> (make-hash-table))))
@@ -1175,9 +1176,9 @@ and making small edits would've solved the problem anyway.
 </div>
 </div>
 </div>
-<div id="outline-container-orgb7d178a" class="outline-2">
-<h2 id="orgb7d178a">Day 11</h2>
-<div class="outline-text-2" id="text-orgb7d178a">
+<div id="outline-container-orgdca3297" class="outline-2">
+<h2 id="orgdca3297">Day 11</h2>
+<div class="outline-text-2" id="text-orgdca3297">
 <div class="org-src-container">
 <pre class="src src-lisp">(load <span class="org-string">"../utils.lisp"</span>)
 
@@ -1219,9 +1220,9 @@ and making small edits would've solved the problem anyway.
 </div>
 </div>
 </div>
-<div id="outline-container-org66d93fb" class="outline-2">
-<h2 id="org66d93fb">Day 12</h2>
-<div class="outline-text-2" id="text-org66d93fb">
+<div id="outline-container-orgcca224a" class="outline-2">
+<h2 id="orgcca224a">Day 12</h2>
+<div class="outline-text-2" id="text-orgcca224a">
 <div class="org-src-container">
 <pre class="src src-lisp">(load <span class="org-string">"../utils.lisp"</span>)
 
@@ -1241,9 +1242,9 @@ and making small edits would've solved the problem anyway.
   ((nodes <span class="org-builtin">:documentation</span> <span class="org-doc">"List of node labels. The node id is the position of the node in the list."</span>
             <span class="org-builtin">:accessor</span> nodes
             <span class="org-builtin">:initarg</span> <span class="org-builtin">:nodes</span>)
-   (edges <span class="org-builtin">:documentation</span> <span class="org-doc">"Hash map of the edges. The keys are the node</span>
-<span class="org-doc">   ids and the edges are pairs (q c) where q is the id of a node and c</span>
-<span class="org-doc">   is the cost of the edge"</span>
+   (edges <span class="org-builtin">:documentation</span> <span class="org-doc">"Hash map of the edges. The keys are the node
+   ids and the edges are pairs (q c) where q is the id of a node and c
+   is the cost of the edge"</span>
             <span class="org-builtin">:accessor</span> edges
             <span class="org-builtin">:initarg</span> <span class="org-builtin">:edges</span>
             <span class="org-builtin">:initform</span> (make-hash-table))))
@@ -1283,8 +1284,8 @@ and making small edits would've solved the problem anyway.
                      for right = (+ (* row ncols) (1+ col))
                      for bottom = (+ (* (1+ row) ncols) col)
                      do (push (list (elt (elt lines row) col) (transform-point (list row col))) (nodes graph))
-                        <span class="org-comment-delimiter">;; </span><span class="org-comment">add an edge only if the labels are equal</span>
-                     when (and (&gt;= (1- row) 0 ) (equal (elt (elt lines row) col) (elt (elt lines (1- row)) col)))
+                        <span class="org-comment-delimiter">;; </span><span class="org-comment">add an edge only if the labels are equal
+</span>                     when (and (&gt;= (1- row) 0 ) (equal (elt (elt lines row) col) (elt (elt lines (1- row)) col)))
                        do (add-neighbor graph current top <span class="org-builtin">:label</span> 'top)
                      when (and (&lt; (1+ row) nrows) (equal (elt (elt lines row) col) (elt (elt lines (1+ row)) col)))
                        do (add-neighbor graph current bottom <span class="org-builtin">:label</span> 'bottom)
@@ -1314,9 +1315,9 @@ and making small edits would've solved the problem anyway.
   (dfs-search graph node (make-hash-table)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">compute-price-perimeter</span> (graph node-cluster)
-  (* (length node-cluster) <span class="org-comment">; area</span>
-     (reduce #'+ <span class="org-comment">; perimeter, which is the sum of 4 - number of neighbors of node, over all nodes in the cluster</span>
-               (mapcar #'(<span class="org-keyword">lambda</span> (node-idx) (- 4 (length (neighbors graph node-idx)))) node-cluster))))
+  (* (length node-cluster) <span class="org-comment">; area
+</span>     (reduce #'+ <span class="org-comment">; perimeter, which is the sum of 4 - number of neighbors of node, over all nodes in the cluster
+</span>               (mapcar #'(<span class="org-keyword">lambda</span> (node-idx) (- 4 (length (neighbors graph node-idx)))) node-cluster))))
 
 (<span class="org-keyword">defstruct</span> <span class="org-type">segment</span> start end mergeable)
 
@@ -1367,16 +1368,16 @@ and making small edits would've solved the problem anyway.
 (<span class="org-keyword">defun</span> <span class="org-function-name">segment-compatible-p</span> (new-segment segment)
   (<span class="org-keyword">if</span> segment
         (and
-         <span class="org-comment-delimiter">;; </span><span class="org-comment">segment ends where new-segment starts</span>
-         (equal (segment-start new-segment) (segment-end segment))
+         <span class="org-comment-delimiter">;; </span><span class="org-comment">segment ends where new-segment starts
+</span>         (equal (segment-start new-segment) (segment-end segment))
          (or
-          <span class="org-comment-delimiter">;; </span><span class="org-comment">new-segment is exactly on the x axis w.r.t. segment</span>
-          (and (equal (car (segment-start segment)) (car (segment-end segment)))
+          <span class="org-comment-delimiter">;; </span><span class="org-comment">new-segment is exactly on the x axis w.r.t. segment
+</span>          (and (equal (car (segment-start segment)) (car (segment-end segment)))
                (equal (car (segment-end segment)) (car (segment-start new-segment)))
                (equal (car (segment-start new-segment)) (car (segment-end new-segment)))
                (find 'right (segment-mergeable segment)))
-          <span class="org-comment-delimiter">;; </span><span class="org-comment">new-segment is exactly on the y axis w.r.t. segment</span>
-          (and (equal (cdr (segment-start segment)) (cdr (segment-end segment)))
+          <span class="org-comment-delimiter">;; </span><span class="org-comment">new-segment is exactly on the y axis w.r.t. segment
+</span>          (and (equal (cdr (segment-start segment)) (cdr (segment-end segment)))
                (equal (cdr (segment-end segment)) (cdr (segment-start new-segment)))
                (equal (cdr (segment-start new-segment)) (cdr (segment-end new-segment)))
                (find 'bottom (segment-mergeable segment)))))
@@ -1409,15 +1410,15 @@ and making small edits would've solved the problem anyway.
     (format t <span class="org-string">"~2%"</span>)))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">compute-price-sides</span> (graph node-cluster)
-  <span class="org-comment-delimiter">;; </span><span class="org-comment">(print-node-cluster graph (isqrt (length (nodes graph))) (isqrt (length (nodes graph))) node-cluster)</span>
-  (<span class="org-keyword">let*</span> ((compare-segments #'(<span class="org-keyword">lambda</span> (segment-a segment-b)
+  <span class="org-comment-delimiter">;; </span><span class="org-comment">(print-node-cluster graph (isqrt (length (nodes graph))) (isqrt (length (nodes graph))) node-cluster)
+</span>  (<span class="org-keyword">let*</span> ((compare-segments #'(<span class="org-keyword">lambda</span> (segment-a segment-b)
                                  (<span class="org-keyword">if</span> (equal (segment-start segment-a) (segment-start segment-b))
                                      (utils:compare-lists (segment-end segment-a) (segment-end segment-b))
                                      (utils:compare-lists (segment-start segment-a) (segment-start segment-b)))))
            (segments-not-merged (sort (mapcan #'(<span class="org-keyword">lambda</span> (node-id) (get-node-segments graph node-id)) node-cluster) compare-segments))
            (segments (reduce #'merge-segment-in-list segments-not-merged <span class="org-builtin">:initial-value</span> nil)))
-    (* (length node-cluster) <span class="org-comment">; area</span>
-         (length segments))))
+    (* (length node-cluster) <span class="org-comment">; area
+</span>         (length segments))))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">solve</span> (file problem-step)
   (<span class="org-keyword">let*</span> ((lines (uiop:read-file-lines file))
@@ -1428,18 +1429,18 @@ and making small edits would've solved the problem anyway.
                  #'compute-price-perimeter
                  #'compute-price-sides)))
     (<span class="org-keyword">loop</span> while not-visited 
-            <span class="org-comment-delimiter">;; </span><span class="org-comment">find the nodes in the same cluster</span>
-            for newly-visited = (reachable-from graph (pop not-visited))
-            <span class="org-comment-delimiter">;; </span><span class="org-comment">remove those from the not-visited list</span>
-            do (mapcar #'(<span class="org-keyword">lambda</span> (node-idx) (setf not-visited (remove node-idx not-visited))) newly-visited)
+            <span class="org-comment-delimiter">;; </span><span class="org-comment">find the nodes in the same cluster
+</span>            for newly-visited = (reachable-from graph (pop not-visited))
+            <span class="org-comment-delimiter">;; </span><span class="org-comment">remove those from the not-visited list
+</span>            do (mapcar #'(<span class="org-keyword">lambda</span> (node-idx) (setf not-visited (remove node-idx not-visited))) newly-visited)
             sum (funcall compute-price graph newly-visited))))
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-orgf8fd1e4" class="outline-2">
-<h2 id="orgf8fd1e4">Day 13</h2>
-<div class="outline-text-2" id="text-orgf8fd1e4">
+<div id="outline-container-org34d30c3" class="outline-2">
+<h2 id="org34d30c3">Day 13</h2>
+<div class="outline-text-2" id="text-org34d30c3">
 <p>
 The problem consists of a function optimization under some numerical
 constraints. In particular, the <i>number of tokens</i> is defined by \(3A +
@@ -1458,7 +1459,7 @@ ay A + by B = py
 <p>
 Where \(ax, ay, bx, by, px, py\) represent respectively the increment in
 X, Y given by buttons A and B, and the prize position. By rewriting
-the equations using the substitution method it's easy to get a closed
+the equations using the substitution method it&rsquo;s easy to get a closed
 formula that gives both \(A\) and \(B\):
 </p>
 
@@ -1468,7 +1469,7 @@ B = \frac{py \cdot ax - ay \cdot px}{ax \cdot by - ay \cdot bx}
 \end{cases}
 
 <p>
-<b>P.S.</b> The homemade regex engine from <a href="#orga428baa">day 3</a> strikes again!
+<b>P.S.</b> The homemade regex engine from <a href="#org61c6395">day 3</a> strikes again!
 </p>
 
 <div class="org-src-container">
@@ -1536,8 +1537,8 @@ B = \frac{py \cdot ax - ay \cdot px}{ax \cdot by - ay \cdot bx}
         (setf joined (concatenate 'string joined fill-in s)))
     joined))
 
-<span class="org-comment-delimiter">;; </span><span class="org-comment">from https://lispcookbook.github.io/cl-cookbook/strings.html#breaking-strings-into-graphenes-sentences-lines-and-words</span>
-(<span class="org-keyword">defun</span> <span class="org-function-name">split-by-one-space</span> (string)
+<span class="org-comment-delimiter">;; </span><span class="org-comment">from https://lispcookbook.github.io/cl-cookbook/strings.html#breaking-strings-into-graphenes-sentences-lines-and-words
+</span>(<span class="org-keyword">defun</span> <span class="org-function-name">split-by-one-space</span> (string)
   (<span class="org-keyword">loop</span> for i = 0 then (1+ j)
           as j = (position #\Space string <span class="org-builtin">:start</span> i)
           collect (subseq string i j)
@@ -1588,15 +1589,15 @@ B = \frac{py \cdot ax - ay \cdot px}{ax \cdot by - ay \cdot bx}
   (<span class="org-keyword">let</span> ((i 0) (matches '()))
     (<span class="org-keyword">loop</span> while (&lt; i (length input))
             do
-               <span class="org-comment-delimiter">;; </span><span class="org-comment">(format t "~a~%" (subseq input i))</span>
-               (<span class="org-keyword">destructuring-bind</span> (result char-read)
+               <span class="org-comment-delimiter">;; </span><span class="org-comment">(format t "~a~%" (subseq input i))
+</span>               (<span class="org-keyword">destructuring-bind</span> (result char-read)
                    (apply-delta-string
                     (automaton-delta automaton)
                     (automaton-init automaton)
                     (subseq input i)
                     (automaton-end automaton))
-                 <span class="org-comment-delimiter">;; </span><span class="org-comment">(format t "char read: ~a~%" char-read)</span>
-                 (<span class="org-keyword">cond</span>
+                 <span class="org-comment-delimiter">;; </span><span class="org-comment">(format t "char read: ~a~%" char-read)
+</span>                 (<span class="org-keyword">cond</span>
                    (result
                      (setq matches (append matches (list (subseq input i (+ i char-read)))))
                      (incf i char-read))
@@ -1625,7 +1626,7 @@ B = \frac{py \cdot ax - ay \cdot px}{ax \cdot by - ay \cdot bx}
             do
                (<span class="org-keyword">destructuring-bind</span>
                    (result char-read)
-                   (check-multiple-automaton automaton-list (subseq input i))
+                   (<span class="org-warning">check-multiple-automaton</span> automaton-list (subseq input i))
                  (<span class="org-keyword">cond</span>
                    (result
                     (setq matches (append matches (list (subseq input i (+ i char-read)))))
@@ -1646,29 +1647,29 @@ B = \frac{py \cdot ax - ay \cdot px}{ax \cdot by - ay \cdot bx}
 
 
 
-<span class="org-comment-delimiter">;;; </span><span class="org-comment">(let+ ((a 1)</span>
-<span class="org-comment-delimiter">;;;        </span><span class="org-comment">((b c) (list 1 2))))</span>
-<span class="org-comment-delimiter">;;; </span>
-<span class="org-comment-delimiter">;;; </span><span class="org-comment">should expand into</span>
-<span class="org-comment-delimiter">;;; </span>
-<span class="org-comment-delimiter">;;; </span><span class="org-comment">(let ((a 1))</span>
-<span class="org-comment-delimiter">;;;   </span><span class="org-comment">(destructuring-bind (b c) (list 1 2)))</span>
-
+<span class="org-comment-delimiter">;;; </span><span class="org-comment">(let+ ((a 1)
+</span><span class="org-comment-delimiter">;;;        </span><span class="org-comment">((b c) (list 1 2))))
+</span><span class="org-comment-delimiter">;;; </span><span class="org-comment">
+</span><span class="org-comment-delimiter">;;; </span><span class="org-comment">should expand into
+</span><span class="org-comment-delimiter">;;; </span><span class="org-comment">
+</span><span class="org-comment-delimiter">;;; </span><span class="org-comment">(let ((a 1))
+</span><span class="org-comment-delimiter">;;;   </span><span class="org-comment">(destructuring-bind (b c) (list 1 2)))
+</span>
 (<span class="org-keyword">defmacro</span> <span class="org-function-name">let+</span> (bindings <span class="org-type">&amp;body</span> body)
-  <span class="org-doc">"Allows to implicitly mix let and destructuring-bind inside a single let+ call.</span>
-<span class="org-doc">For normal let the syntax stays the same, while for a destructuring-bind the syntax is</span>
-<span class="org-doc">(let+ (((a b) '(1 2)))) which is like (destructuring-bind (a b) '(1 2))."</span>
+  <span class="org-doc">"Allows to implicitly mix let and destructuring-bind inside a single let+ call.
+For normal let the syntax stays the same, while for a destructuring-bind the syntax is
+(let+ (((a b) '(1 2)))) which is like (destructuring-bind (a b) '(1 2))."</span>
   (<span class="org-keyword">let</span> ((stack nil)
           (compiled nil))
     (<span class="org-keyword">loop</span> for binding in bindings
-            if (listp (car binding)) <span class="org-comment">; multiple symbols to bind</span>
-              do (push `(<span class="org-keyword">destructuring-bind</span> ,@binding) stack)
-            else <span class="org-comment">; normal let</span>
-              do (push `(<span class="org-keyword">let</span> ,(list binding)) stack))
-    <span class="org-comment-delimiter">;; </span><span class="org-comment">last binding gets the actual body</span>
-    (setf compiled (append (pop stack) body))
-    (<span class="org-keyword">loop</span> while stack <span class="org-comment">; build the nested expression by unwinding the stack</span>
-            do (setf compiled (append (pop stack) (list compiled))))
+            if (listp (car binding)) <span class="org-comment">; multiple symbols to bind
+</span>              do (push `(<span class="org-keyword">destructuring-bind</span> ,@binding) stack)
+            else <span class="org-comment">; normal let
+</span>              do (push `(<span class="org-keyword">let</span> ,(list binding)) stack))
+    <span class="org-comment-delimiter">;; </span><span class="org-comment">last binding gets the actual body
+</span>    (setf compiled (append (pop stack) body))
+    (<span class="org-keyword">loop</span> while stack <span class="org-comment">; build the nested expression by unwinding the stack
+</span>            do (setf compiled (append (pop stack) (list compiled))))
     compiled))
 
 (<span class="org-keyword">defun</span> <span class="org-function-name">compare-lists</span> (list1 list2 <span class="org-type">&amp;optional</span> (pred #'&lt;))
