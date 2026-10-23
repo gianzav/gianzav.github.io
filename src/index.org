@@ -1,9 +1,8 @@
-#+title:Buongiorno, sono Gianluca Zavan
-#+HTML_HEAD_EXTRA: <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Honk">
+#+title: Buongiorno, sono Gianluca Zavan
 
 #+BEGIN_EXPORT html
 <header>
-    <p>And this is the laziest web page ever (with the flashiest font I found).</p>
+    <p>And this is the laziest web page ever</p>
 </header>
 #+END_EXPORT
 
@@ -13,11 +12,11 @@
 :END:
 
 #+BEGIN_EXPORT html
-<div style="margin: 20px; float: right; display: flex; flex-direction: column; max-width: 40%;">
+<div style="margin: 20px; float: right; display: flex; flex-direction: column; max-width: 40%; text-align: center;">
 #+END_EXPORT
 
 #+ATTR_HTML: :id profile-picture
-[[file:img/me-with-a-cup.png]]
+[[file:img/me-with-a-cup.jpeg]]
 
 This is me showing you a cup from 3000 BC.
 

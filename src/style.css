@@ -1,4 +1,5 @@
 @import url(//fonts.googleapis.com/css?family=Honk);
+@import url('https://fonts.googleapis.com/css2?family=M+PLUS+1:wght@100..900&display=swap');
 
 body {
     min-height: 100vh;
@@ -14,8 +15,11 @@ body {
 
 html {
     background-color: #fae9ca;
-    font-family: Georgia;
+    /* font-family: Georgia; */
     margin: 0 max(2em, calc(30% - 300px)) 0;
+    font-family: "M PLUS 1", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
 }
 
 header {
@@ -30,7 +34,7 @@ header {
 
 .title {
     text-align: center;
-    font-family: Honk;
+    /* font-family: Honk; */
 }
 
 footer {

@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2026-09-22 Tue 19:32 -->
+<!-- 2026-10-23 Fri 14:57 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>The Maybe monad in Scheme</title>
@@ -173,8 +173,8 @@ Of course, this way of writing functions that use monads is not feasible in the 
 </p>
 
 <div class="org-src-container">
-<pre class="src src-haskell">do m &lt;- evaluate x
-   n &lt;- evaluate y
+<pre class="src src-haskell"><span class="org-haskell-keyword">do</span> m <span class="org-haskell-operator">&lt;-</span> evaluate x
+   n <span class="org-haskell-operator">&lt;-</span> evaluate y
    safediv m n 
 </pre>
 </div>
